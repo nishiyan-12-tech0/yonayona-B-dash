@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミチスジ｜DX戦略マップ</title>
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9IuODn+ODgeOCueOCuCI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMzA5NUNCIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDA0QUFEIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMTIiIGZpbGw9InVybCgjZykiLz48cGF0aCBkPSJNMTY0LjAsMjk0LjAgTDMxNC4wLDI5NC4wIFEzMjQuMCwyOTQuMCAzMjQuMCwzMDQuMCBMMzI0LjAsMzI4LjAgUTMyNC4wLDMzOC4wIDMxNC4wLDMzOC4wIEwxNjQuMCwzMzguMCBMMTQyLjAsMzE2LjAgWiIgZmlsbD0iIzhGQzNFQyIvPjxyZWN0IHg9IjIyNi4wIiB5PSIxODAuMCIgd2lkdGg9IjQ0LjAiIGhlaWdodD0iMjkwLjAiIHJ4PSIxMC4wIiBmaWxsPSIjRkZGRkZGIi8+PHBhdGggZD0iTTEwNC4wLDcwLjAgTDMyNi4wLDcwLjAgTDM5Mi4wLDEzNC4wIEwzMjYuMCwxOTguMCBMMTA0LjAsMTk4LjAgWiIgZmlsbD0iIzQxQjhENSIvPjxjaXJjbGUgY3g9IjIxMi4wIiBjeT0iMTMwLjAiIHI9IjExLjAiIGZpbGw9IiNGRkZGRkYiLz48Y2lyY2xlIGN4PSIyNzIuMCIgY3k9IjEzMC4wIiByPSIxMS4wIiBmaWxsPSIjRkZGRkZGIi8+PHBhdGggZD0iTTIyNC4wLDE1NS4wIFEyNDIuMCwxNzEuMCAyNjAuMCwxNTUuMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjcuMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root{
+  --bg:#f3f6fa;--surface:#fff;--ink:#14213d;--muted:#64708a;--faint:#a9b2c4;--line:#dfe5ee;
+  --accent:#004aad;--accent-2:#3095cb;--accent-soft:#e6eefa;--accent-ink:#fff;
+  --cyan:#41b8d5;--cyan-soft:#e2f5f9;
+  --amber:#a5620c;--amber-soft:#fbf0dc;--biz:#1a9a8a;--biz-soft:#e3f5f1;--gray:#5f6577;--gray-soft:#eef0f4;
+  --ok:#0f8a7a;--ok-soft:#e1f5f1;--ng:#b4401a;--ng-soft:#fbe8e0;
+  --shadow:0 1px 2px rgba(20,33,61,.05),0 4px 14px rgba(20,33,61,.05);
+  --f:"IBM Plex Sans JP","Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1420;--surface:#161e2d;--ink:#e7ebf4;--muted:#9aa4bb;--faint:#566079;--line:#273149;
+  --accent:#7fb0f5;--accent-2:#6cc7e3;--accent-soft:#18294a;--accent-ink:#0e1420;
+  --cyan:#5de0e6;--cyan-soft:#123640;
+  --amber:#eab25e;--amber-soft:#3a2c14;--biz:#5fd0bf;--biz-soft:#143430;--gray:#b3bacb;--gray-soft:#222a3b;
+  --ok:#5fd0bf;--ok-soft:#143430;--ng:#f08f68;--ng-soft:#3a2219;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.25);color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.6}
+.app{max-width:1440px;margin:0 auto;padding:14px 16px 48px;display:grid;gap:14px}
+button,select,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.brand{display:flex;align-items:center;gap:22px;flex-wrap:nowrap}
+.brand svg{height:48px;width:159px;min-width:159px;flex:none;display:block;overflow:visible}
+.brand .lt{fill:var(--ink)}.brand .ls{fill:var(--accent-2)}
+.brand .sub{font-size:12.5px;color:var(--muted);border-left:1px solid var(--line);padding-left:20px;line-height:1.3;white-space:nowrap}
+.brand .sub b{display:block;color:var(--ink);font-size:14px}
+.pill{font-size:11.5px;border:1px dashed var(--accent);color:var(--accent);border-radius:999px;padding:1px 10px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;width:fit-content}
+.tabs a{padding:6px 14px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:13.5px}
+.tabs a[aria-current="page"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.view{display:none}.view.on{display:grid;gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px}
+.card h2{font-size:15px;margin:0 0 8px}
+.card h3{font-size:13.5px;margin:12px 0 4px}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:7px;padding:4px 12px;cursor:pointer;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--muted)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px;border:1.5px solid var(--c);background:var(--cs)}
+.o-biz{--c:var(--biz);--cs:var(--biz-soft)}
+.o-dx{--c:var(--accent);--cs:var(--accent-soft)}
+.o-mgmt{--c:var(--gray);--cs:var(--gray-soft)}
+.sw.dash{background:transparent;border-style:dashed;--c:var(--muted)}
+.sw.warn{background:transparent;border-style:dashed;--c:var(--ng)}
+/* map */
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px;align-items:start}
+@media (max-width:1150px){.mapgrid{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+.map{position:relative;min-width:1000px}
+#links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.cols{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));column-gap:36px}
+.mhead{margin-bottom:4px}
+.mhead>div{font-weight:700;font-size:13px;border-radius:8px;padding:5px 8px;background:var(--cyan-soft)}
+.mhead>div:first-child{background:none;padding-left:0}
+.mhead span{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
+.flow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:4px 0 8px 186px}
+.flow i{flex:1;height:2px;margin:9px 10px 0;background:linear-gradient(90deg,var(--cyan),var(--accent));position:relative}
+.flow i::after{content:"";position:absolute;right:-2px;top:-4px;border:5px solid transparent;border-left:7px solid var(--accent)}
+.band{border-top:1px solid var(--line);padding:10px 0 12px}
+.band.corp{background:var(--bg);border-radius:10px;border:0;padding:8px 10px;margin-bottom:6px}
+.bh{border:0;background:none;padding:0;cursor:pointer;text-align:left;display:flex;gap:6px 10px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px;width:100%}
+.bh b{font-size:14px}
+.bh .tog{font-size:11px;color:var(--muted);width:14px}
+.chipx{font-size:11px;border-radius:999px;padding:0 8px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+.chipx.st{border-color:var(--accent-2);color:var(--accent)}
+.bgrid{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));column-gap:36px;row-gap:12px;align-items:center}
+.tl{font-size:12.5px;font-weight:700;line-height:1.4;align-self:center}
+.tl .bh{font-weight:700;font-size:12.5px}
+.tl span{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.cell{display:grid;gap:8px;align-content:center}
+.fincell{grid-column:5;align-self:stretch;display:grid;gap:8px;align-content:center}
+.obj{position:relative;z-index:1}
+.box{position:relative;border:1.5px solid var(--c);background:var(--cs);border-radius:9px;padding:6px 9px;cursor:pointer;text-align:left;width:100%;transition:opacity .2s}
+.box.dash{border-style:dashed;background:var(--surface)}
+.box.warn{border-color:var(--ng);border-style:dashed;background:var(--surface)}
+.box.fin{border-color:var(--gray);background:var(--gray-soft)}
+.box.sel{box-shadow:0 0 0 3px var(--cyan-soft),0 0 0 4.5px var(--cyan)}
+.box .lb{display:block;font-size:12.5px;font-weight:500;line-height:1.35}
+.box .meta{display:block;font-size:11px;color:var(--muted)}
+.box .val{display:block;font-size:11.5px;color:var(--muted)}
+.alert{font-size:11px;color:var(--ng);display:block;margin-top:2px}
+.chips{display:grid;gap:4px;margin-top:4px;padding-left:8px;border-left:2px solid var(--line)}
+.chip{border:1px solid var(--c);background:var(--surface);border-radius:8px;padding:2px 7px 2px 5px;font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;width:100%;text-align:left;line-height:1.3;transition:opacity .2s}
+.chip .nm{flex:1;min-width:0}
+.orphan .chip{width:auto;gap:8px}
+.chip .ex{white-space:nowrap;color:var(--muted);font-size:10.5px}
+.chip .muted,.chip .ipa,.chip .cm{white-space:nowrap}
+.chip .ipa{font-size:10px;border-radius:999px;background:var(--cs);color:var(--c);padding:0 5px;font-weight:700}
+.chip .ipa.nd{background:var(--gray-soft);color:var(--muted);font-weight:400}
+.chip.sel{box-shadow:0 0 0 2px var(--cyan)}
+.ipa.s1,.chip .ipa.s1{background:var(--cyan-soft);color:var(--accent);border:1px solid var(--cyan)}
+.ipa.s2,.chip .ipa.s2{background:var(--accent-2);color:#fff}
+.ipa.s3,.chip .ipa.s3{background:var(--accent);color:var(--accent-ink)}
+.legend .ipa{font-size:10px;border-radius:999px;padding:0 6px;font-weight:700;margin-right:2px}
+.trk{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin:4px 0 2px}
+.trk i{height:7px;border-radius:4px;background:var(--bg);border:1px solid var(--line)}
+.trk i.on{background:var(--accent);border-color:var(--accent)}
+.trk i.was{background:var(--cyan-soft);border-color:var(--cyan)}
+.trkl{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;font-size:10.5px;color:var(--muted);text-align:center}
+.bul{display:grid;gap:12px}
+.bul h3{margin:0;font-size:13.5px;display:flex;align-items:center;gap:6px}
+.bul h3 u{width:11px;height:11px;border-radius:50%;display:inline-block}
+.chip .cm{font-size:10px;color:var(--accent-2)}
+.dots{display:inline-flex;gap:2px;vertical-align:-1px}
+.dots i{width:7px;height:7px;border-radius:50%;border:1px solid var(--ok);display:inline-block}
+.dots i.y{background:var(--ok)}
+.dim{opacity:.22}
+.corpgrid{display:grid;grid-template-columns:150px repeat(4,minmax(0,1fr));column-gap:36px;align-items:center}
+.ipapills{display:flex;flex-wrap:wrap;gap:4px;grid-column:2/5}
+.ipp{font-size:11px;border-radius:999px;padding:1px 8px;background:var(--surface);border:1px solid var(--line)}
+.ipp b{font-weight:700;color:var(--accent)}
+.orphan{border-top:1px solid var(--line);padding-top:10px;margin-top:4px}
+.diff{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px;font-size:12.5px}
+.diff li::before{content:"・";color:var(--accent)}
+/* panel */
+.panel h3{font-size:15px;margin:0 0 2px}
+.panel .kind{font-size:11.5px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:3px 8px;font-size:12.5px;margin:8px 0}
+.kv dt{color:var(--muted)}.kv dd{margin:0}
+.checks{list-style:none;padding:0;margin:6px 0;display:grid;gap:6px}
+.checks li{display:grid;grid-template-columns:22px 1fr;font-size:12.5px;align-items:start}
+.mk{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700}
+.mk.y{background:var(--ok-soft);color:var(--ok)}.mk.n{background:var(--ng-soft);color:var(--ng)}
+.note{background:var(--accent-soft);border-radius:10px;padding:8px 10px;font-size:12.5px}
+.hyp{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;margin-top:6px}
+.hyp b{display:block;font-size:12px;color:var(--muted);font-weight:500}
+/* map v5 */
+:root{--done:#d3e4fb;--stripe:#f6f8fc}
+@media (prefers-color-scheme:dark){:root{--done:#1f3d6e;--stripe:#131a28}}
+.mapgrid{grid-template-columns:minmax(0,1fr)}
+.mapgrid.haspanel{grid-template-columns:minmax(0,1fr) 330px}
+.panel{display:none}
+.mapgrid.haspanel .panel{display:block;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+@media (max-width:1000px){.mapgrid.haspanel{grid-template-columns:minmax(0,1fr)}.mapgrid.haspanel .panel{position:fixed;right:12px;bottom:12px;top:auto;width:min(360px,calc(100vw - 24px));max-height:60vh;z-index:30;box-shadow:0 8px 30px rgba(20,33,61,.25)}}
+.tb1{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.tb1 .when{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb2{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 28px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.grp{display:grid;gap:4px}
+.grp>b{font-size:12px;color:var(--muted);font-weight:700}
+.grp .segs{display:flex;flex-wrap:wrap;gap:8px}
+.grp.hl{margin-left:auto}
+.seg .ipa{font-size:10px;border-radius:999px;padding:0 6px;font-weight:700;margin-right:5px}
+.seg button[aria-pressed="true"] .ipa{outline:1px solid var(--accent-ink)}
+.fnote{display:none;margin-top:10px;background:var(--accent-soft);border-radius:8px;padding:5px 10px;font-size:12.5px;align-items:center;gap:10px}
+.fnote.on{display:flex}
+.fnote button{border:1px solid var(--accent);background:var(--surface);color:var(--accent);border-radius:999px;padding:0 10px;font-size:12px;cursor:pointer;margin-left:auto}
+.lg2{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:12px;color:var(--muted);margin-top:10px;align-items:center}
+.sw.done{--c:var(--accent);--cs:var(--done)}
+.sw.yet{--c:var(--faint);--cs:var(--surface)}
+.wm{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--ng);color:#fff;font-size:11px;font-weight:700;line-height:1;vertical-align:-2px}
+.map{min-width:0;z-index:0;--cols:132px repeat(4,minmax(0,1fr));--gap:28px}
+.cols,.bgrid,.corpgrid,.vst,.bprog{grid-template-columns:var(--cols);column-gap:var(--gap)}
+.vst{position:absolute;inset:0;z-index:-1;display:grid;padding:0 10px;pointer-events:none}
+.vst i{background:var(--stripe);border-radius:10px}
+.vst i:first-child{background:none}
+.stick{position:sticky;top:0;z-index:5;background:var(--surface);padding:6px 10px 2px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.mhead{margin-bottom:0}
+.mhead>div{font-size:14px}
+.flow{margin:4px 0 4px 160px}
+.band{border:0;box-shadow:inset 0 0 0 1px var(--line);border-radius:12px;padding:10px 10px 16px;margin-top:10px;background:none}
+.band.corp{box-shadow:none;background:none;padding:2px 10px;margin:0}
+.corpgrid .goal{grid-column:2/5;text-align:right;font-size:12.5px;color:var(--muted)}
+.corpgrid .goal b{color:var(--accent);font-size:14px}
+.bhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.bhead .tg{border:0;background:none;cursor:pointer;color:var(--muted);font-size:12px;width:22px;height:22px;border-radius:6px;padding:0}
+.bhead .tg:hover{background:var(--bg)}
+.bhead .bn{border:0;background:none;cursor:pointer;padding:0;font-size:15.5px;font-weight:700;text-align:left}
+.bhead .bn.sel{text-decoration:underline;text-decoration-color:var(--cyan);text-underline-offset:4px;text-decoration-thickness:2px}
+.bhead .r{margin-left:auto;display:flex;gap:8px;align-items:center}
+.bdg{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:1px 9px 1px 4px;background:var(--ng-soft);color:var(--ng);font-size:12px}
+.bdg.q{padding-left:9px}
+.bprog{display:grid;align-items:center}
+.bprog>span{font-size:12px;color:var(--muted);line-height:1.35}
+.bprog>span b{display:block;color:var(--ink);font-size:13px}
+.bprog i{height:8px;border-radius:4px;background:var(--surface);border:1px solid var(--line)}
+.bprog i.on{background:var(--accent);border-color:var(--accent)}
+.bgrid{row-gap:18px;margin-top:16px}
+.lane{align-self:stretch;border:1px solid var(--line);border-radius:10px;margin:-8px -6px;pointer-events:none}
+.tl .bh span{font-size:13px;font-weight:700;color:var(--ink)}
+.tl .bh.sel span{text-decoration:underline;text-decoration-color:var(--cyan);text-underline-offset:3px;text-decoration-thickness:2px}
+.box{border:1.5px solid var(--faint);background:var(--surface);padding:7px 10px}
+.box.fin{border-color:var(--faint);background:var(--surface)}
+.box.done{border-color:var(--accent);background:var(--done)}
+.box.dash{border-style:dashed}
+.box.warn{border-color:var(--ng);border-style:dashed}
+.box.warn.done{background:var(--done)}
+.box.cgoal{border-color:var(--gray);background:var(--gray-soft)}
+.box .lb{font-size:13px;font-weight:700}
+.box .val{font-size:12px;color:var(--muted);margin-top:1px}
+.box .val b{color:var(--ink)}
+.box .wm{position:absolute;top:-7px;right:-7px}
+.chip{border-color:var(--line);font-size:11.5px;padding:3px 7px 3px 5px;flex-wrap:wrap;gap:2px 5px}
+.chip .nm{flex:1 1 7em}
+.orphan{position:relative;background:var(--surface);border:1.5px dashed var(--ng);border-radius:12px;padding:10px;margin-top:10px}
+.ph{display:flex;align-items:center;gap:8px}
+.kb{font-size:12px;font-weight:700;border-radius:999px;padding:1px 10px;background:var(--accent);color:var(--accent-ink)}
+.px{margin-left:auto;border:0;background:none;cursor:pointer;font-size:18px;line-height:1;color:var(--muted);width:26px;height:26px;border-radius:6px}
+.px:hover{background:var(--bg)}
+.crumb{font-size:12px;color:var(--muted);margin:8px 0 0}
+.panel h3{font-size:16px;margin:0 0 4px}
+.panel h4{font-size:12px;color:var(--muted);margin:14px 0 4px;font-weight:700;border-top:1px solid var(--line);padding-top:10px}
+.now{font-size:13px;margin:0}
+.now b{font-size:15px}
+.pbar{height:8px;border-radius:4px;background:var(--bg);border:1px solid var(--line);overflow:hidden;margin:4px 0}
+.pbar i{display:block;height:100%;background:var(--accent)}
+.path{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:12px}
+.path span{border:1.5px solid var(--faint);border-radius:7px;padding:1px 7px;background:var(--surface)}
+.path span.on{border-color:var(--accent);background:var(--done)}
+.path span.me{font-weight:700}
+.path em{font-style:normal;color:var(--muted)}
+.panel details{margin-top:14px;border-top:1px solid var(--line);padding-top:8px;font-size:12.5px}
+.panel summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:700}
+.st-line{font-size:12.5px;margin:4px 0 0}
+/* map v6 */
+.mnav{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:12.5px}
+.mnav .co{margin-left:auto;color:var(--muted);font-size:12px}
+.mnav .seg button{font-size:12.5px;padding:3px 11px}
+.lnk{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:4px 11px;cursor:pointer;font-size:12.5px;color:var(--muted)}
+.lnk[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.opts{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end;padding:12px 16px}
+.opts[hidden],.dbox[hidden]{display:none}
+#fnotes{display:grid;gap:6px}
+#fnotes:empty{display:none}
+.fnote{margin-top:0}
+.hero{padding:22px 26px}
+.hk{font-size:12.5px;color:var(--accent);font-weight:700}
+.hero h1{font-size:28px;line-height:1.35;margin:4px 0 10px;letter-spacing:.01em}
+.tht{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tht button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 12px;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.tht button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:700;background:var(--accent-soft)}
+.hgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:20px 32px;align-items:start}
+@media (max-width:900px){.hgrid{grid-template-columns:1fr}}
+.hdl{margin:0;display:grid;gap:2px}
+.hdl dt,.hl2{font-size:12px;color:var(--muted);font-weight:700;margin-top:8px}
+.hdl dt:first-child,.hl2{margin-top:0}
+.hdl dd{margin:0;font-size:14.5px}
+.hdl dd button{border:0;background:none;padding:0;cursor:pointer;color:var(--accent);text-align:left;font-size:14px}
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:6px}
+.met{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;text-align:left;cursor:pointer;display:grid;gap:2px;align-content:start}
+.met.sel{box-shadow:0 0 0 2px var(--cyan)}
+.met .ml{font-size:11.5px;color:var(--accent);font-weight:700}
+.met .mn{font-size:13px;font-weight:700}
+.met .mv{font-size:13px;color:var(--muted)}
+.met .mv b{font-size:19px;color:var(--ink)}
+.met .mb{height:6px;border-radius:3px;background:var(--surface);border:1px solid var(--line);overflow:hidden;margin:3px 0}
+.met .mb i{display:block;height:100%;background:var(--accent)}
+.met .md{font-size:12px;color:var(--muted)}
+.is{display:inline-block;border-radius:999px;padding:0 8px;font-size:11.5px;font-weight:700;border:1px solid currentColor;white-space:nowrap}
+.is.up{color:var(--ok);background:var(--ok-soft)}
+.is.flat{color:var(--gray);background:var(--gray-soft)}
+.is.worse{color:var(--ng);background:var(--ng-soft)}
+.is.none,.is.nokpi{color:var(--muted);border-style:dashed}
+.hiss{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.hih{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hih h2{font-size:15px;margin:0}
+.hih span{font-size:12.5px;color:var(--muted)}
+.iss{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:4px}
+.iss button{width:100%;display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;cursor:pointer;font-size:13px}
+.iss button:hover{border-color:var(--accent)}
+.iss .io{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.iss em{font-style:normal;font-size:11.5px;color:var(--muted);margin-left:6px}
+.ik{font-size:11.5px;font-weight:700;border-radius:6px;padding:1px 0;text-align:center;display:inline-block;min-width:64px}
+.ik.unset{background:var(--accent-soft);color:var(--accent)}
+.ik.unmeasured{background:var(--gray-soft);color:var(--gray)}
+.ik.worse{background:var(--ng-soft);color:var(--ng)}
+.ik.wait{background:var(--cyan-soft);color:var(--accent);outline:1px solid var(--cyan)}
+.im{min-width:0;padding:0 7px;justify-self:start;margin-top:3px;font-weight:500}
+.more{border:0;background:none;color:var(--accent);cursor:pointer;font-size:12.5px;margin-top:6px;padding:0}
+.map.v-theme{--cols:repeat(4,minmax(0,1fr))}
+.vst i:first-child{background:var(--stripe)}
+.vst i.x{background:none}
+.mhead>div.c{position:relative;background:var(--cyan-soft);padding:6px 10px}
+.mhead>div.c b{display:block;font-size:14px}
+.mhead>div.c+div.c::before{content:"→";position:absolute;left:-21px;top:50%;transform:translateY(-50%);color:var(--accent-2);font-weight:700}
+.mhead>div.x{background:none}
+.stick{padding-bottom:6px}
+.tstat{font-size:12.5px;color:var(--muted);padding:0 10px 4px}
+.bgrid.one{padding:6px 10px 16px;margin-top:6px}
+.empty{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:9px;padding:10px;text-align:center;background:var(--surface)}
+.ocard{position:relative;display:grid;gap:1px;width:100%;text-align:left;border:1.5px solid var(--faint);background:var(--surface);border-radius:10px;padding:8px 10px;cursor:pointer;transition:opacity .2s}
+.ocard.nok{border-style:dashed}
+.ocard.sel{box-shadow:0 0 0 3px var(--cyan-soft),0 0 0 4.5px var(--cyan)}
+.oh{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:2px}
+.tag{font-size:10.5px;font-weight:700;border-radius:4px;padding:0 6px;background:var(--accent);color:var(--accent-ink);white-space:nowrap}
+.tag.t2{background:none;color:var(--muted);border:1px solid var(--line)}
+.own{font-size:11.5px;color:var(--muted)}
+.ocard .on{font-size:13.5px;font-weight:700;line-height:1.4}
+.ocard .ok{font-size:12px;color:var(--muted);margin-top:3px}
+.ocard .ov{font-size:12.5px;color:var(--muted)}
+.ocard .ov b{font-size:14px;color:var(--ink)}
+.ocard .ov span,.met .mv span{white-space:nowrap;display:inline-block}
+.ocard .od{font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+.acts{display:grid;gap:4px;margin-top:5px;padding-left:10px;border-left:2px solid var(--line);justify-items:start}
+.act{width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 8px;cursor:pointer;display:grid;gap:0;transition:opacity .2s}
+.act.sel{box-shadow:0 0 0 2px var(--cyan)}
+.act .an{font-size:12.5px;font-weight:500}
+.act .am{font-size:11px;color:var(--muted)}
+.act .ipa{font-size:10px;border-radius:999px;padding:0 5px;font-weight:700;margin-right:5px}
+.tl .go{color:var(--accent)}
+.todo{list-style:none;margin:4px 0;padding:0;display:grid;gap:8px;font-size:12.5px}
+.todo li{display:grid;grid-template-columns:66px 1fr;gap:8px;align-items:start}
+.jump{display:grid;gap:4px}
+.jump button{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:3px 8px;font-size:12.5px;text-align:left;cursor:pointer}
+.dbox{padding:10px 16px}
+.dbox summary{cursor:pointer;font-size:13px;font-weight:700}
+/* entry */
+.entry{display:grid;grid-template-columns:250px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:860px){.entry{grid-template-columns:1fr}}
+.steps{list-style:none;margin:0;padding:6px;display:grid;gap:2px}
+.steps .grp{font-size:11.5px;color:var(--muted);padding:8px 10px 2px;font-weight:700}
+.steps button{width:100%;text-align:left;border:0;background:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.steps button[aria-current="step"]{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.steps .n{width:20px;height:20px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;font-size:11px;flex:none}
+.lead{background:var(--bg);border-radius:10px;padding:8px 12px;font-size:12.5px;margin-bottom:6px;display:grid;grid-template-columns:auto 1fr;gap:2px 10px}
+.lead b{color:var(--muted);font-weight:500}
+.field{display:grid;grid-template-columns:200px minmax(0,1fr);gap:6px 14px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.field:first-of-type{border-top:0}
+@media (max-width:860px){.field{grid-template-columns:1fr}}
+.field>label{font-size:13px;font-weight:500}
+.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 9px;font-size:13px}
+.field textarea{min-height:52px;resize:vertical}
+.hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+.imp{font-size:11px;border-radius:999px;padding:0 7px;margin-left:6px;background:var(--ok-soft);color:var(--ok);font-weight:700;vertical-align:1px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:11.5px;white-space:nowrap}
+td input,td select{width:100%;min-width:64px;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 6px;font-size:12.5px}
+td input[type=checkbox]{width:auto;min-width:0}
+.btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 14px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.refbox{border:1px dashed var(--ok);border-radius:10px;padding:8px 12px;font-size:12.5px;margin:6px 0}
+.refbox b{color:var(--ok)}
+.split{display:flex;height:22px;border-radius:6px;overflow:hidden;font-size:11px;color:#fff;margin-top:6px}
+.split i{display:grid;place-items:center;font-style:normal}
+/* compare */
+.cmpgrid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:1000px){.cmpgrid{grid-template-columns:1fr}}
+.bars{display:grid;gap:10px}
+.bt{font-size:12.5px;margin-bottom:3px}
+.br{display:grid;grid-template-columns:1fr 42px;gap:6px;align-items:center}
+.bw{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bw i{display:block;height:100%;border-radius:4px}
+.stack{display:flex;height:16px;border-radius:5px;overflow:hidden;background:var(--bg)}
+.stack i{display:block;height:100%}
+.p-lg{background:var(--cyan)}.p-pr{background:var(--accent-2)}.p-cu{background:var(--accent)}.p-fi{background:var(--gray)}
+.summary{display:flex;flex-wrap:wrap;gap:10px}
+.stat{flex:1 1 150px;background:var(--bg);border-radius:10px;padding:8px 12px}
+.stat b{display:block;font-size:20px}.stat span{font-size:12px;color:var(--muted)}
+.goalbar{position:relative;height:14px;background:var(--bg);border-radius:7px;margin:22px 0 6px}
+.goalbar i{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:7px}
+.goalbar u{position:absolute;top:-18px;bottom:-4px;border-left:2px dashed var(--ng);text-decoration:none}
+.goalbar u span{position:absolute;top:-2px;left:4px;font-size:11px;color:var(--ng);white-space:nowrap}
+.heat td,.heat th{text-align:center}
+.heat td:first-child,.heat th:first-child{text-align:left}
+.hc{display:inline-block;min-width:54px;border-radius:6px;padding:1px 4px;font-size:11px}
+.h0{background:var(--gray-soft);color:var(--muted)}.h1{background:var(--cyan-soft);color:var(--accent)}.h2{background:var(--accent);color:var(--accent-ink)}
+.hx{font-size:10.5px;color:var(--ng);display:block}
+.about{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.about ol,.about ul{margin:4px 0;padding-left:20px}.about li{margin:3px 0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar">
+    <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="100 70 1390 420" width="159" height="48" preserveAspectRatio="xMinYMid meet" role="img" aria-label="ミチスジ"><path d="M195.0,320.0 L345.0,320.0 Q355.0,320.0 355.0,330.0 L355.0,354.0 Q355.0,364.0 345.0,364.0 L195.0,364.0 L173.0,342.0 Z" fill="#9CC6EA"/><rect x="257.0" y="206.0" width="44.0" height="290.0" rx="10.0" fill="#004AAD"/><path d="M135.0,96.0 L357.0,96.0 L423.0,160.0 L357.0,224.0 L135.0,224.0 Z" fill="#41B8D5"/><circle cx="243.0" cy="156.0" r="11.0" fill="#FFFFFF"/><circle cx="303.0" cy="156.0" r="11.0" fill="#FFFFFF"/><path d="M255.0,181.0 Q273.0,197.0 291.0,181.0" fill="none" stroke="#FFFFFF" stroke-width="7.0" stroke-linecap="round"/><path class="lt" d="M558.4 152.08 547.12 180.4C580.96 184.72 649.12 200.08 676.96 210.4L689.2 180.4C658.96 169.84 589.84 155.92000000000002 558.4 152.08ZM547.36 216.64 536.32 245.68C572.08 251.44 633.52 265.36 661.12 275.92L672.88 245.92000000000002C642.64 235.36 581.68 222.4 547.36 216.64ZM535.12 285.28 523.12 315.52C561.52 321.28 637.36 337.84 669.76 351.28L682.96 321.28C650.0799999999999 309.04 576.16 291.76 535.12 285.28Z M753.52 225.04000000000002V256.0C759.76 255.52 768.64 255.04000000000002 776.0799999999999 255.04000000000002H842.0799999999999C837.52 290.56 818.3199999999999 316.24 781.8399999999999 333.04L812.3199999999999 353.92C852.64 329.44 869.92 295.36 873.76 255.04000000000002H935.92C942.4 255.04000000000002 950.56 255.52 957.04 256.0V225.04000000000002C951.76 225.52 940.4799999999999 226.48000000000002 935.1999999999999 226.48000000000002H874.7199999999999V188.32C889.1199999999999 186.16 903.28 183.52 915.04 180.4C919.1199999999999 179.44 925.3599999999999 177.76000000000002 933.52 175.84L913.8399999999999 149.44C901.8399999999999 154.96 877.3599999999999 160.48000000000002 853.3599999999999 163.84C826.9599999999999 167.68 789.76 168.16 771.52 167.68L778.9599999999999 195.52C795.04 195.04 820.24 194.32 843.28 192.4V226.48000000000002H775.5999999999999C768.16 226.48000000000002 760.0 225.76 753.52 225.04000000000002Z M1179.76 177.28 1160.08 162.64000000000001C1155.28 164.32 1145.6799999999998 165.76000000000002 1135.36 165.76000000000002C1124.56 165.76000000000002 1063.12 165.76000000000002 1050.6399999999999 165.76000000000002C1043.4399999999998 165.76000000000002 1028.8 165.04000000000002 1022.3199999999999 164.08V198.16C1027.36 197.92000000000002 1040.56 196.48000000000002 1050.6399999999999 196.48000000000002C1060.9599999999998 196.48000000000002 1122.1599999999999 196.48000000000002 1132.0 196.48000000000002C1126.7199999999998 213.52 1112.08 237.28 1096.24 255.28C1073.6799999999998 280.48 1036.48 309.76 997.8399999999999 324.16L1022.56 350.08C1055.4399999999998 334.48 1087.36 309.52 1112.8 282.88C1135.36 304.48 1157.6799999999998 328.96 1173.28 350.56L1200.6399999999999 326.8C1186.48 309.52 1157.4399999999998 278.8 1133.6799999999998 258.15999999999997C1149.76 236.32 1163.1999999999998 210.88 1171.36 192.16C1173.52 187.36 1177.84 179.92000000000002 1179.76 177.28Z M1399.6 155.68 1379.4399999999998 164.08C1388.08 176.32 1393.6 186.64000000000001 1400.56 201.76L1421.4399999999998 192.88C1415.9199999999998 181.84 1406.32 165.76000000000002 1399.6 155.68ZM1432.4799999999998 144.16 1412.08 152.56C1420.9599999999998 164.56 1426.9599999999998 173.92000000000002 1434.6399999999999 189.04L1455.04 179.92000000000002C1449.2799999999997 169.36 1439.9199999999998 153.76000000000002 1432.4799999999998 144.16ZM1295.1999999999998 151.12 1277.9199999999998 177.52C1293.7599999999998 186.4 1318.7199999999998 202.48000000000002 1332.1599999999999 211.84L1349.9199999999998 185.44C1337.4399999999998 176.8 1311.04 159.76000000000002 1295.1999999999998 151.12ZM1250.8 321.52 1268.8 352.96C1289.9199999999998 349.12 1324.4799999999998 337.12 1348.9599999999998 323.44C1388.08 300.64 1422.1599999999999 270.4 1444.2399999999998 237.04000000000002L1425.7599999999998 204.4C1406.8 238.72 1373.1999999999998 271.6 1332.3999999999999 294.4C1306.4799999999998 308.8 1277.6799999999998 316.96 1250.8 321.52ZM1258.2399999999998 205.84 1240.9599999999998 232.24C1257.04 240.88 1281.9999999999998 256.96000000000004 1295.6799999999998 266.56L1313.1999999999998 239.68C1300.9599999999998 231.04000000000002 1274.56 214.48000000000002 1258.2399999999998 205.84Z"/><path transform="translate(236.045 0)" class="ls" d="M482.402 432.0H489.332V407.976C489.332 403.62 488.738 397.35 488.276 392.928H488.54L492.434 404.148L500.948 427.314H505.7L514.148 404.148L518.042 392.928H518.372C517.91 397.35 517.316 403.62 517.316 407.976V432.0H524.444V383.358H515.534L506.822 407.976C505.766 411.144 504.776 414.51 503.654 417.744H503.324C502.26800000000003 414.51 501.212 411.144 500.09 407.976L491.246 383.358H482.402Z M564.902 432.0H572.558V383.358H564.902Z M631.9580000000001 432.924C638.294 432.924 643.178 430.416 647.138 425.862L642.98 420.978C640.076 424.146 636.71 426.192 632.288 426.192C623.7080000000001 426.192 618.23 419.064 618.23 407.58C618.23 396.162 624.104 389.166 632.486 389.166C636.38 389.166 639.416 391.014 641.99 393.522L646.082 388.638C643.1120000000001 385.404 638.36 382.5 632.354 382.5C620.0120000000001 382.5 610.3100000000001 392.004 610.3100000000001 407.778C610.3100000000001 423.75 619.748 432.924 631.9580000000001 432.924Z M683.3720000000001 432.0H691.028V409.89H711.818V432.0H719.474V383.358H711.818V403.224H691.028V383.358H683.3720000000001Z M759.998 432.0H767.654V383.358H759.998Z M821.972 432.924C832.5980000000001 432.924 839.066 426.522 839.066 418.734C839.066 411.606 834.974 408.042 829.166 405.6L822.5 402.762C818.606 401.112 814.712 399.594 814.712 395.37C814.712 391.608 817.88 389.166 822.83 389.166C827.12 389.166 830.552 390.816 833.5880000000001 393.522L837.4820000000001 388.638C833.918 384.876 828.572 382.5 822.83 382.5C813.524 382.5 806.8580000000001 388.242 806.8580000000001 395.898C806.8580000000001 403.026 812.0060000000001 406.656 816.758 408.636L823.49 411.54C827.9780000000001 413.52 831.212 414.906 831.212 419.328C831.212 423.42 827.9780000000001 426.192 822.1700000000001 426.192C817.418 426.192 812.666 423.882 809.168 420.45L804.6800000000001 425.73C809.1020000000001 430.218 815.306 432.924 821.972 432.924Z M893.78 432.924C904.538 432.924 911.798 426.984 911.798 411.144V383.358H904.406V411.606C904.406 422.628 899.918 426.192 893.78 426.192C887.708 426.192 883.352 422.628 883.352 411.606V383.358H875.696V411.144C875.696 426.984 883.022 432.924 893.78 432.924Z M961.694 432.924C971.5939999999999 432.924 975.818 425.862 975.818 417.084V383.358H968.096V416.424C968.096 423.486 965.7199999999999 426.192 960.8359999999999 426.192C957.7339999999999 426.192 955.0279999999999 424.608 952.982 420.912L947.636 424.806C950.6719999999999 430.152 955.16 432.924 961.694 432.924Z M1016.012 432.0H1023.6679999999999V383.358H1016.012Z"/></svg><div class="sub"><b>DX戦略マップ</b>事業の目標までの道筋を描く</div></div>
+  </div>
+  <nav class="tabs" aria-label="画面の切り替え">
+    <a href="#entry">① 申請</a>
+    <a href="#map">② 戦略マップ</a>
+    <a href="#compare">③ 他社と比べる</a>
+    <a href="#meti">④ 経産省の画面</a>
+  </nav>
+
+  <!-- ① 申請 -->
+  <section class="view" id="v-entry" aria-label="申請">
+    <div class="card row">
+      <div><b id="e-co"></b><span class="muted small">　事業部と経営が事業の目標を先に決め、そのあとDX推進部が加わって作ります</span></div>
+      <span class="small muted" style="margin-left:auto">入力中の事業</span>
+      <div class="seg" id="e-bu"></div>
+    </div>
+    <div class="entry">
+      <div class="card" style="padding:6px"><ul class="steps" id="steps"></ul></div>
+      <div class="card"><div id="form"></div>
+        <div class="btns">
+          <button class="btn" id="prev">前へ</button>
+          <button class="btn" id="next">次へ</button>
+          <button class="btn pri" id="tomap">入力内容で戦略マップを表示</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ② 戦略マップ -->
+  <section class="view" id="v-map" aria-label="戦略マップ">
+    <div class="mnav">
+      <div class="seg" id="butabs" aria-label="事業"></div>
+      <div class="seg" id="vsw" aria-label="表示の範囲">
+        <button data-v="theme" aria-pressed="true">テーマごと</button>
+        <button data-v="all" aria-pressed="false">全体マップ</button>
+      </div>
+      <button class="lnk" id="optbtn" aria-controls="opts" aria-expanded="false">表示オプション</button>
+      <span class="co" id="m-co"></span>
+    </div>
+    <div class="card opts" id="opts" hidden>
+      <div class="grp"><b>表示する時点</b>
+        <div class="seg" id="snap">
+          <button data-t="now" aria-pressed="true">現在</button>
+          <button data-t="mar" aria-pressed="false">2026年3月末</button>
+        </div>
+      </div>
+      <div class="grp"><b>担当で強調（もう一度押すと解除）</b>
+        <div class="seg" id="who">
+          <button data-w="biz" aria-pressed="false">事業部の担当</button>
+          <button data-w="dx" aria-pressed="false">DX推進部の担当</button>
+        </div>
+      </div>
+      <div class="grp"><b>DXの段階で強調（もう一度押すと解除）</b>
+        <div class="seg" id="stg">
+          <button data-s="1" aria-pressed="false"><span class="ipa s1">1</span>デジタイゼーション</button>
+          <button data-s="2" aria-pressed="false"><span class="ipa s2">2・3</span>デジタライゼーション</button>
+          <button data-s="3" aria-pressed="false"><span class="ipa s3">4〜7</span>DX</button>
+        </div>
+      </div>
+      <div class="grp"><b>分類</b>
+        <div class="seg"><button id="ipatog" aria-pressed="false">施策にIPAの取組項目の番号を表示</button></div>
+      </div>
+    </div>
+    <div id="fnotes"></div>
+    <div id="hero"></div>
+    <div class="mapgrid" id="mapgrid">
+      <div class="card">
+        <div class="map" id="mapc">
+          <div class="vst" id="vst" aria-hidden="true"></div>
+          <svg id="links" aria-hidden="true"></svg>
+          <div class="stick" id="mhead"></div>
+          <div id="bands"></div>
+        </div>
+      </div>
+      <aside class="card panel" id="panel" aria-live="polite"></aside>
+    </div>
+    <details class="card dbox" id="diffbox"></details>
+  </section>
+
+  <!-- ③ 他社と比べる -->
+  <section class="view" id="v-compare" aria-label="他社と比べる">
+    <div class="card row">
+      <div><b>他社と比べる</b><span class="muted small">　他社：年度末の集計（2026年3月末）／自社：現在と2026年3月末</span></div>
+      <span class="small muted" style="margin-left:auto">比べる相手</span>
+      <div class="seg" id="peer">
+        <button data-p="same" aria-pressed="true">同じ業種の事業</button>
+        <button data-p="all" aria-pressed="false">参加企業の全事業</button>
+      </div>
+    </div>
+    <div class="cmpgrid">
+      <div class="card"><h2>道筋のどこまで進んだか × DXの段階</h2><div id="grid"></div>
+        <p class="small muted" style="margin:6px 0 0">点＝事業。<b>横</b>：道筋のどこまで進んだか。施策から順にたどり、指標が基準値から目標の方向へ動いたところまで（途中が動いていないと、その先は数えません）。<b>縦</b>：その事業の道筋にある、試行・実行中のデジタル施策のうち一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。</p>
+      </div>
+      <div class="card"><h2>自社の事業</h2><div class="bul" id="bulist"></div></div>
+    </div>
+    <div class="cmpgrid">
+      <div class="card"><h2>項目ごとの比較</h2><div class="bars" id="bars"></div>
+        <div class="legend" style="margin-top:10px"><span><span class="sw o-dx"></span>自社（現在）</span><span><span class="sw" style="--c:var(--faint);--cs:var(--faint)"></span>比べる相手の平均</span></div>
+        <p class="small muted" style="margin:8px 0 0">施策・目標の件数は会社ごとに切り分け方が違うため、割合だけで比べます。</p>
+      </div>
+      <div class="card"><h2>道筋にあるDX（IPAの7項目）</h2><div id="heat"></div>
+        <p class="small muted" style="margin:8px 0 0">その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「—」は、その項目の施策がまだないところ。項目：1. アナログ・物理データのデジタル化／2. 業務の効率化による生産性の向上／3. 既存製品・サービスの高付加価値化／4. 新規製品・サービスの創出／5. 組織横断／全体の業務・製造プロセスのデジタル化／6. 顧客起点の価値創出によるビジネスモデルの根本的な変革／7. 企業文化や組織マインドの根本的な変革（IPA『DX動向2026』データ集 p.2）</p></div>
+    </div>
+  </section>
+
+  <!-- ④ 経産省 -->
+  <section class="view" id="v-meti" aria-label="経産省の画面">
+    <div class="card">
+      <h2>参加企業の現在地（2026年3月末の集計）</h2>
+      <div class="summary">
+        <div class="stat"><b>42社</b><span>参加企業（118事業）</span></div>
+        <div class="stat"><b>31社</b><span>直近1年以内に更新</span></div>
+        <div class="stat"><b>13%</b><span>顧客・財務まで道筋が進んだ事業</span></div>
+        <div class="stat"><b>47%</b><span>業務プロセスで止まっている事業</span></div>
+        <div class="stat"><b>17%</b><span>どの目標にも付いていない施策</span></div>
+      </div>
+    </div>
+    <div class="cmpgrid">
+      <div class="card"><h2>参加企業の全事業：道筋の進み × DXの段階</h2><div id="mgrid"></div>
+        <p class="small muted" style="margin:6px 0 0">数字は、全118事業のうちそのマスにいる事業の割合。段階が高くても、道筋を右へ進んでいない事業が多いことが分かります。評価・表彰の基準を「どの段階の施策で、道筋のどこまで進んだか」で示すための材料になります（チームの提言）。</p>
+      </div>
+      <div class="card"><h2>業種別：顧客・財務まで道筋が進んだ事業の割合</h2>
+        <div id="industry" style="display:grid;grid-template-columns:150px 1fr 44px;gap:8px 12px;align-items:center"></div>
+        <h2 style="margin-top:18px">指標はどの視点に置かれているか</h2>
+        <div class="legend" style="margin-bottom:8px">
+          <span><span class="sw" style="--c:var(--cyan);--cs:var(--cyan)"></span>学習と成長</span>
+          <span><span class="sw" style="--c:var(--accent-2);--cs:var(--accent-2)"></span>業務プロセス</span>
+          <span><span class="sw" style="--c:var(--accent);--cs:var(--accent)"></span>顧客</span>
+          <span><span class="sw" style="--c:var(--gray);--cs:var(--gray)"></span>財務</span>
+        </div>
+        <div id="persp" style="display:grid;grid-template-columns:110px 1fr;gap:8px 12px;align-items:center"></div>
+        <p class="small muted" style="margin:8px 0 0">参考：IPA『DX動向2026』では、成果指標の対象は「内向きの業務改革（社内の効率化）」が80.0%、「外向きの業務改革（新たなビジネスや顧客価値の創出）」が33.5%（p.19 図表2-15、複数回答）。参加企業の中でこの偏りがどう変わるかを定点で見ます。</p>
+      </div>
+    </div>
+    <div class="card"><h2>企業一覧</h2><div class="scroll"><table id="cos"></table></div></div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+/* ===== 定数 ===== */
+const PERSP={lg:'学習と成長',pr:'業務プロセス',cu:'顧客',fi:'財務'};
+const PCOL={lg:2,pr:3,cu:4,fi:5};
+const CAP={hum:'人的資本',inf:'情報資本',org:'組織資本'};
+const PROC=['業務管理','顧客管理','イノベーション','規制と社会'];
+const HZ=['短期（0〜1年）','中期（1〜3年）','長期（3〜4年）'];
+const HZDEF={'業務管理':0,'顧客管理':1,'イノベーション':2,'規制と社会':2};
+const CVP=['トータル・コスト・リーダーシップ','製品リーダーシップ','完全な顧客ソリューション','システムロックイン'];
+const IPA={1:'アナログ・物理データのデジタル化',2:'業務の効率化による生産性の向上',3:'既存製品・サービスの高付加価値化',4:'新規製品・サービスの創出',5:'組織横断／全体の業務・製造プロセスのデジタル化',6:'顧客起点の価値創出によるビジネスモデルの根本的な変革',7:'企業文化や組織マインドの根本的な変革'};
+const IPA_STAGE={1:1,2:2,3:2,4:3,5:3,6:3,7:3};
+const STAGE=['未到達','デジタイゼーション','デジタライゼーション','DX'];
+const BU_ITEMS=[1,2,3,4,6], CORP_ITEMS=[5,7];
+const ST=['未着手','取り組み中','成果が出ている'];
+const STS=['未着手','取組中','成果'];
+const EXEC=['検討中','試行中','実行中','中止'];
+const VERIFY=['未測定','確認中','効果あり','効果なし'];
+const OWN={biz:'事業部',dx:'DX推進部',mgmt:'経営'};
+const CHECKS=['目標と役割の合意','実行条件（予算・工数・権限・データの提供者）の確保','検証と次の判断日の決定'];
+const FINKIND=['収益増大','生産性向上'];
+const PROG=['指標はまだ動いていない','学習と成長','業務プロセス','顧客','財務'];
+const PROGS=['まだ','学習と成長','業務','顧客','財務'];
+const PIDX={lg:1,pr:2,cu:3,fi:4};
+
+/* ===== ダミーデータ（架空の企業） ===== */
+const DATA={
+ company:{name:'みらい精機株式会社（架空）',industry:'製造業（機械）',size:'従業員1,000〜4,999人',listing:'プライム'},
+ corp:{
+  fin:{id:'cfin',persp:'fi',name:'連結の営業利益を伸ばす',kpi:'連結営業利益',base:'180億円',prev:'184億円',cur:'190億円',target:'260億円',due:'2028年度',owner:'mgmt'},
+  ipa:{5:{now:1,mar:1,fut:2},7:{now:0,mar:0,fut:1}},
+  goal:{year:'2028年度',share:60,i5:2,i7:1}
+ },
+ bus:[
+  {id:'B1',name:'産業機器事業',industry:'はん用・生産用機械',share:70,owner:'産業機器事業部長',cvp:2,
+   customer:'当社設備を使う工場の保全部門・生産技術部門',future:'顧客の設備を止めず、段取りも短くできる機械と保守を提供している',
+   gap:'＋150億円（2028年度）',growth:70,confBy:'産業機器事業部長',confAt:'2026-04-15',
+   ref:'DX認定（2025年取得）設問(2)「データを活用した保守サービスの高度化」から読み込み',
+   themes:[{id:'T1',name:'保守を「壊れてから」から「止めない」へ',proc:'顧客管理',hz:1},
+           {id:'T2',name:'組立の段取り替えを短くする',proc:'業務管理',hz:0}],
+   objs:[
+    {id:'b1lg1',persp:'lg',cap:'inf',theme:'T1',name:'必要な稼働データがそろっている',kpi:'必要データの欠損なし率',base:'70%',prev:'78%',cur:'91%',target:'98%',due:'2027年3月',owner:'dx',partner:'事業部'},
+    {id:'b1pr1',persp:'pr',theme:'T1',name:'稼働状況に応じて保守を提案する',kpi:'稼働データを使った提案件数',base:'月20件',prev:'月20件',cur:'月42件',target:'月60件',due:'2027年度',owner:'biz',partner:'DX推進部'},
+    {id:'b1pr2',persp:'pr',theme:'T1',name:'保守メニューを予防型に組み直す',kpi:'',owner:'biz',partner:''},
+    {id:'b1cu1',persp:'cu',theme:'T1',name:'保守契約を続けてもらう',kpi:'保守契約の継続率',base:'82%',prev:'82%',cur:'84%',target:'90%',due:'2027年度',owner:'biz',partner:''},
+    {id:'b1lg2',persp:'lg',cap:'inf',theme:'T2',name:'組立の実績が自動で取れている',kpi:'実績を自動で取れる工程の割合',base:'20%',prev:'20%',cur:'35%',target:'80%',due:'2027年度',owner:'dx',partner:'生産技術部'},
+    {id:'b1lg3',persp:'lg',cap:'hum',theme:'T2',name:'標準の手順で誰でも段取りできる',kpi:'標準手順で段取りできる作業者の割合',base:'30%',prev:'30%',cur:'45%',target:'80%',due:'2027年度',owner:'biz',partner:''},
+    {id:'b1pr3',persp:'pr',theme:'T2',name:'段取り替えの時間を短くする',kpi:'1回あたりの段取り替え時間',base:'45分',prev:'43分',cur:'38分',target:'25分',due:'2027年度',owner:'biz',partner:''},
+    {id:'b1fi1',persp:'fi',kind:0,name:'既存顧客からの売上を伸ばす',kpi:'既存顧客からの売上',base:'1,200億円',prev:'1,220億円',cur:'1,240億円',target:'1,350億円',due:'2028年度',owner:'mgmt'},
+    {id:'b1fi2',persp:'fi',kind:1,name:'製造原価率を下げる',kpi:'製造原価率',base:'68%',prev:'68%',cur:'67%',target:'64%',due:'2028年度',owner:'mgmt'}],
+   links:[
+    {from:'b1lg1',to:'b1pr1',reason:'欠損のない稼働データがあれば、故障の前に提案できる',cond:'提案に使える精度のデータが取れる',check:'提案に使えたデータの割合',date:'2026年9月'},
+    {from:'b1pr1',to:'b1cu1',reason:'故障前に提案できれば停止のリスクが下がり、顧客が価値を感じて契約を続ける',cond:'営業に提案する時間がある',check:'提案への反応と実施率',date:'2027年3月'},
+    {from:'b1pr2',to:'b1cu1',reason:'予防型のメニューがないと、提案しても契約の形にできない',cond:'価格と提供体制を決められる',check:'新メニューの受注件数',date:'2027年9月'},
+    {from:'b1cu1',to:'b1fi1',reason:'継続率が上がれば、既存顧客からの保守売上が積み上がる',cond:'解約の主な理由が設備停止である',check:'解約理由の調査',date:'2027年3月'},
+    {from:'b1lg2',to:'b1pr3',reason:'実績が自動で取れれば、時間がかかる段取りを特定できる',cond:'工程ごとの実績が比べられる形で取れる',check:'時間がかかる段取りの特定件数',date:'2026年12月'},
+    {from:'b1lg3',to:'b1pr3',reason:'手順がそろえば、人による段取り時間のばらつきが減る',cond:'標準手順の教育時間を確保できる',check:'作業者ごとの段取り時間のばらつき',date:'2026年12月'},
+    {from:'b1pr3',to:'b1fi2',reason:'段取り時間が減れば稼働率が上がり、原価率が下がる',cond:'受注量が今の水準を保つ',check:'稼働率と原価率',date:'2027年3月'}],
+   ipa:{now:{1:2,2:2,3:1,4:0,6:0},mar:{1:2,2:2,3:0,4:0,6:0},fut:{1:2,2:2,3:2,4:1,6:0}}},
+  {id:'B2',name:'計測機器事業',industry:'電気機器',share:30,owner:'計測機器事業部長',cvp:1,
+   customer:'品質検査を行う電子部品メーカー',future:'検査の結果から不良の原因まで示す計測機器で選ばれている',
+   gap:'＋60億円（2028年度）',growth:90,confBy:'',confAt:'',
+   ref:'DX調査2026 記述10「取組プロジェクト」から読み込み',
+   themes:[{id:'T3',name:'検査データから原因まで示す新製品',proc:'イノベーション',hz:2}],
+   objs:[
+    {id:'b2lg1',persp:'lg',cap:'hum',theme:'T3',name:'検査データを解析できる技術者がいる',kpi:'データ解析ができる技術者',base:'8人',prev:'8人',cur:'12人',target:'30人',due:'2028年度',owner:'biz',partner:'DX推進部'},
+    {id:'b2lg2',persp:'lg',cap:'inf',theme:'T3',name:'顧客の検査データが集まる',kpi:'接続できた顧客の検査装置',base:'0台',prev:'0台',cur:'40台',target:'500台',due:'2028年度',owner:'dx',partner:'事業部'},
+    {id:'b2lg3',persp:'lg',cap:'org',theme:'T3',name:'開発と営業が顧客の声を共有する',kpi:'',owner:'biz',partner:''},
+    {id:'b2pr1',persp:'pr',theme:'T3',name:'新製品の開発期間を短くする',kpi:'新製品の開発期間',base:'24か月',prev:'24か月',cur:'22か月',target:'15か月',due:'2028年度',owner:'biz',partner:''},
+    {id:'b2cu1',persp:'cu',theme:'T3',name:'新製品を採用してもらう',kpi:'新製品の採用社数',base:'0社',prev:'0社',cur:'3社',target:'50社',due:'2028年度',owner:'biz',partner:''},
+    {id:'b2fi1',persp:'fi',kind:0,name:'新製品で売上をつくる',kpi:'新製品の売上',base:'0億円',prev:'0億円',cur:'0億円',target:'60億円',due:'2028年度',owner:'mgmt'}],
+   links:[
+    {from:'b2lg1',to:'b2pr1',reason:'解析できる技術者が増えれば、検査データから製品の改良点を早く見つけられる',cond:'技術者が解析に使う時間を取れる',check:'改良点の発見から設計反映までの日数',date:'2027年6月'},
+    {from:'b2lg2',to:'b2pr1',reason:'実際の検査データがあれば、試作の回数を減らせる',cond:'顧客がデータ提供に同意する',check:'試作の回数',date:'2027年6月'},
+    {from:'b2pr1',to:'b2cu1',reason:'開発が早まれば、顧客の新ラインの立ち上げに間に合う',cond:'顧客の設備投資の時期が読める',check:'商談での採用・失注の理由',date:'2027年9月'},
+    {from:'b2cu1',to:'b2fi1',reason:'採用社数が増えれば新製品の売上が立つ',cond:'単価を今の想定で保てる',check:'受注単価',date:'2027年9月'}],
+   ipa:{now:{1:2,2:1,3:0,4:1,6:0},mar:{1:2,2:1,3:0,4:0,6:0},fut:{1:2,2:2,3:1,4:2,6:0}}},
+  {id:'B3',name:'予防保守サービス事業（新規）',industry:'情報サービス',share:0,owner:'新事業推進室長',cvp:2,
+   customer:'複数の拠点を持つ大手の製造業',future:'予防保守を有償のサービスとして提供している',
+   gap:'＋40億円（2028年度）',growth:100,confBy:'新事業推進室長',confAt:'2026-05-20',
+   ref:'—',
+   themes:[{id:'T4',name:'予防保守を有償のサービスに',proc:'顧客管理',hz:1}],
+   objs:[
+    {id:'b3lg1',persp:'lg',cap:'inf',theme:'T4',name:'故障を前もって予知できる',kpi:'故障予知の精度',base:'60%',prev:'60%',cur:'72%',target:'85%',due:'2027年度',owner:'dx',partner:'事業部'},
+    {id:'b3pr1',persp:'pr',theme:'T4',name:'予知に基づいて訪問する',kpi:'',owner:'biz',partner:'DX推進部'},
+    {id:'b3cu1',persp:'cu',theme:'T4',name:'有償の予防保守を契約してもらう',kpi:'有償予防保守の契約数',base:'0社',prev:'0社',cur:'0社',target:'300社',due:'2028年度',owner:'biz',partner:''},
+    {id:'b3cu2',persp:'cu',theme:'T4',name:'販売パートナーを広げる',kpi:'販売パートナーの数',base:'0社',prev:'0社',cur:'0社',target:'20社',due:'2028年度',owner:'biz',partner:''},
+    {id:'b3fi1',persp:'fi',kind:0,name:'新しいサービスで売上をつくる',kpi:'新サービスの売上',base:'0億円',prev:'0億円',cur:'0億円',target:'40億円',due:'2028年度',owner:'mgmt'}],
+   links:[
+    {from:'b3lg1',to:'b3pr1',reason:'予知できれば、止まる前に訪問できる',cond:'予知の精度が実用水準（85%）に届く',check:'PoC先での停止回数',date:'2027年6月'},
+    {from:'b3pr1',to:'b3cu1',reason:'止まらない価値を体験すれば、有償でも契約してもらえる',cond:'訪問の人員を確保できる',check:'PoC先の有償契約への移行率',date:'2027年9月'},
+    {from:'b3cu1',to:'b3fi1',reason:'契約数が増えれば新サービスの売上が立つ',cond:'',check:'',date:''},
+    {from:'b3cu2',to:'b3fi1',reason:'パートナー経由で自社が届かない顧客に売れる',cond:'',check:'',date:''}],
+   ipa:{now:{1:2,2:0,3:0,4:1,6:0},mar:{1:2,2:0,3:0,4:0,6:0},fut:{1:2,2:1,3:0,4:2,6:1}}}
+ ],
+ inits:[
+  {id:'i1',name:'稼働データの連携基盤',attach:['b1lg1'],owner:'dx',partner:'事業部',digital:true,ipa:3,exec:2,verify:1,checks:[true,true,false],ev:'産業機器事業 事業計画会議（2026-04-15）',kpi:'連携できた設備の台数',base:'0台',cur:'1,800台',target:'3,000台',prev:{checks:[false,false,false],exec:1,verify:0}},
+  {id:'i9',name:'全社データ基盤',attach:['b1lg1','b2lg2'],owner:'dx',partner:'情報システム部',digital:true,ipa:5,exec:2,verify:1,checks:[true,true,false],ev:'経営会議（2026-02-10）',kpi:'基盤につながった事業の数',base:'0',cur:'2',target:'3',prev:{checks:[true,false,false],exec:2,verify:0}},
+  {id:'i2',name:'提案ルールの見直し',attach:['b1pr1'],owner:'biz',partner:'DX推進部',digital:false,ipa:null,exec:2,verify:1,checks:[true,true,true],ev:'産業機器事業 営業会議（2026-05-08）',kpi:'',prev:{checks:[false,false,false],exec:0,verify:0}},
+  {id:'i3',name:'予防型メニューの設計',attach:['b1pr2'],owner:'biz',partner:'',digital:false,ipa:null,exec:0,verify:0,checks:[false,false,false],ev:'',kpi:''},
+  {id:'i4',name:'組立実績の自動収集',attach:['b1lg2'],owner:'dx',partner:'生産技術部',digital:true,ipa:2,exec:2,verify:1,checks:[false,true,false],ev:'',kpi:'自動収集を始めた工程の数',base:'0',cur:'6',target:'14',prev:{checks:[false,false,false],exec:1,verify:0}},
+  {id:'i5',name:'段取り手順の標準化と教育',attach:['b1lg3'],owner:'biz',partner:'',digital:false,ipa:null,exec:2,verify:1,checks:[true,true,false],ev:'製造部 定例（2026-03-12）',kpi:'',prev:{checks:[true,false,false],exec:1,verify:0}},
+  {id:'i6',name:'検査データのAI解析PoC',attach:['b2pr1'],owner:'dx',partner:'計測機器事業部',digital:true,ipa:4,exec:1,verify:1,checks:[false,false,false],ev:'',kpi:'PoCで見つけた改良点',base:'0件',cur:'4件',target:'10件',prev:{checks:[false,false,false],exec:0,verify:0}},
+  {id:'i7',name:'データ解析の研修',attach:['b2lg1'],owner:'dx',partner:'計測機器事業部',digital:true,ipa:7,exec:2,verify:0,checks:[false,true,false],ev:'',kpi:'受講者数',base:'0人',cur:'26人',target:'60人'},
+  {id:'i8',name:'故障予知モデルのPoC',attach:['b3lg1'],owner:'dx',partner:'事業部',digital:true,ipa:4,exec:1,verify:1,checks:[true,false,false],ev:'新事業推進会議（2026-05-20）',kpi:'',prev:{checks:[false,false,false],exec:0,verify:0}},
+  {id:'i11',name:'予防保守の顧客ポータル',attach:['b3pr1'],owner:'dx',partner:'',digital:true,ipa:6,exec:0,verify:0,checks:[false,false,false],ev:'',kpi:''},
+  {id:'i10',name:'社内チャットAI',attach:[],owner:'dx',partner:'',digital:true,ipa:2,exec:2,verify:0,checks:[false,false,false],ev:'',kpi:'利用率',base:'0%',cur:'38%',target:'60%'}
+ ]
+};
+const DIFFS=[
+ '産業機器事業：「稼働データの連携基盤」の予算と工数を確保（事業計画会議 2026-04-15）',
+ '「提案ルールの見直し」を開始。稼働データを使った提案は月20件 → 月42件',
+ '保守契約の継続率は82% → 84%。提案との関係は確認中（次の確認：2027年3月）',
+ '計測機器事業：新製品のテーマを追加。採用は3社。売上はまだ動いていない',
+ '予防保守サービス（新規）：「故障予知モデルのPoC」を開始。予知の精度は60% → 72%',
+ '「社内チャットAI」はどの目標にも付いていないまま（利用率38%）'
+];
+/* 他社の事業（匿名・ダミー）：st＝DXの段階（1〜3）、p＝道筋の進み（0〜4） */
+const PEERS=(()=>{const inds=['はん用・生産用機械','電気機器','情報サービス'];let s=7;const r=()=>{s=(s*9301+49297)%233280;return s/233280};
+ const W=[[2,2,7],[2,1,4],[1,1,4],[1,0,2],[1,2,2],[3,1,4],[3,2,4],[3,3,2],[3,4,1],[2,3,2],[2,0,1],[3,0,1]];const bag=[];W.forEach(([a,b,n])=>{for(let i=0;i<n;i++)bag.push([a,b])});
+ const out=[];for(let i=0;i<34;i++){const[c,p]=bag[Math.floor(r()*bag.length)];out.push({ind:inds[i%3],st:c,p})}return out})();
+const PEER_AVG={reach:74,c:[31,26,18],ver:16,persp:{lg:36,pr:46,cu:10,fi:8}};
+
+/* ===== 状態 ===== */
+const S={snap:'now',who:'all',view:'theme',cb:'B1',ct:'T1',opt:false,ipa:false,issAll:false,stg:0,sel:null,collapsed:{},peer:'same',step:0,ebu:'B1'};
+
+/* ===== 便利関数 ===== */
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>{const m=String(v??'').replace(/,/g,'').match(/-?\d+(\.\d+)?/);return m?parseFloat(m[0]):null};
+const pct=v=>Math.round(v*100);
+function allObjs(){const a=[];DATA.bus.forEach(b=>b.objs.forEach(o=>a.push(o)));return a}
+function objById(id){for(const b of DATA.bus){const o=b.objs.find(x=>x.id===id);if(o)return o}return null}
+function buOfObj(id){return DATA.bus.find(b=>b.objs.some(o=>o.id===id))}
+function curOf(o){return S.snap==='mar'&&o.prev!==undefined?o.prev:o.cur}
+function st(i){return S.snap==='mar'&&i.prev?Object.assign({},i,i.prev):i}
+function initsOn(objId){return DATA.inits.filter(i=>i.attach.includes(objId))}
+function initsOfBu(b){const ids=new Set(b.objs.map(o=>o.id));return DATA.inits.filter(i=>i.attach.some(a=>ids.has(a)))}
+function down(b,id){const seen=new Set();const q=[id];while(q.length){const c=q.shift();b.links.filter(l=>l.from===c).forEach(l=>{if(!seen.has(l.to)){seen.add(l.to);q.push(l.to)}})}return seen}
+function up(b,id){const seen=new Set();const q=[id];while(q.length){const c=q.shift();b.links.filter(l=>l.to===c).forEach(l=>{if(!seen.has(l.from)){seen.add(l.from);q.push(l.from)}})}return seen}
+function moved(o,snap){const c=num(snap==='mar'&&o.prev!==undefined?o.prev:o.cur),b=num(o.base),t=num(o.target);if(c===null||b===null||t===null||t===b)return false;return (c-b)*(t-b)>0}
+function warns(b,o){const w=[];
+ if(o.persp!=='fi'){const d=down(b,o.id);if(![...d].some(id=>(objById(id)||{}).persp==='fi'))w.push('財務の目標につながっていない')}
+ const ups=up(b,o.id);ups.add(o.id);if(![...ups].some(id=>initsOn(id).length))w.push('この目標に向かう施策がない');
+ return w}
+/* 段階は企業が選んだIPA項目から変換し、道筋の進みは入力された指標の変化から計算する */
+function stAt(i,snap){return (snap||S.snap)==='mar'&&i.prev?Object.assign({},i,i.prev):i}
+function running(i,snap){const e=stAt(i,snap).exec;return e===1||e===2}
+/* 道筋の順に指標が動いた目標。施策が付いた目標から始め、左の目標が動いていないと右は数えない */
+function reachedSet(b,snap,filt){snap=snap||S.snap;const R=new Set();
+ const started=o=>DATA.inits.some(i=>i.attach.includes(o.id)&&running(i,snap)&&(!filt||filt(i)));
+ let ch=true;while(ch){ch=false;b.objs.forEach(o=>{if(R.has(o.id)||!moved(o,snap))return;
+  if(started(o)||b.links.some(l=>l.to===o.id&&R.has(l.from))){R.add(o.id);ch=true}})}
+ return R}
+function progOf(b,snap,filt){let p=0;reachedSet(b,snap,filt).forEach(id=>{p=Math.max(p,PIDX[objById(id).persp])});return p}
+/* 事業の段階＝その事業の道筋にある（試行・実行中の）デジタル施策のうち、一番上の段階 */
+function stageTop(b,snap){let s=0;initsOfBu(b).filter(i=>i.digital&&running(i,snap)).forEach(i=>{s=Math.max(s,IPA_STAGE[i.ipa])});return s}
+function dxSummary(b){const m={1:new Set(),2:new Set(),3:new Set()};initsOfBu(b).filter(i=>i.digital).forEach(i=>m[IPA_STAGE[i.ipa]].add(i.ipa));
+ return [1,2,3].filter(k=>m[k].size).map(k=>`${STAGE[k]}（項目${[...m[k]].sort().join('・')}）`).join('／')||'デジタルの施策はまだない'}
+function itemRows(b,snap){return [1,2,3,4,5,6,7].map(k=>{const its=initsOfBu(b).filter(i=>i.digital&&i.ipa===k);if(!its.length)return null;
+ return{k,its,p:progOf(b,snap,i=>i.digital&&i.ipa===k)}}).filter(Boolean)}
+function progText(p){return p?PROG[p]+'まで指標が動いた':PROG[0]}
+function track(p,was){return `<div class="trk">${[1,2,3,4].map(n=>`<i class="${n<=p?'on':(was&&n<=was?'was':'')}"></i>`).join('')}</div><div class="trkl">${[1,2,3,4].map(n=>`<span>${PROG[n]}</span>`).join('')}</div>`}
+function heatHTML(){return `<table class="heat"><tr><th>事業</th>${[1,2,3,4,5,6,7].map(k=>`<th title="${esc(IPA[k])}">${k}</th>`).join('')}</tr>
+ ${DATA.bus.map(b=>{const rs=itemRows(b);return `<tr><td>${esc(b.name)}</td>${[1,2,3,4,5,6,7].map(k=>{const r=rs.find(x=>x.k===k);return `<td>${r?`<span class="hc ${r.p>=3?'h2':r.p>=1?'h1':'h0'}" title="${esc(r.its.map(i=>i.name).join('・'))}">${PROGS[r.p]}${r.p?'まで':''}</span>`:'<span class="muted">—</span>'}</td>`}).join('')}</tr>`}).join('')}</table>`}
+function ownCls(o){return 'o-'+(o||'mgmt')}
+
+/* ===== タブ ===== */
+const VIEWS=['entry','map','compare','meti'];
+function route(){const h=(location.hash||'#map').slice(1);const v=VIEWS.includes(h)?h:'map';
+ VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
+ document.querySelectorAll('.tabs a').forEach(a=>a.setAttribute('aria-current',a.getAttribute('href')==='#'+v?'page':'false'));
+ if(v==='map')renderMap();if(v==='compare')renderCompare();if(v==='entry')renderEntry();if(v==='meti')renderMeti()}
+window.addEventListener('hashchange',route);
+
+/* ===== 戦略マップ ===== */
+const PL={lg:'必要な人・データ・体制',pr:'変える業務',cu:'顧客に起きる変化',fi:'売上・利益への貢献'};
+const IS={up:'改善',flat:'横ばい',worse:'悪化',none:'未測定',nokpi:'未設定'};
+const IK={wait:'確認待ち',worse:'悪化',unmeasured:'未測定',unset:'未設定'};
+const IKO=['wait','worse','unmeasured','unset'];
+let ISS=[];
+/* 指標の事実：基準値と現在値の比較だけで決める（経路上の判定とは別） */
+function indState(o){if(!o.kpi)return 'nokpi';const c=num(curOf(o)),b=num(o.base),t=num(o.target);if(c===null||b===null||t===null||t===b)return 'none';const d=(c-b)*(t-b);return d>0?'up':d<0?'worse':'flat'}
+function nowL(){return S.snap==='mar'?'3月末':'現在'}
+function pctOf(o){const c=num(curOf(o)),b=num(o.base),t=num(o.target);if(!o.kpi||c===null||b===null||t===null||t===b)return null;return Math.max(0,Math.min(100,Math.round((c-b)/(t-b)*100)))}
+function thsOf(b,oid){const o=objById(oid);if(o.theme)return[o.theme];const s=new Set();up(b,oid).forEach(x=>{const u=objById(x);if(u&&u.theme)s.add(u.theme)});return[...s]}
+function themeFin(b,t){const s=new Set();b.objs.filter(o=>o.theme===t.id).forEach(o=>down(b,o.id).forEach(x=>{if(objById(x).persp==='fi')s.add(x)}));return b.objs.filter(o=>s.has(o.id))}
+/* 未決事項：登録されたデータから機械的に拾う。need＝必要な確認内容 */
+function issuesAll(){const L=[];
+ const add=(k,t,s,n,own,sel,bu,sc,need,g)=>L.push({k,t,s,n,own,sel,bu,sc,need,g:!!g});
+ DATA.bus.forEach(b=>{
+  if(!b.confAt)add('wait','事業側の確認がまだ','事業側の確認',b.name,b.owner,'b:'+b.id,[b.id],null,'事業の責任者が、目標と施策の内容を確認する');
+  b.objs.forEach(o=>{const sc=thsOf(b,o.id).map(t=>b.id+':'+t),own=OWN[o.owner],sel='o:'+o.id,s=indState(o);
+   if(s==='nokpi')add('unset','指標が未設定','指標',o.name,own,sel,[b.id],sc,'指標名・基準値・目標値・期限を決める');
+   if(s==='none')add('unmeasured','指標が未測定','指標',o.name,own,sel,[b.id],sc,'現在値を測って登録する');
+   if(s==='worse')add('worse','指標が悪化','指標',o.name,own,sel,[b.id],sc,'悪化の理由を確かめ、施策やつながりを見直すかを決める');
+   const w=warns(b,o);
+   if(w.includes('財務の目標につながっていない'))add('unset','売上・利益へのつながりが未設定','売上・利益へのつながり',o.name,own,sel,[b.id],sc,'この目標が、どの顧客・財務の目標につながるかを決める');
+   if(w.includes('この目標に向かう施策がない'))add('unset','施策が未設定','施策',o.name,own,sel,[b.id],sc,'この目標に向けて何を実施するかを決める')});
+  b.links.forEach(l=>{const f=objById(l.from),t=objById(l.to);if(!f||!t||l.check)return;
+   add('unset','つながりの確かめ方が未設定','つながりの確かめ方',f.name+' → '+t.name,OWN[f.owner],'o:'+f.id,[b.id],thsOf(b,f.id).map(x=>b.id+':'+x),'このつながりが成り立つかを、何でいつ確かめるかを決める')})});
+ DATA.inits.forEach(i=>{const s=st(i),own=OWN[i.owner],sel='i:'+i.id;
+  if(!i.attach.length){add('unset','事業目標との接続が未設定','事業目標との接続',i.name,own,sel,[],null,'どの事業の目標に付けるか、やめるかを決める',true);return}
+  if(!running(i))return;
+  const bu=[...new Set(i.attach.map(x=>buOfObj(x).id))];const sc=[];i.attach.forEach(x=>{const bb=buOfObj(x);thsOf(bb,x).forEach(t=>sc.push(bb.id+':'+t))});
+  if(!s.checks[1])add('unset','実行条件が未確保','実行条件',i.name,own,sel,bu,sc,'予算・工数・権限・データの提供者を確保する');
+  if(!s.checks[2])add('unset','検証と次の判断日が未設定','検証と次の判断日',i.name,own,sel,bu,sc,'何をいつ確かめ、続ける・直す・やめるをいつ決めるかを決める');
+  if(s.verify===0)add('unmeasured','施策の効果が未測定','施策の効果',i.name,own,sel,bu,sc,'何で効果を測るかを決めて、測る')});
+ return L}
+function issCount(L){return IKO.map(k=>{const n=L.filter(i=>i.k===k).length;return n?`${IK[k]} ${n}`:''}).filter(Boolean).join('・')||'該当なし'}
+function issHTML(L,showBu){if(!L.length)return '<p class="small muted" style="margin:8px 0 0">登録されたデータの中には、未設定・未測定・悪化・確認待ちの項目はありません。</p>';
+ const S2=[...L].sort((x,y)=>IKO.indexOf(x.k)-IKO.indexOf(y.k));const show=S.issAll?S2:S2.slice(0,6);
+ return `<ul class="iss">${show.map(i=>`<li><button data-iss="${i.sel}"><span class="ik ${i.k}">${IK[i.k]}</span><span><b>${esc(i.t)}</b>：${esc(i.n)}${i.g?'<em>全社（どの事業にも付いていない）</em>':showBu&&i.bu.length&&i.sel[0]!=='b'?`<em>${i.bu.map(x=>esc(DATA.bus.find(b=>b.id===x).name)).join('・')}</em>`:''}</span><span class="io">担当：${esc(i.own)}</span></button></li>`).join('')}</ul>${S2.length>6?`<button class="more" data-issall>${S.issAll?'たたむ':`残り${S2.length-6}件を表示`}</button>`:''}`}
+function metHTML(o,label){const s=indState(o),pc=pctOf(o);
+ return `<button class="met" data-sel="o:${o.id}" data-m="${o.id}"><span class="ml">${label}</span><span class="mn">${esc(o.kpi||o.name)}</span>
+  ${o.kpi?`<span class="mv"><span>${nowL()} <b>${esc(curOf(o))}</b></span> ／ <span>目標 <b>${esc(o.target)}</b></span></span><span class="mb"><i style="width:${pc??0}%"></i></span><span class="md">期限 ${esc(o.due||'未設定')}　<span class="is ${s}">指標：${IS[s]}</span></span>`:'<span class="md">指標が未設定</span>'}</button>`}
+function actHTML(i){const s=st(i);
+ return `<button class="act" data-sel="i:${i.id}" data-i="${i.id}"><span class="an">${S.ipa&&i.digital?`<span class="ipa s${IPA_STAGE[i.ipa]}" title="${STAGE[IPA_STAGE[i.ipa]]}・IPA取組項目${i.ipa}：${esc(IPA[i.ipa])}">${i.ipa}</span>`:''}${esc(i.name)}</span>
+  <span class="am">担当：${OWN[i.owner]}・${EXEC[s.exec]}${running(i)?'・効果の検証：'+VERIFY[s.verify]:''}</span>${i.attach.length>1?'<span class="am">複数の事業で共通</span>':''}</button>`}
+function cardHTML(b,o){const s=indState(o);const my=ISS.filter(i=>i.sel==='o:'+o.id&&i.s!=='指標');const its=initsOn(o.id);
+ return `<div class="obj" data-o="${o.id}"><button class="ocard${o.kpi?'':' nok'}" id="o-${o.id}" data-sel="o:${o.id}">
+  <span class="oh"><span class="tag">${b?'目標':'全社の目標'}</span><span class="own">主担当：${OWN[o.owner]}</span></span>
+  <span class="on">${esc(o.name)}</span>
+  ${o.kpi?`<span class="ok">${esc(o.kpi)}</span><span class="ov"><span>${nowL()} <b>${esc(curOf(o))}</b></span> ／ <span>目標 <b>${esc(o.target)}</b></span></span><span class="od"><span>期限 ${esc(o.due||'未設定')}</span><span class="is ${s}">指標：${IS[s]}</span></span>`:`<span class="ok">指標：<span class="is nokpi">未設定</span></span><span class="od">現在値・目標値・期限も未設定</span>`}
+  ${my.map(i=>`<span class="ik im ${i.k}">${IK[i.k]}：${esc(i.s)}</span>`).join('')}</button>
+  ${its.length?`<div class="acts"><span class="tag t2">実施する施策</span>${its.map(actHTML).join('')}</div>`:''}</div>`}
+function statLine(objs){const c={up:0,flat:0,worse:0,none:0,nokpi:0};objs.forEach(o=>c[indState(o)]++);
+ return ['up','flat','worse','none','nokpi'].filter(k=>c[k]).map(k=>`${k==='nokpi'?'指標が未設定':IS[k]} ${c[k]}`).join('・')}
+function verLine(objs){const ids=new Set(objs.map(o=>o.id));const its=DATA.inits.filter(i=>running(i)&&i.attach.some(a=>ids.has(a)));if(!its.length)return '';const c=[0,0,0,0];its.forEach(i=>c[st(i).verify]++);
+ return '施策の効果の検証：'+VERIFY.map((v,n)=>c[n]?`${v} ${c[n]}`:'').filter(Boolean).join('・')}
+function renderMap(){
+ const co=DATA.company;const b=DATA.bus.find(x=>x.id===S.cb)||DATA.bus[0];S.cb=b.id;const t=b.themes.find(x=>x.id===S.ct)||b.themes[0]||null;S.ct=t?t.id:null;if(!t)S.view='all';
+ const allv=S.view==='all';
+ $('#m-co').textContent=co.name;
+ $('#butabs').innerHTML=DATA.bus.map(x=>`<button data-bu="${x.id}" aria-pressed="${x.id===b.id}">${esc(x.name)}</button>`).join('');
+ document.querySelectorAll('#vsw button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===S.view));
+ $('#optbtn').setAttribute('aria-expanded',S.opt);$('#opts').hidden=!S.opt;$('#ipatog').setAttribute('aria-pressed',S.ipa);
+ document.querySelectorAll('#snap button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.t===S.snap));
+ document.querySelectorAll('#who button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.w===S.who));
+ document.querySelectorAll('#stg button').forEach(x=>x.setAttribute('aria-pressed',Number(x.dataset.s)===S.stg));
+ const hl=S.who!=='all'?`${OWN[S.who]}が主担当の目標・施策`:S.stg?`${STAGE[S.stg]}の施策`:'';
+ $('#fnotes').innerHTML=(S.snap==='mar'?'<div class="fnote on"><span><b>2026年3月末</b>の時点を表示しています</span><button data-now>現在に戻す</button></div>':'')
+  +(hl?`<div class="fnote on"><span><b>${hl}</b>と、そこから先の道筋を強調しています</span><button data-clear>解除</button></div>`:'');
+ ISS=[];
+ const key=t?b.id+':'+t.id:'';
+ const iss=allv?ISS:ISS.filter(i=>i.g||(i.sc?i.sc.includes(key):i.bu.includes(b.id)));
+ const issBlock='';
+ let hero;
+ if(allv){hero=`<div class="card hero"><div class="hk">全体マップ</div><h1>${esc(co.name.replace('（架空）',''))}の事業と戦略テーマ</h1>
+   <div class="hgrid"><dl class="hdl">${DATA.bus.map(x=>`<dt>${esc(x.name)}</dt>${x.themes.map(y=>`<dd><button data-th="${x.id}:${y.id}">${esc(y.name)} ›</button></dd>`).join('')}`).join('')}</dl>
+   <div><div class="hl2">主要な成果指標</div><div class="mets">${metHTML(DATA.corp.fin,'全社の目標')}</div></div></div>${issBlock}</div>`}
+ else{const idx=b.themes.indexOf(t);const cus=b.objs.filter(o=>o.theme===t.id&&o.persp==='cu');const fin=themeFin(b,t);
+  hero=`<div class="card hero"><div class="hk">${esc(b.name)}の戦略テーマ${b.themes.length>1?`（${idx+1}／${b.themes.length}）`:''}　｜　取り組む期間の目安：${esc(HZ[t.hz])}</div><h1>${esc(t.name)}</h1>
+   ${b.themes.length>1?`<div class="tht">${b.themes.map(x=>`<button data-th="${b.id}:${x.id}" aria-pressed="${x.id===t.id}">${esc(x.name)}</button>`).join('')}</div>`:''}
+   <div class="hgrid"><dl class="hdl"><dt>対象の顧客</dt><dd>${esc(b.customer)}</dd><dt>実現したい変化（この事業が目指す姿）</dt><dd>${esc(b.future)}</dd></dl>
+   <div><div class="hl2">主要な成果指標（このテーマの先にある目標）</div><div class="mets">${cus.map(o=>metHTML(o,PL.cu)).join('')}${fin.map(o=>metHTML(o,PL.fi)).join('')}</div></div></div>${issBlock}</div>`}
+ $('#hero').innerHTML=hero;
+ $('#mapc').className='map '+(allv?'v-all':'v-theme');
+ $('#vst').innerHTML=(allv?'<i class="x"></i>':'')+'<i></i><i></i><i></i><i></i>';
+ $('#mhead').innerHTML=`<div class="cols mhead">${allv?'<div class="x"></div>':''}${['lg','pr','cu','fi'].map(p=>`<div class="c"><b>${PL[p]}</b><span>${PERSP[p]}の視点</span></div>`).join('')}</div>`;
+ let h='';
+ if(!allv){const tob=b.objs.filter(o=>o.theme===t.id);const fin=themeFin(b,t);const cell=(os,n)=>`<div class="cell" style="grid-column:${n}">${os.length?os.map(o=>cardHTML(b,o)).join(''):'<div class="empty">このテーマでは、ここに目標は登録されていません</div>'}</div>`;
+  h+=`<div class="bgrid one">${['lg','pr','cu'].map((p,n)=>cell(tob.filter(o=>o.persp===p),n+1)).join('')}${cell(fin,4)}</div>`}
+ else{const cg=DATA.corp;
+  h+=`<div class="band corp"><div class="corpgrid"><div class="tl">全社<span>${esc(co.name.replace('株式会社（架空）',''))}</span></div>
+   <div class="goal">各事業の「売上・利益への貢献」の先にある、全社の目標</div><div>${cardHTML(null,cg.fin)}</div></div></div>`;
+  DATA.bus.forEach(x=>{const col=S.collapsed[x.id];const bi=ISS.filter(i=>i.bu.includes(x.id));
+   h+=`<div class="band" data-b="${x.id}"><div class="bhead"><button class="tg" data-tog="${x.id}" aria-label="${col?'開く':'閉じる'}" aria-expanded="${!col}">${col?'▶':'▼'}</button>
+    <button class="bn" data-sel="b:${x.id}">${esc(x.name)}</button></div>`;
+   if(!col){const n=x.themes.length;h+=`<div class="bgrid">`;
+    x.themes.forEach((y,ti)=>{const tob=x.objs.filter(o=>o.theme===y.id);
+     h+=`<div class="lane" style="grid-row:${ti+1};grid-column:1/5"></div>
+      <div class="tl" style="grid-row:${ti+1};grid-column:1"><span>戦略テーマ</span><button class="bh" style="margin:0" data-th="${x.id}:${y.id}"><span>${esc(y.name)}</span></button><span class="go">このテーマを開く ›</span></div>`;
+     ['lg','pr','cu'].forEach(p=>{h+=`<div class="cell" style="grid-row:${ti+1};grid-column:${PCOL[p]}">${tob.filter(o=>o.persp===p).map(o=>cardHTML(x,o)).join('')}</div>`})});
+    h+=`<div class="fincell" style="grid-row:1 / span ${n}">${x.objs.filter(o=>o.persp==='fi').map(o=>cardHTML(x,o)).join('')}</div></div>`}
+   h+=`</div>`});
+  const orph=DATA.inits.filter(i=>!i.attach.length);
+  if(orph.length)h+=`<div class="orphan"><b class="small">事業の目標との接続が未設定の施策</b><div class="acts" style="border:0;padding:0;max-width:340px">${orph.map(actHTML).join('')}</div></div>`}
+ $('#bands').innerHTML=h;
+ const db=$('#diffbox');db.hidden=S.snap!=='now';db.innerHTML=`<summary>2026年3月末から変わったこと</summary><ul class="diff">${DIFFS.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>`;
+ applyFocus();renderPanel();requestAnimationFrame(drawLinks)}
+function focusSets(){
+ // 強調する目標・施策の集合（null＝すべて）
+ let objs=null,inits=null;
+ if(S.sel){const[k,a]=S.sel.split(':');
+  if(k==='o'){const bu=buOfObj(a);if(bu){objs=new Set([a,...down(bu,a),...up(bu,a)]);inits=new Set(DATA.inits.filter(i=>i.attach.some(x=>objs.has(x))).map(i=>i.id))}}
+  if(k==='i'){const it=DATA.inits.find(x=>x.id===a);objs=new Set();it.attach.forEach(x=>{const bu=buOfObj(x);objs.add(x);down(bu,x).forEach(d=>objs.add(d))});inits=new Set([a])}}
+ else if(S.stg){objs=new Set();inits=new Set();
+  DATA.inits.forEach(i=>{if(i.digital&&IPA_STAGE[i.ipa]===S.stg){inits.add(i.id);i.attach.forEach(x=>{objs.add(x);down(buOfObj(x),x).forEach(d=>objs.add(d))})}})}
+ else if(S.who!=='all'){objs=new Set();inits=new Set();
+  DATA.bus.forEach(b=>b.objs.forEach(o=>{if(o.owner===S.who){objs.add(o.id);down(b,o.id).forEach(d=>objs.add(d))}}));
+  DATA.inits.forEach(i=>{if(i.owner===S.who){inits.add(i.id);i.attach.forEach(x=>{objs.add(x);down(buOfObj(x),x).forEach(d=>objs.add(d))})}})}
+ return{objs,inits}}
+function applyFocus(){const{objs,inits}=focusSets();
+ document.querySelectorAll('#bands .ocard').forEach(el=>{const id=el.id.slice(2);el.classList.toggle('dim',!!objs&&id!=='cfin'&&!objs.has(id));el.classList.toggle('sel',S.sel==='o:'+id)});
+ document.querySelectorAll('#bands .act').forEach(el=>{el.classList.toggle('dim',!!inits&&!inits.has(el.dataset.i));el.classList.toggle('sel',S.sel==='i:'+el.dataset.i)});
+ document.querySelectorAll('#hero .met').forEach(el=>el.classList.toggle('sel',S.sel==='o:'+el.dataset.m));
+ document.querySelectorAll('#bands .bn').forEach(el=>el.classList.toggle('sel',S.sel===el.dataset.sel))}
+function drawLinks(){const svg=$('#links');const map=$('#mapc');if(!svg||!map.offsetParent)return;const R=map.getBoundingClientRect();
+ const{objs}=focusSets();
+ let p='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" style="fill:var(--muted)"/></marker><marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" style="fill:var(--accent)"/></marker></defs>';
+ DATA.bus.forEach(b=>{b.links.forEach(l=>{const A=document.getElementById('o-'+l.from),B=document.getElementById('o-'+l.to);if(!A||!B)return;
+  const a=A.getBoundingClientRect(),c=B.getBoundingClientRect();const x1=a.right-R.left,y1=a.top+a.height/2-R.top,x2=c.left-R.left-2,y2=c.top+c.height/2-R.top;const dx=Math.max(12,(x2-x1)/2);
+  const on=!objs||(objs.has(l.from)&&objs.has(l.to));const hi=!!objs&&on;
+  p+=`<path d="M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}" fill="none" style="stroke:var(${hi?'--accent':'--muted'})" stroke-width="${hi?2.4:1.5}" opacity="${on?.9:.13}" marker-end="url(#${hi?'ahd':'ah'})"/>`})});
+ svg.innerHTML=p}
+window.addEventListener('resize',()=>requestAnimationFrame(drawLinks));
+if(window.ResizeObserver)new ResizeObserver(()=>requestAnimationFrame(drawLinks)).observe(document.getElementById('mapc'));
+function hyp(l){const t=objById(l.to);return `<div class="hyp"><b>→ ${esc(t?t.name:'')}</b>${esc(l.reason||'理由はまだ書いていない')}
+ ${l.cond?`<br><span class="muted">成り立つ条件：</span>${esc(l.cond)}`:''}${l.check?`<br><span class="muted">次に確かめること：</span>${esc(l.check)}（${esc(l.date)}）`:'<br><span class="muted">次に確かめること：未設定</span>'}</div>`}
+function phead(kind,crumb,name){return `<div class="ph"><span class="kb">${kind}</span><button class="px" data-close aria-label="詳細を閉じる">×</button></div><p class="crumb">${crumb}</p><h3>${esc(name)}</h3>`}
+function todoHTML(sel){const my=ISS.filter(i=>i.sel===sel);if(!my.length)return '';
+ return `<h4>次に確認・判断すること</h4><ul class="todo">${my.map(i=>`<li><span class="ik ${i.k}">${IK[i.k]}</span><span><b>${esc(i.t)}</b>${i.s==='つながりの確かめ方'?'（'+esc(i.n)+'）':''}<br>${esc(i.need)}<br><span class="muted">担当：${esc(i.own)}</span></span></li>`).join('')}</ul>`}
+function renderPanel(){const P=$('#panel');$('#mapgrid').classList.toggle('haspanel',!!S.sel);
+ if(!S.sel){P.innerHTML='';return}
+ const[k,a]=S.sel.split(':');
+ if(k==='b'){const b=DATA.bus.find(x=>x.id===a);const rs=itemRows(b);const pg=progOf(b);
+  P.innerHTML=phead('事業',esc(DATA.company.name),b.name)+`<h4>目指すこと</h4><dl class="kv">
+   <dt>対象の顧客</dt><dd>${esc(b.customer)}</dd><dt>目指す姿</dt><dd>${esc(b.future)}</dd><dt>価値提案</dt><dd>${esc(CVP[b.cvp])}</dd>
+   <dt>財務の差</dt><dd>${esc(b.gap)}<div class="split"><i style="width:${b.growth}%;background:var(--accent)">${b.growth?'収益増大 '+b.growth+'%':''}</i><i style="width:${100-b.growth}%;background:var(--gray)">${100-b.growth?'生産性 '+(100-b.growth)+'%':''}</i></div></dd></dl>
+   ${todoHTML(S.sel)}
+   <h4>戦略テーマ</h4><div class="jump">${b.themes.map(t=>`<button data-th="${b.id}:${t.id}">${esc(t.name)} ›</button>`).join('')}</div>
+   <details><summary>事業の基本情報・分類</summary><dl class="kv">
+   <dt>業種</dt><dd>${esc(b.industry)}</dd><dt>売上比率</dt><dd>${b.share}%${b.share?'':'（売上はまだない）'}</dd>
+   <dt>責任者</dt><dd>${esc(b.owner)}</dd><dt>事業側の確認</dt><dd>${b.confAt?esc(b.confBy+'（'+b.confAt+'）'):'まだ'}</dd></dl>
+   ${rs.length?`<ul class="checks">${rs.map(r=>`<li><span class="mk y">${r.k}</span><span><b>${STAGE[IPA_STAGE[r.k]]}</b>：${esc(IPA[r.k])}<br><span class="muted">施策：${r.its.map(i=>esc(i.name)).join('・')}</span></span></li>`).join('')}</ul>`:'<p class="small muted">デジタルの施策はまだ付いていません。</p>'}
+   <p class="small muted">経路上の判定（他社比較の「道筋の進み」に使う値）：${progText(pg)}。実行中の施策から順に、途中の指標が基準値より改善しているところまでを数えたもので、事業全体の順調さや施策の成果を示すものではありません。</p></details>`;return}
+ if(k==='o'){const o=a==='cfin'?DATA.corp.fin:objById(a);const b=buOfObj(a);const out=b?b.links.filter(l=>l.from===a):[];const inn=b?b.links.filter(l=>l.to===a):[];const its=initsOn(a);
+  const th=b&&o.theme?b.themes.find(t=>t.id===o.theme):null;const s=indState(o),pc=pctOf(o);
+  const crumb=b?[esc(b.name),th?esc(th.name):null,PL[o.persp]].filter(Boolean).join(' › '):'全社 › '+PL.fi;
+  let h=phead(b?'目標':'全社の目標',crumb,o.name)+'<h4>指標</h4>'
+   +(o.kpi?`<dl class="kv"><dt>指標名</dt><dd>${esc(o.kpi)}</dd><dt>${nowL()}の値</dt><dd><b>${esc(curOf(o))}</b>${S.snap==='now'&&o.prev!==undefined&&o.prev!==o.cur?'（2026年3月末：'+esc(o.prev)+'）':''}</dd><dt>目標値</dt><dd>${esc(o.target)}</dd><dt>期限</dt><dd>${esc(o.due||'未設定')}</dd><dt>基準値</dt><dd>${esc(o.base)}</dd><dt>測り方</dt><dd class="muted">未登録</dd></dl>
+    <h4>状態</h4><dl class="kv"><dt>指標の動き</dt><dd><span class="is ${s}">${IS[s]}</span> 基準値との比較</dd><dt>目標の達成状況</dt><dd>${pc===null?'判定できない':pc>=100?'達成':'未達（基準から目標までの'+pc+'%）'}${pc===null?'':`<div class="pbar"><i style="width:${pc}%"></i></div>`}</dd></dl>`
+   :'<p class="now">指標が未設定（現在値・目標値・期限も未設定）</p>');
+  h+=todoHTML(S.sel);
+  if(b)h+=`<h4>実施する施策</h4>${its.length?`<div class="acts" style="border:0;padding:0;margin:0">${its.map(actHTML).join('')}</div>`:'<p class="small muted" style="margin:0">この目標に直接付いている施策はありません。</p>'}`;
+  if(!b){const xi=n=>DATA.inits.filter(i=>i.digital&&i.ipa===n&&i.attach.length).map(i=>esc(i.name)).join('・')||'まだない';
+   h+=`<h4>全社にまたがる施策</h4><dl class="kv"><dt>事業をまたぐ施策</dt><dd>${xi(5)}</dd><dt>組織・文化の施策</dt><dd>${xi(7)}</dd></dl>`}
+  if(b&&(inn.length||out.length))h+=`<h4>つながり（仮説）</h4>${inn.length?`<p class="st-line muted">手前の目標</p><div class="jump">${inn.map(l=>`<button data-sel="o:${l.from}">${esc(objById(l.from).name)}</button>`).join('')}</div>`:''}${out.length?'<p class="st-line muted">この目標から先</p>'+out.map(hyp).join(''):''}`;
+  if(b)h+=`<details><summary>担当・分類・経路上の判定</summary><dl class="kv"><dt>主担当</dt><dd>${OWN[o.owner]}</dd><dt>協働</dt><dd>${o.partner?esc(o.partner):'なし'}</dd><dt>BSCの視点</dt><dd>${PERSP[o.persp]}${o.cap?'（'+CAP[o.cap]+'）':''}${o.persp==='fi'&&FINKIND[o.kind]?'（'+FINKIND[o.kind]+'）':''}</dd></dl>
+   ${o.kpi?`<p class="small muted">経路上の判定（他社比較の「道筋の進み」に使う）：実行中の施策からこの目標まで、途中の目標の指標が順に改善して${reachedSet(b).has(a)?'います':'いません'}。指標そのものの動きとは別の判定で、施策の成果を示すものではありません。</p>`:''}</details>`;
+  P.innerHTML=h;return}
+ if(k==='i'){const i=DATA.inits.find(x=>x.id===a);const s=st(i);
+  const crumb=i.attach.length?[...new Set(i.attach.map(x=>esc(buOfObj(x).name)))].join('・'):'どの事業の目標にも付いていない';
+  P.innerHTML=phead('実施する施策',crumb,i.name)+`<h4>状態</h4><dl class="kv">
+   <dt>実行の状態</dt><dd>${EXEC[s.exec]}</dd><dt>効果の検証</dt><dd>${running(i)?VERIFY[s.verify]:'まだ対象外（'+EXEC[s.exec]+'）'}</dd>
+   ${i.kpi?`<dt>施策の指標</dt><dd>${esc(i.kpi)}<br>現在 <b>${esc(i.cur)}</b> ／ 目標 ${esc(i.target)}（基準 ${esc(i.base)}）</dd>`:'<dt>施策の指標</dt><dd class="muted">未登録</dd>'}</dl>
+   ${todoHTML(S.sel)}
+   <h4>この施策が付いている目標</h4>${i.attach.length?`<div class="jump">${i.attach.map(x=>`<button data-sel="o:${x}">${esc(objById(x).name)}<span class="muted">（${esc(buOfObj(x).name)}）</span></button>`).join('')}</div>`:'<p class="small muted" style="margin:0">なし</p>'}
+   <h4>実行の準備</h4>
+   <ul class="checks">${[1,2].map(n=>`<li><span class="mk ${s.checks[n]?'y':'n'}">${s.checks[n]?'済':'未'}</span><span>${CHECKS[n]}</span></li>`).join('')}</ul>
+   <details><summary>担当・分類</summary><dl class="kv"><dt>主担当</dt><dd>${OWN[i.owner]}</dd><dt>協働</dt><dd>${i.partner?esc(i.partner):'なし'}</dd>${i.ev?`<dt>決めた場</dt><dd>${esc(i.ev)}</dd>`:''}
+   <dt>DXの段階</dt><dd>${i.digital?STAGE[IPA_STAGE[i.ipa]]+'（IPA取組項目'+i.ipa+'. '+esc(IPA[i.ipa])+'）':'デジタル以外の施策'}</dd></dl>
+   ${i.digital&&i.attach.length&&objById(i.attach[0]).persp==='lg'?'<p class="small muted">施策の指標（利用率・導入数など）は「準備がどれだけ整ったか」を表します。事業の成果は、先の目標の指標で見ます。</p>':''}</details>`}}
+function scrollToSel(s){const[k,a]=s.split(':');const el=k==='o'?document.getElementById('o-'+a):k==='i'?document.querySelector('#bands .act[data-i="'+a+'"]'):document.querySelector('#bands [data-b="'+a+'"]');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})}
+document.addEventListener('click',e=>{
+ const M=$('#v-map');const q=s=>{const x=e.target.closest(s);return x&&M.contains(x)?x:null};let x;
+ if(q('[data-close]')){S.sel=null;applyFocus();renderPanel();requestAnimationFrame(drawLinks);return}
+ if(q('[data-clear]')){S.who='all';S.stg=0;renderMap();return}
+ if(q('[data-now]')){S.snap='now';renderMap();return}
+ if(x=q('[data-bu]')){S.cb=x.dataset.bu;S.ct=null;S.sel=null;S.issAll=false;renderMap();if(S.view==='all')requestAnimationFrame(()=>scrollToSel('b:'+S.cb));return}
+ if(x=q('[data-th]')){const[bb,tt]=x.dataset.th.split(':');S.cb=bb;S.ct=tt;S.view='theme';S.sel=null;S.issAll=false;renderMap();window.scrollTo({top:0});return}
+ if(x=q('[data-v]')){S.view=x.dataset.v;S.sel=null;S.issAll=false;renderMap();return}
+ if(q('#optbtn')){S.opt=!S.opt;renderMap();return}
+ if(q('#ipatog')){S.ipa=!S.ipa;renderMap();return}
+ if(q('[data-issall]')){S.issAll=!S.issAll;renderMap();return}
+ if(x=q('[data-iss]')){const s=x.dataset.iss;const[k,a]=s.split(':');if(k==='i'&&!DATA.inits.find(i=>i.id===a).attach.length&&S.view!=='all'){S.view='all';S.issAll=false}if(k==='b')S.collapsed[a]=false;S.sel=s;renderMap();setTimeout(()=>scrollToSel(s),60);return}
+ if(x=q('[data-tog]')){const id=x.dataset.tog;S.collapsed[id]=!S.collapsed[id];renderMap();return}
+ if(x=q('[data-sel]')){S.sel=S.sel===x.dataset.sel?null:x.dataset.sel;applyFocus();renderPanel();requestAnimationFrame(drawLinks);return}
+ if(x=q('#who button')){S.who=S.who===x.dataset.w?'all':x.dataset.w;S.stg=0;S.sel=null;renderMap();return}
+ if(x=q('#stg button')){const v=Number(x.dataset.s);S.stg=S.stg===v?0:v;S.who='all';S.sel=null;renderMap();return}
+ if(x=q('#snap button')){S.snap=x.dataset.t;renderMap();return}
+ const pe=e.target.closest('#peer button');if(pe){S.peer=pe.dataset.p;document.querySelectorAll('#peer button').forEach(x=>x.setAttribute('aria-pressed',x===pe));renderCompare();return}
+ if(e.target.closest('#v-map .card')&&!e.target.closest('.panel')&&!e.target.closest('button')&&!e.target.closest('summary')&&S.sel){S.sel=null;applyFocus();renderPanel();requestAnimationFrame(drawLinks)}
+});
+
+/* ===== 他社と比べる ===== */
+const BCOL=['var(--accent)','var(--cyan)','#7b6fd6'];
+/* マス目：cells[段階1〜3][進み0〜4]＝割合(%)、pts＝[{name,c,st,p,st0,p0}] */
+function gridSVG(cells,pts,label){
+ const W=700,L=158,T=34,cw=(W-L-6)/5,chh=92,H=T+chh*3+8;const mx=Math.max(1,...[1,2,3].flatMap(r=>cells[r]));
+ const cx=p=>L+cw*p+cw/2,cy=st=>T+chh*(3-st)+chh/2;
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${label}" style="max-width:${W}px;display:block">`;
+ PROG.forEach((t,p)=>{s+=`<text x="${cx(p)}" y="${p?14:14}" text-anchor="middle" font-size="11.5" font-weight="${p?700:400}" fill="${p?'var(--ink)':'var(--muted)'}">${p?t:'まだ動いていない'}</text>`});
+ s+=`<text x="${L+cw}" y="28" font-size="10.5" fill="var(--muted)">道筋の進み（先行）</text><text x="${W-8}" y="28" text-anchor="end" font-size="10.5" fill="var(--muted)">（遅行）→</text>`;
+ [3,2,1].forEach(st=>{s+=`<text x="${L-10}" y="${cy(st)+4}" text-anchor="end" font-size="11.5" font-weight="700" fill="var(--ink)">${STAGE[st]}</text>`;
+  for(let p=0;p<5;p++){const v=cells[st][p];s+=`<rect x="${L+cw*p+2}" y="${T+chh*(3-st)+2}" width="${cw-4}" height="${chh-4}" rx="8" fill="var(--accent-2)" fill-opacity="${(v/mx*.5).toFixed(2)}" stroke="var(--line)"/>`;
+   s+=`<text x="${L+cw*p+10}" y="${T+chh*(3-st)+18}" font-size="11" fill="var(--muted)">${v?v+'%':''}</text>`}});
+ // 自社の点：同じマスに重なるときは縦にずらす
+ pts.forEach((q,n)=>{const off=(n-(pts.length-1)/2)*22+8;const y=cy(q.st)+off;const x=cx(q.p)-34;q.x=x;q.y=y;
+  if(q.st0&&(q.st0!==q.st||q.p0!==q.p)){const x0=cx(q.p0)-34,y0=cy(q.st0)+off;
+   s+=`<line x1="${x0}" y1="${y0}" x2="${x-9}" y2="${y}" stroke="${q.c}" stroke-width="2" stroke-dasharray="4 3"/><circle cx="${x0}" cy="${y0}" r="6" fill="var(--surface)" stroke="${q.c}" stroke-width="2"><title>${esc(q.name)}（2026年3月末）</title></circle>`}});
+ pts.forEach(q=>{s+=`<circle cx="${q.x}" cy="${q.y}" r="8" fill="${q.c}" stroke="var(--surface)" stroke-width="1.5"><title>${esc(q.name)}：${STAGE[q.st]}・${PROG[q.p]}</title></circle><text x="${q.x+12}" y="${q.y+4}" font-size="11" font-weight="700" fill="var(--ink)">${esc(q.short)}</text>`});
+ return s+'</svg>'}
+function ownPoints(){return DATA.bus.map((b,n)=>{const st=stageTop(b,'now');if(!st)return null;return{name:b.name,short:b.name.replace('事業','').replace('（新規）','').replace('サービス',''),c:BCOL[n%3],st,p:progOf(b,'now'),st0:stageTop(b,'mar'),p0:progOf(b,'mar')}}).filter(Boolean)}
+function renderCompare(){
+ const inds=new Set(DATA.bus.map(b=>b.industry));const peers=PEERS.filter(p=>S.peer==='all'||inds.has(p.ind));
+ const cells={1:[0,0,0,0,0],2:[0,0,0,0,0],3:[0,0,0,0,0]};peers.forEach(p=>cells[p.st][p.p]++);[1,2,3].forEach(r=>cells[r]=cells[r].map(v=>Math.round(v/peers.length*100)));
+ $('#grid').innerHTML=gridSVG(cells,ownPoints(),'道筋の進みとDXの段階のマス目')+`<div class="legend" style="margin-top:6px">${DATA.bus.map((b,n)=>`<span><span class="sw" style="--c:${BCOL[n%3]};--cs:${BCOL[n%3]};border-radius:50%"></span>${esc(b.name)}</span>`).join('')}<span>白抜き＝2026年3月末</span><span>数字＝比べる相手（${peers.length}事業・匿名）の割合</span></div>`;
+ $('#bulist').innerHTML=DATA.bus.map((b,n)=>{const p=progOf(b,'now'),p0=progOf(b,'mar'),st=stageTop(b,'now');
+  return `<div><h3><u style="background:${BCOL[n%3]}"></u>${esc(b.name)}</h3>
+   <div class="small">道筋にあるDX：${esc(dxSummary(b))}</div>
+   <div class="small">道筋の進み：${p0!==p?PROG[p0]+' → ':''}<b>${p?PROG[p]+'まで':PROG[0]}</b>${st?'':'（試行・実行中のデジタル施策がないため、マス目には出ません）'}</div>${track(p,p0)}</div>`}).join('');
+ // 項目ごとの比較（自社は単純な割合。売上での重み付けはしない）
+ const objs=allObjs().filter(o=>o.persp!=='fi');const reach=objs.filter(o=>[...down(buOfObj(o.id),o.id)].some(id=>objById(id).persp==='fi')).length/objs.length;
+ const its=DATA.inits.filter(i=>i.attach.length);const sh=fn=>its.filter(fn).length/its.length;
+ const rows=[['財務の目標までつながっている目標',pct(reach),PEER_AVG.reach],
+  ['実行条件（予算・工数・権限・データの提供者）の確保がある施策',pct(sh(i=>i.checks[1])),PEER_AVG.c[1]],
+  ['検証と次の判断日が決まっている施策',pct(sh(i=>i.checks[2])),PEER_AVG.c[2]],
+  ['検証が済んだ施策（効果あり・なし）',pct(sh(i=>i.verify>=2)),PEER_AVG.ver]];
+ let h=rows.map(([t,a,b])=>`<div><div class="bt">${t}</div><div class="br"><div class="bw"><i style="width:${a}%;background:var(--accent)"></i></div><span class="small">${a}%</span></div><div class="br" style="margin-top:3px"><div class="bw"><i style="width:${b}%;background:var(--faint)"></i></div><span class="small muted">${b}%</span></div></div>`).join('');
+ const kp=allObjs().filter(o=>o.kpi);const own={};['lg','pr','cu','fi'].forEach(p=>own[p]=Math.round(kp.filter(o=>o.persp===p).length/kp.length*100));
+ const stack=o=>`<div class="stack">${['lg','pr','cu','fi'].map(p=>`<i class="p-${p}" style="width:${o[p]}%" title="${PERSP[p]} ${o[p]}%"></i>`).join('')}</div>`;
+ h+=`<div><div class="bt">指標の視点別の構成（学習と成長／業務プロセス／顧客／財務）</div>${stack(own)}<div style="height:4px"></div>${stack(PEER_AVG.persp)}<div class="small muted" style="margin-top:3px">上：自社　下：比べる相手の平均</div></div>`;
+ $('#bars').innerHTML=h;
+ $('#heat').innerHTML=heatHTML()}
+
+/* ===== 経産省 ===== */
+function renderMeti(){
+ const cells={1:[3,8,3,1,0],2:[2,11,25,3,1],3:[3,13,19,6,2]};
+ $('#mgrid').innerHTML=gridSVG(cells,[],'参加企業の全事業の分布');
+ const rows=[['全参加企業',{lg:36,pr:46,cu:10,fi:8}],['はん用・生産用機械',{lg:38,pr:47,cu:9,fi:6}],['電気機器',{lg:34,pr:44,cu:13,fi:9}],['情報サービス',{lg:30,pr:40,cu:18,fi:12}]];
+ $('#persp').innerHTML=rows.map(([n,o])=>`<span class="small">${n}</span><div class="stack">${['lg','pr','cu','fi'].map(p=>`<i class="p-${p}" style="width:${o[p]}%" title="${PERSP[p]} ${o[p]}%"></i>`).join('')}</div>`).join('');
+ const ind=[['はん用・生産用機械',12],['電気機器',16],['輸送用機械',9],['化学',13],['情報サービス',22],['小売',11]];
+ $('#industry').innerHTML=ind.map(([n,v])=>`<span class="small">${n}</span><div class="bw" style="height:12px"><i style="width:${v*2}%;background:var(--accent)"></i></div><span class="small">${v}%</span>`).join('');
+ const best=()=>{let bb=null;DATA.bus.forEach(b=>{const p=progOf(b,'now');if(!bb||p>bb.p)bb={p,st:stageTop(b,'now'),name:b.name}});return `${bb.name}：${STAGE[bb.st]}・${PROG[bb.p]}まで`};
+ const cos=[[DATA.company.name,DATA.company.industry,DATA.bus.length,best(),'2026-05-20'],['あおば化学株式会社（架空）','化学',4,'機能材料事業：デジタライゼーション・業務プロセスまで','2026-04-02'],['ひかり電機株式会社（架空）','電気機器',3,'空調事業：DX・顧客まで','2026-03-28'],['さくら物流株式会社（架空）','運輸',2,'国内輸送事業：デジタイゼーション・学習と成長まで','2025-11-14']];
+ $('#cos').innerHTML='<tr><th>企業名</th><th>業種</th><th>対象の事業</th><th>道筋が一番進んだ事業（段階・進み）</th><th>最終更新</th></tr>'+cos.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}
+
+/* ===== 申請書 ===== */
+const STEPS=[
+ {g:'準備',t:'会社と事業',dec:'対象にする事業',who:'事業部・経営（入力はDX推進部が手伝ってよい）',then:'戦略マップに事業ができる'},
+ {g:'第1層　事業の方向（事業ごと）',t:'財務の目標',dec:'事業の財務目標と今との差。差を収益増大分と生産性向上分に分ける',who:'事業部・経営',then:'戦略マップの右端「売上・利益への貢献」の列ができる'},
+ {g:'',t:'顧客への価値',dec:'どの顧客に、どんな価値で選ばれるか（四類型から1つ）',who:'事業部・経営',then:'「顧客に起きる変化」の列と、上の「対象の顧客」「実現したい変化」ができる'},
+ {g:'',t:'戦略テーマと業務',dec:'どの業務を変えるか（テーマは1〜3個）',who:'事業部・経営',then:'戦略テーマと、「変える業務」の列ができる'},
+ {g:'第2層　実現の方法（DX推進部が加わる）',t:'必要な力と施策',dec:'人・データ・組織の何が足りないか。施策をどの目標に付けるか',who:'事業部＋DX推進部',then:'「必要な人・データ・体制」の列と、「実施する施策」ができる'},
+ {g:'',t:'つながりと検証',dec:'目標どうしのつながりの理由、確かめること、時期',who:'事業部＋DX推進部',then:'矢印と、その仮説が出る'},
+ {g:'',t:'実行の準備',dec:'施策ごとに、実行条件（予算・工数・権限・データの提供者）と、検証・次の判断日が決まっているか',who:'事業部＋DX推進部',then:'施策の詳細に出る'},
+ {g:'DXの段階',t:'道筋にあるDX（自動）',dec:'ここでの追加入力はありません。企業が選んだIPA項目に対応する段階と、指標の変化から計算した道筋の進みを確かめる',who:'全員',then:'比較画面のマス目（道筋 × 段階）ができる'},
+ {g:'確認',t:'一枚で確認',dec:'全員での読み合わせ',who:'全員',then:'経産省への提出'}];
+const BUSTEP=[1,2,3,4,5,6];
+const sel=(arr,v,attr,blank)=>`<select ${attr}>${blank!==undefined?`<option value="">${blank}</option>`:''}${arr.map((t,i)=>`<option value="${i}" ${String(v)===String(i)?'selected':''}>${esc(t)}</option>`).join('')}</select>`;
+function ebu(){return DATA.bus.find(b=>b.id===S.ebu)}
+function renderEntry(){
+ $('#e-co').textContent=DATA.company.name;
+ const needBu=BUSTEP.includes(S.step);
+ $('#e-bu').innerHTML=DATA.bus.map(b=>`<button data-eb="${b.id}" aria-pressed="${S.ebu===b.id}" ${needBu?'':'disabled'}>${esc(b.name.replace('（新規）',''))}</button>`).join('');
+ $('#e-bu').style.opacity=needBu?1:.45;
+ let lh='';let g='';STEPS.forEach((s,i)=>{if(s.g){g=s.g;lh+=`<li class="grp">${esc(g)}</li>`}lh+=`<li><button data-step="${i}" aria-current="${S.step===i?'step':'false'}"><span class="n">${i}</span>${esc(s.t)}</button></li>`});
+ $('#steps').innerHTML=lh;
+ const s=STEPS[S.step];const b=ebu();
+ let f=`<h2>${S.step}. ${esc(s.t)}${needBu?`<span class="small muted">　${esc(b.name)}</span>`:''}</h2><div class="lead"><b>ここで決めること</b><span>${esc(s.dec)}</span><b>主に話す人</b><span>${esc(s.who)}</span><b>決まると</b><span>${esc(s.then)}</span></div>`;
+ f+=FORMS[S.step](b);
+ $('#form').innerHTML=f;
+ $('#prev').disabled=S.step===0;$('#next').disabled=S.step===STEPS.length-1}
+const objOpts=(b,v,blank)=>`<option value="">${blank||'なし'}</option>`+b.objs.map(o=>`<option value="${o.id}" ${v===o.id?'selected':''}>${esc(PERSP[o.persp]+'：'+o.name)}</option>`).join('');
+function kpiCells(o,pref){return ['kpi','base','cur','target','due'].map(k=>`<td><input data-ed="${pref}:${o.id}:${k}" value="${esc(o[k]||'')}"></td>`).join('')}
+const FORMS=[
+ ()=>`<div class="field" style="grid-template-columns:1fr"><label>全社の財務目標</label><table><tr><th>目標</th><th>指標</th><th>基準</th><th>今</th><th>目標</th><th>期限</th></tr><tr>${['name','kpi','base','cur','target','due'].map(k=>`<td><input data-cf="${k}" value="${esc(DATA.corp.fin[k])}"></td>`).join('')}</tr></table></div>
+  <div class="field" style="grid-template-columns:1fr"><label>対象にする事業</label><table><tr><th>事業名</th><th>業種</th><th>全社売上に占める割合（%）</th><th>責任者</th></tr>
+  ${DATA.bus.map(b=>`<tr><td><input data-bu="${b.id}:name" value="${esc(b.name)}"></td><td><input data-bu="${b.id}:industry" value="${esc(b.industry)}"></td><td><input type="number" min="0" max="100" data-bu="${b.id}:share" value="${b.share}"></td><td><input data-bu="${b.id}:owner" value="${esc(b.owner)}"></td></tr>`).join('')}</table>
+  <div class="hint">売上がまだない新規事業は0%にします。</div></div>`,
+ b=>{const fs=b.objs.filter(o=>o.persp==='fi');return `<div class="field"><label>今との差</label><div><input data-bu="${b.id}:gap" value="${esc(b.gap)}"><div class="hint">中期経営計画の目標と、今の差</div></div></div>
+  <div class="field"><label>差の埋め方</label><div><input type="range" min="0" max="100" step="10" data-bu="${b.id}:growth" value="${b.growth}" style="width:100%">
+  <div class="split"><i style="width:${b.growth}%;background:var(--accent)">収益増大 ${b.growth}%</i><i style="width:${100-b.growth}%;background:var(--gray)">生産性向上 ${100-b.growth}%</i></div>
+  <div class="hint">生産性向上（効率化）だけで差を埋める計画か、収益増大も描けているかが、最初に見えます。</div></div></div>
+  <div class="field" style="grid-template-columns:1fr"><label>財務の目標</label><table><tr><th>目標</th><th>種類</th><th>指標</th><th>基準</th><th>今</th><th>目標</th><th>期限</th></tr>
+  ${fs.map(o=>`<tr><td><input data-ed="o:${o.id}:name" value="${esc(o.name)}"></td><td>${sel(FINKIND,o.kind,`data-ed="o:${o.id}:kind"`)}</td>${kpiCells(o,'o')}</tr>`).join('')}</table></div>`},
+ b=>{const cs=b.objs.filter(o=>o.persp==='cu');return `<div class="field"><label>対象の顧客</label><input data-bu="${b.id}:customer" value="${esc(b.customer)}"></div>
+  <div class="field"><label>顧客価値提案の類型</label><div>${sel(CVP,b.cvp,`data-bu="${b.id}:cvp"`)}<div class="hint">一つを選びます。「すべてを少しずつ」は戦略にならない、という考え方です（Kaplan &amp; Norton『戦略マップ』）。</div></div></div>
+  <div class="field"><label>将来の提供価値</label><div><textarea data-bu="${b.id}:future">${esc(b.future)}</textarea><div class="hint">技術名を使わずに書けるか確認してください（例：×AI導入　○設備を止めない保守）</div></div></div>
+  <div class="field" style="grid-template-columns:1fr"><label>顧客の成果目標</label><table><tr><th>目標</th><th>指標</th><th>基準</th><th>今</th><th>目標</th><th>期限</th></tr>
+  ${cs.map(o=>`<tr><td><input data-ed="o:${o.id}:name" value="${esc(o.name)}"></td>${kpiCells(o,'o')}</tr>`).join('')}</table></div>`},
+ b=>{const ps=b.objs.filter(o=>o.persp==='pr');return `<div class="field" style="grid-template-columns:1fr"><label>戦略テーマ（1〜3個）</label><table><tr><th>テーマ名</th><th>取り組む期間の目安</th></tr>
+  ${b.themes.map(t=>`<tr><td><input data-th="${b.id}:${t.id}:name" value="${esc(t.name)}"></td><td>${sel(HZ,t.hz,`data-th="${b.id}:${t.id}:hz"`)}</td></tr>`).join('')}</table></div>
+  <div class="field" style="grid-template-columns:1fr"><label>変える業務</label><table><tr><th>目標</th><th>テーマ</th><th>主担当</th><th>協働</th><th>指標</th><th>基準</th><th>今</th><th>目標</th><th>期限</th></tr>
+  ${ps.map(o=>`<tr><td><input data-ed="o:${o.id}:name" value="${esc(o.name)}"></td><td><select data-ed="o:${o.id}:theme">${b.themes.map(t=>`<option value="${t.id}" ${o.theme===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select></td><td>${sel(['事業部','DX推進部'],o.owner==='dx'?1:0,`data-ed="o:${o.id}:owner"`)}</td><td><input data-ed="o:${o.id}:partner" value="${esc(o.partner)}"></td>${kpiCells(o,'o')}</tr>`).join('')}</table></div>
+  <div class="field"><label>事業側で確認した人・日付</label><div class="row"><input data-bu="${b.id}:confBy" value="${esc(b.confBy)}" placeholder="例：産業機器事業部長" style="flex:1"><input type="date" data-bu="${b.id}:confAt" value="${esc(b.confAt)}" style="width:170px"></div></div>`},
+ b=>{const ls=b.objs.filter(o=>o.persp==='lg');const its=DATA.inits.filter(i=>i.attach.some(a=>b.objs.some(o=>o.id===a))||!i.attach.length);
+  return `  <div class="field" style="grid-template-columns:1fr"><label>必要な力（学習と成長の目標）</label><table><tr><th>目標</th><th>資本の種類</th><th>テーマ</th><th>主担当</th><th>指標</th><th>基準</th><th>今</th><th>目標</th><th>期限</th></tr>
+  ${ls.map(o=>`<tr><td><input data-ed="o:${o.id}:name" value="${esc(o.name)}"></td><td>${sel(Object.values(CAP),Object.keys(CAP).indexOf(o.cap),`data-ed="o:${o.id}:cap"`)}</td><td><select data-ed="o:${o.id}:theme">${b.themes.map(t=>`<option value="${t.id}" ${o.theme===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select></td><td>${sel(['事業部','DX推進部'],o.owner==='dx'?1:0,`data-ed="o:${o.id}:owner"`)}</td>${kpiCells(o,'o')}</tr>`).join('')}</table>
+  <div class="hint">データ・システムは情報資本、スキル・人数は人的資本、文化・協働の仕組みは組織資本です。</div></div>
+  <div class="field" style="grid-template-columns:1fr"><label>施策（チップ）</label><table><tr><th>施策</th><th>付ける目標（この事業）</th><th>主担当</th><th>デジタル</th><th>IPA項目</th><th>実行</th><th>検証</th></tr>
+  ${its.map(i=>{const mine=i.attach.find(a=>b.objs.some(o=>o.id===a))||'';return `<tr><td><input data-in="${i.id}:name" value="${esc(i.name)}">${i.attach.length>1?'<div class="hint">複数の事業に付く施策</div>':''}${!i.attach.length?'<div class="hint" style="color:var(--ng)">どの目標にも付いていない</div>':''}</td>
+   <td><select data-in="${i.id}:attach" data-cur="${mine}">${objOpts(b,mine,'付けない')}</select></td><td>${sel(['事業部','DX推進部'],i.owner==='dx'?1:0,`data-in="${i.id}:owner"`)}</td>
+   <td><input type="checkbox" data-in="${i.id}:digital" ${i.digital?'checked':''}></td><td>${sel([1,2,3,4,5,6,7].map(k=>k+'. '+IPA[k]),i.ipa?i.ipa-1:'',`data-in="${i.id}:ipa" ${i.digital?'':'disabled'}`,'—')}</td>
+   <td>${sel(EXEC,i.exec,`data-in="${i.id}:exec"`)}</td><td>${sel(VERIFY,i.verify,`data-in="${i.id}:verify"`)}</td></tr>`}).join('')}</table>
+  <div class="hint">IPA項目は、施策が何を変えるかで企業が選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で表示します。</div></div>`},
+ b=>`<div class="field" style="grid-template-columns:1fr"><label>目標どうしのつながり</label><table><tr><th>元の目標</th><th>先の目標</th><th>理由（仮説）</th><th>成り立つ条件</th><th>次に確かめること</th><th>時期</th><th></th></tr>
+  ${b.links.map((l,n)=>`<tr><td><select data-ln="${b.id}:${n}:from">${objOpts(b,l.from,'—')}</select></td><td><select data-ln="${b.id}:${n}:to">${objOpts(b,l.to,'—')}</select></td>${['reason','cond','check','date'].map(k=>`<td><input data-ln="${b.id}:${n}:${k}" value="${esc(l[k])}"></td>`).join('')}<td><button class="btn" style="padding:2px 8px" data-lndel="${b.id}:${n}">削除</button></td></tr>`).join('')}</table>
+  <div class="btns" style="justify-content:flex-start"><button class="btn" data-lnadd="${b.id}">＋ つながりを追加</button></div>
+  <div class="hint">つながりは「因果の仮説」です。半年〜1年ごとの更新で、確かめた結果と、変えたかどうかを記録します。</div></div>`,
+ b=>{const its=initsOfBu(b);return `<div class="field" style="grid-template-columns:1fr"><label>施策ごとの実行の準備</label><table><tr><th>施策</th><th>実行条件の確保</th><th>検証と次の判断日</th><th>決めた場（会議体・日付・資料）</th></tr>
+  ${its.map(i=>`<tr><td>${esc(i.name)}${i.digital?'':'<div class="hint">デジタル以外</div>'}</td>${[1,2].map(n=>`<td><input type="checkbox" data-ck="${i.id}:${n}" ${i.checks[n]?'checked':''}></td>`).join('')}<td><input data-in="${i.id}:ev" value="${esc(i.ev)}"></td></tr>`).join('')}</table>
+  <div class="hint">実行条件＝予算・工数・権限・データの提供者。事業部とDX推進部の目標の合意は、この申請を一緒に作る時点で済んでいるので、別には聞きません。評価・報酬の変更は条件にしません。</div></div>`},
+ ()=>`<div class="field" style="grid-template-columns:1fr"><label>道筋にあるDX（入力なし・自動）</label>${heatHTML()}
+  <div class="hint">その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「未着手／取り組み中／成果が出ている」の自己申告はしません。<br>項目：${[1,2,3,4,5,6,7].map(k=>k+'. '+esc(IPA[k])).join('／')}（1＝デジタイゼーション、2・3＝デジタライゼーション、4〜7＝DX。分類の出典：IPA『DX動向2025』本文 p.16 図表1-19）</div></div>
+  <div class="field" style="grid-template-columns:1fr"><label>事業ごとの道筋の進み</label><div class="bul">${DATA.bus.map(b=>{const p=progOf(b,'now');return `<div><b class="small">${esc(b.name)}</b>：<span class="small">${p?PROG[p]+'まで指標が動いた':PROG[0]}</span>${track(p,0)}</div>`}).join('')}</div></div>`,
+ ()=>{const iss=[];DATA.bus.forEach(b=>{if(!b.confAt)iss.push(`${b.name}：事業側の確認がまだ`);b.objs.forEach(o=>warns(b,o).forEach(w=>iss.push(`${b.name}「${o.name}」：${w}`)));initsOfBu(b).forEach(i=>{if(!i.checks[1]&&(i.exec===1||i.exec===2)&&!iss.includes(`「${i.name}」：実行中・試行中だが、実行条件が未確保`))iss.push(`「${i.name}」：実行中・試行中だが、実行条件が未確保`)})});
+  DATA.inits.filter(i=>!i.attach.length).forEach(i=>iss.push(`「${i.name}」：どの目標にも付いていない`));
+  return `<div class="field" style="grid-template-columns:1fr"><label>一枚で読み合わせ</label><table><tr><th>事業</th><th>財務</th><th>顧客</th><th>業務プロセス</th><th>学習と成長</th><th>施策</th></tr>
+  ${DATA.bus.map(b=>`<tr><td>${esc(b.name)}</td>${['fi','cu','pr','lg'].map(p=>`<td>${b.objs.filter(o=>o.persp===p).map(o=>esc(o.name)).join('<br>')}</td>`).join('')}<td>${initsOfBu(b).map(i=>esc(i.name)).join('<br>')}</td></tr>`).join('')}</table></div>`}
+];
+function onEdit(e){const t=e.target;const v=t.type==='checkbox'?t.checked:t.value;let d;
+ if(d=t.dataset.bu){const[id,k]=d.split(':');const b=DATA.bus.find(x=>x.id===id);b[k]=(k==='share'||k==='growth'||k==='cvp')?Number(v):v;if(k==='growth')return renderEntry()}
+ else if(d=t.dataset.ed){const[,id,k]=d.split(':');const o=objById(id);if(k==='owner')o.owner=v==='1'?'dx':'biz';else if(k==='kind')o.kind=Number(v);else if(k==='cap')o.cap=Object.keys(CAP)[Number(v)];else o[k]=v}
+ else if(d=t.dataset.th){const[bid,tid,k]=d.split(':');const th=ebu().themes.find(x=>x.id===tid);if(k==='proc'){th.proc=PROC[Number(v)];th.hz=HZDEF[th.proc];return renderEntry()}if(k==='hz')th.hz=Number(v);else th[k]=v}
+ else if(d=t.dataset.in){const[id,k]=d.split(':');const i=DATA.inits.find(x=>x.id===id);
+  if(k==='attach'){const cur=t.dataset.cur;i.attach=i.attach.filter(a=>a!==cur);if(v)i.attach.push(v);return renderEntry()}
+  if(k==='owner')i.owner=v==='1'?'dx':'biz';else if(k==='digital'){i.digital=v;if(!v)i.ipa=null;else if(!i.ipa)i.ipa=2;return renderEntry()}
+  else if(k==='ipa')i.ipa=v===''?null:Number(v)+1;else if(k==='exec'||k==='verify')i[k]=Number(v);else i[k]=v;if(i.prev&&(k==='exec'||k==='verify')){}}
+ else if(d=t.dataset.ck){const[id,n]=d.split(':');DATA.inits.find(x=>x.id===id).checks[Number(n)]=v}
+ else if(d=t.dataset.ln){const[bid,n,k]=d.split(':');DATA.bus.find(x=>x.id===bid).links[Number(n)][k]=v}
+ else if(d=t.dataset.ip){const[bid,when,k]=d.split(':');DATA.bus.find(x=>x.id===bid).ipa[when][k]=Number(v);return renderEntry()}
+ else if(d=t.dataset.cip){const[k,when]=d.split(':');DATA.corp.ipa[k][when]=Number(v)}
+ else if(d=t.dataset.cf){DATA.corp.fin[d]=v}
+ else if(d=t.dataset.goal){DATA.corp.goal[d]=d==='share'?Number(v):v}}
+document.addEventListener('change',e=>{if($('#v-entry').contains(e.target))onEdit(e)});
+document.addEventListener('input',e=>{if($('#v-entry').contains(e.target)&&e.target.type==='range')onEdit(e)});
+document.addEventListener('click',e=>{
+ const st2=e.target.closest('[data-step]');if(st2){S.step=Number(st2.dataset.step);renderEntry();return}
+ const eb=e.target.closest('[data-eb]');if(eb){S.ebu=eb.dataset.eb;renderEntry();return}
+ const la=e.target.closest('[data-lnadd]');if(la){const b=DATA.bus.find(x=>x.id===la.dataset.lnadd);b.links.push({from:'',to:'',reason:'',cond:'',check:'',date:''});renderEntry();return}
+ const ld=e.target.closest('[data-lndel]');if(ld){const[bid,n]=ld.dataset.lndel.split(':');DATA.bus.find(x=>x.id===bid).links.splice(Number(n),1);renderEntry();return}
+ if(e.target.id==='prev'&&S.step>0){S.step--;renderEntry()}
+ if(e.target.id==='next'&&S.step<STEPS.length-1){S.step++;renderEntry()}
+ if(e.target.id==='tomap'){S.snap='now';S.sel=null;location.hash='#map'}
+});
+route();
+
+</script>
+</body>
+</html>
