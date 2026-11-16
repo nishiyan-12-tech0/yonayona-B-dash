@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { useStore } from '@/lib/store';
-import { FORMS } from './forms';
-import { BU_STEPS, STEPS } from './steps';
+import { useRouter } from "next/navigation";
+import { useStore } from "@/lib/store";
+import { FORMS } from "./forms";
+import { BU_STEPS, STEPS } from "./steps";
 
 /** ① 申請 */
 export function EntryView() {
@@ -21,15 +21,22 @@ export function EntryView() {
       <div className="card row">
         <div>
           <b id="e-co">{data.company.name}</b>
-          <span className="muted small">　事業部と経営が事業の目標を先に決め、そのあとDX推進部が加わって作ります</span>
+          <span className="muted small">
+            　事業部と経営が事業の目標を先に決め、そのあとDX推進部が加わって作ります
+          </span>
         </div>
-        <span className="small muted" style={{ marginLeft: 'auto' }}>
+        <span className="small muted" style={{ marginLeft: "auto" }}>
           入力中の事業
         </span>
         <div className="seg" id="e-bu" style={{ opacity: needBu ? 1 : 0.45 }}>
           {data.bus.map((b) => (
-            <button key={b.id} aria-pressed={bu.id === b.id} disabled={!needBu} onClick={() => setUi({ ebu: b.id })}>
-              {b.name.replace('（新規）', '')}
+            <button
+              key={b.id}
+              aria-pressed={bu.id === b.id}
+              disabled={!needBu}
+              onClick={() => setUi({ ebu: b.id })}
+            >
+              {b.name.replace("（新規）", "")}
             </button>
           ))}
         </div>
@@ -39,7 +46,10 @@ export function EntryView() {
           <ul className="steps" id="steps">
             {STEPS.map((x, i) => (
               <StepItem key={i} group={x.g}>
-                <button aria-current={step === i ? 'step' : 'false'} onClick={() => setUi({ step: i })}>
+                <button
+                  aria-current={step === i ? "step" : "false"}
+                  onClick={() => setUi({ step: i })}
+                >
                   <span className="n">{i}</span>
                   {x.t}
                 </button>
@@ -64,18 +74,28 @@ export function EntryView() {
             <Form data={data} bu={bu} update={update} />
           </div>
           <div className="btns">
-            <button className="btn" id="prev" disabled={step === 0} onClick={() => setUi({ step: step - 1 })}>
+            <button
+              className="btn"
+              id="prev"
+              disabled={step === 0}
+              onClick={() => setUi({ step: step - 1 })}
+            >
               前へ
             </button>
-            <button className="btn" id="next" disabled={step === STEPS.length - 1} onClick={() => setUi({ step: step + 1 })}>
+            <button
+              className="btn"
+              id="next"
+              disabled={step === STEPS.length - 1}
+              onClick={() => setUi({ step: step + 1 })}
+            >
               次へ
             </button>
             <button
               className="btn pri"
               id="tomap"
               onClick={() => {
-                setUi({ snap: 'now', sel: null });
-                router.push('/map');
+                setUi({ snap: "now", sel: null });
+                router.push("/map");
               }}
             >
               入力内容で戦略マップを表示
@@ -88,7 +108,13 @@ export function EntryView() {
 }
 
 /** 左の一覧の1行。グループの先頭なら、グループ名の行を上に足す */
-function StepItem({ group, children }: { group: string; children: React.ReactNode }) {
+function StepItem({
+  group,
+  children,
+}: {
+  group: string;
+  children: React.ReactNode;
+}) {
   return (
     <>
       {group ? <li className="grp">{group}</li> : null}

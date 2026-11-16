@@ -1,9 +1,10 @@
-import { EXEC, IPA, IPA_STAGE, IS, OWN, STAGE, VERIFY } from '@/lib/constants';
-import { curOf, indState, initsOn, pctOf, running, stAt } from '@/lib/logic';
-import type { Initiative, Objective, Snap, StrategyData } from '@/lib/types';
+import { EXEC, IPA, IPA_STAGE, IS, OWN, STAGE, VERIFY } from "@/lib/constants";
+import { curOf, indState, initsOn, pctOf, running, stAt } from "@/lib/logic";
+import type { Initiative, Objective, Snap, StrategyData } from "@/lib/types";
 
-export const cls = (...xs: (string | false | null | undefined)[]) => xs.filter(Boolean).join(' ');
-export const nowLabel = (snap: Snap) => (snap === 'mar' ? '3月末' : '現在');
+export const cls = (...xs: (string | false | null | undefined)[]) =>
+  xs.filter(Boolean).join(" ");
+export const nowLabel = (snap: Snap) => (snap === "mar" ? "3月末" : "現在");
 
 /** 戦略マップの描画に共通で渡すもの */
 export interface MapCtx {
@@ -20,16 +21,24 @@ export interface MapCtx {
 }
 
 /** 施策のボタン。dimmable＝強調のときに薄くする対象か（マップ上の施策だけ） */
-export function ActButton({ ctx, init, dimmable }: { ctx: MapCtx; init: Initiative; dimmable?: boolean }) {
+export function ActButton({
+  ctx,
+  init,
+  dimmable,
+}: {
+  ctx: MapCtx;
+  init: Initiative;
+  dimmable?: boolean;
+}) {
   const s = stAt(init, ctx.snap);
   const run = running(init, ctx.snap);
-  const key = 'i:' + init.id;
+  const key = "i:" + init.id;
   return (
     <button
       className={cls(
-        'act',
-        dimmable && !!ctx.focus.inits && !ctx.focus.inits.has(init.id) && 'dim',
-        dimmable && ctx.sel === key && 'sel',
+        "act",
+        dimmable && !!ctx.focus.inits && !ctx.focus.inits.has(init.id) && "dim",
+        dimmable && ctx.sel === key && "sel",
       )}
       data-i={init.id}
       onClick={() => ctx.onSel(key)}
@@ -47,28 +56,43 @@ export function ActButton({ ctx, init, dimmable }: { ctx: MapCtx; init: Initiati
       </span>
       <span className="am">
         担当：{OWN[init.owner]}・{EXEC[s.exec]}
-        {run ? '・効果の検証：' + VERIFY[s.verify] : ''}
+        {run ? "・効果の検証：" + VERIFY[s.verify] : ""}
       </span>
-      {init.attach.length > 1 ? <span className="am">複数の事業で共通</span> : null}
+      {init.attach.length > 1 ? (
+        <span className="am">複数の事業で共通</span>
+      ) : null}
     </button>
   );
 }
 
 /** 目標の箱と、その目標に付いた施策。corp＝全社の目標 */
-export function ObjCard({ ctx, obj, corp }: { ctx: MapCtx; obj: Objective; corp?: boolean }) {
+export function ObjCard({
+  ctx,
+  obj,
+  corp,
+}: {
+  ctx: MapCtx;
+  obj: Objective;
+  corp?: boolean;
+}) {
   const s = indState(obj, ctx.snap);
   const its = initsOn(ctx.data, obj.id);
-  const key = 'o:' + obj.id;
+  const key = "o:" + obj.id;
   const dim = !!ctx.focus.objs && !corp && !ctx.focus.objs.has(obj.id);
   return (
     <div className="obj" data-o={obj.id}>
       <button
-        className={cls('ocard', !obj.kpi && 'nok', dim && 'dim', ctx.sel === key && 'sel')}
+        className={cls(
+          "ocard",
+          !obj.kpi && "nok",
+          dim && "dim",
+          ctx.sel === key && "sel",
+        )}
         id={`o-${obj.id}`}
         onClick={() => ctx.onSel(key)}
       >
         <span className="oh">
-          <span className="tag">{corp ? '全社の目標' : '目標'}</span>
+          <span className="tag">{corp ? "全社の目標" : "目標"}</span>
           <span className="own">主担当：{OWN[obj.owner]}</span>
         </span>
         <span className="on">{obj.name}</span>
@@ -79,13 +103,13 @@ export function ObjCard({ ctx, obj, corp }: { ctx: MapCtx; obj: Objective; corp?
               <span>
                 {nowLabel(ctx.snap)} <b>{curOf(obj, ctx.snap)}</b>
               </span>
-              {' ／ '}
+              {" ／ "}
               <span>
                 目標 <b>{obj.target}</b>
               </span>
             </span>
             <span className="od">
-              <span>期限 {obj.due || '未設定'}</span>
+              <span>期限 {obj.due || "未設定"}</span>
               <span className={`is ${s}`}>指標：{IS[s]}</span>
             </span>
           </>
@@ -111,12 +135,24 @@ export function ObjCard({ ctx, obj, corp }: { ctx: MapCtx; obj: Objective; corp?
 }
 
 /** 上部の「主要な成果指標」のカード */
-export function MetButton({ ctx, obj, label }: { ctx: MapCtx; obj: Objective; label: string }) {
+export function MetButton({
+  ctx,
+  obj,
+  label,
+}: {
+  ctx: MapCtx;
+  obj: Objective;
+  label: string;
+}) {
   const s = indState(obj, ctx.snap);
   const pc = pctOf(obj, ctx.snap);
-  const key = 'o:' + obj.id;
+  const key = "o:" + obj.id;
   return (
-    <button className={cls('met', ctx.sel === key && 'sel')} data-m={obj.id} onClick={() => ctx.onSel(key)}>
+    <button
+      className={cls("met", ctx.sel === key && "sel")}
+      data-m={obj.id}
+      onClick={() => ctx.onSel(key)}
+    >
       <span className="ml">{label}</span>
       <span className="mn">{obj.kpi || obj.name}</span>
       {obj.kpi ? (
@@ -125,7 +161,7 @@ export function MetButton({ ctx, obj, label }: { ctx: MapCtx; obj: Objective; la
             <span>
               {nowLabel(ctx.snap)} <b>{curOf(obj, ctx.snap)}</b>
             </span>
-            {' ／ '}
+            {" ／ "}
             <span>
               目標 <b>{obj.target}</b>
             </span>
@@ -134,7 +170,8 @@ export function MetButton({ ctx, obj, label }: { ctx: MapCtx; obj: Objective; la
             <i style={{ width: `${pc ?? 0}%` }} />
           </span>
           <span className="md">
-            期限 {obj.due || '未設定'}　<span className={`is ${s}`}>指標：{IS[s]}</span>
+            期限 {obj.due || "未設定"}　
+            <span className={`is ${s}`}>指標：{IS[s]}</span>
           </span>
         </>
       ) : (

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 /** データ取得の結果を持つ。届くまでは null */
 export function useAsync<T>(load: () => Promise<T>): T | null {

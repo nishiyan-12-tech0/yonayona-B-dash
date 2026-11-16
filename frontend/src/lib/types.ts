@@ -1,11 +1,11 @@
 /** BSCの4視点：学習と成長／業務プロセス／顧客／財務 */
-export type Persp = 'lg' | 'pr' | 'cu' | 'fi';
+export type Persp = "lg" | "pr" | "cu" | "fi";
 /** 主担当：事業部／DX推進部／経営 */
-export type Owner = 'biz' | 'dx' | 'mgmt';
+export type Owner = "biz" | "dx" | "mgmt";
 /** 学習と成長の資本の種類：人的／情報／組織 */
-export type Cap = 'hum' | 'inf' | 'org';
+export type Cap = "hum" | "inf" | "org";
 /** 表示する時点：現在／2026年3月末 */
-export type Snap = 'now' | 'mar';
+export type Snap = "now" | "mar";
 /** DXの段階：1＝デジタイゼーション、2＝デジタライゼーション、3＝DX */
 export type Stage = 1 | 2 | 3;
 
@@ -130,7 +130,13 @@ export interface PeerPoint {
 export interface PeerData {
   points: PeerPoint[];
   /** 比べる相手の平均（%） */
-  avg: { reach: number; condition: number; review: number; verified: number; persp: PerspShare };
+  avg: {
+    reach: number;
+    condition: number;
+    review: number;
+    verified: number;
+    persp: PerspShare;
+  };
 }
 
 /** 段階(1〜3)ごとに、道筋の進み(0〜4)の割合(%)を並べたもの */
@@ -143,5 +149,11 @@ export interface MetiData {
   perspRows: { name: string; persp: PerspShare }[];
   /** 自社の最終更新日 */
   ownUpdatedAt: string;
-  otherCompanies: { name: string; industry: string; buCount: number; best: string; updatedAt: string }[];
+  otherCompanies: {
+    name: string;
+    industry: string;
+    buCount: number;
+    best: string;
+    updatedAt: string;
+  }[];
 }

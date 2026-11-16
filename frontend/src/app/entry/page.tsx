@@ -1,4 +1,4 @@
-import { EntryView } from '@/features/entry/EntryView';
+import { EntryView } from "@/features/entry/EntryView";
 
 export default function Page() {
   return <EntryView />;

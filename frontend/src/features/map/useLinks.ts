@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, type RefObject } from 'react';
-import type { StrategyData } from '@/lib/types';
+import { useCallback, useEffect, type RefObject } from "react";
+import type { StrategyData } from "@/lib/types";
 
 const MARKERS =
   '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" style="fill:var(--muted)"/></marker><marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10z" style="fill:var(--accent)"/></marker></defs>';
@@ -25,8 +25,8 @@ export function useLinks(
     let p = MARKERS;
     data.bus.forEach((b) => {
       b.links.forEach((l) => {
-        const A = document.getElementById('o-' + l.from);
-        const B = document.getElementById('o-' + l.to);
+        const A = document.getElementById("o-" + l.from);
+        const B = document.getElementById("o-" + l.to);
         if (!A || !B) return;
         const a = A.getBoundingClientRect();
         const c = B.getBoundingClientRect();
@@ -37,7 +37,7 @@ export function useLinks(
         const dx = Math.max(12, (x2 - x1) / 2);
         const on = !focusObjs || (focusObjs.has(l.from) && focusObjs.has(l.to));
         const hi = !!focusObjs && on;
-        p += `<path d="M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}" fill="none" style="stroke:var(${hi ? '--accent' : '--muted'})" stroke-width="${hi ? 2.4 : 1.5}" opacity="${on ? 0.9 : 0.13}" marker-end="url(#${hi ? 'ahd' : 'ah'})"/>`;
+        p += `<path d="M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}" fill="none" style="stroke:var(${hi ? "--accent" : "--muted"})" stroke-width="${hi ? 2.4 : 1.5}" opacity="${on ? 0.9 : 0.13}" marker-end="url(#${hi ? "ahd" : "ah"})"/>`;
       });
     });
     svg.innerHTML = p;
@@ -52,12 +52,12 @@ export function useLinks(
   // 幅や高さが変わったとき（ウィンドウ、詳細の開閉、フォントの読み込み）も引き直す
   useEffect(() => {
     const redraw = () => requestAnimationFrame(draw);
-    window.addEventListener('resize', redraw);
+    window.addEventListener("resize", redraw);
     const ro = new ResizeObserver(redraw);
     if (mapRef.current) ro.observe(mapRef.current);
     document.fonts?.ready.then(redraw);
     return () => {
-      window.removeEventListener('resize', redraw);
+      window.removeEventListener("resize", redraw);
       ro.disconnect();
     };
   }, [draw, mapRef]);

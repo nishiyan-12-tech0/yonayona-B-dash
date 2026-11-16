@@ -1,5 +1,19 @@
-import type { ReactNode } from 'react';
-import { CAP, CHECK_LABELS, CVP, EXEC, FINKIND, IPA, IPA_STAGE, IS, OWN, PERSP, PL, STAGE, VERIFY } from '@/lib/constants';
+import type { ReactNode } from "react";
+import {
+  CAP,
+  CHECK_LABELS,
+  CVP,
+  EXEC,
+  FINKIND,
+  IPA,
+  IPA_STAGE,
+  IS,
+  OWN,
+  PERSP,
+  PL,
+  STAGE,
+  VERIFY,
+} from "@/lib/constants";
 import {
   buOfObj,
   curOf,
@@ -13,9 +27,9 @@ import {
   reachedSet,
   running,
   stAt,
-} from '@/lib/logic';
-import type { Link } from '@/lib/types';
-import { ActButton, nowLabel, type MapCtx } from './cards';
+} from "@/lib/logic";
+import type { Link } from "@/lib/types";
+import { ActButton, nowLabel, type MapCtx } from "./cards";
 
 interface Props {
   ctx: MapCtx;
@@ -24,7 +38,17 @@ interface Props {
   onOpenTheme: (buId: string, themeId: string) => void;
 }
 
-function Head({ kind, crumb, name, onClose }: { kind: string; crumb: string; name: string; onClose: () => void }) {
+function Head({
+  kind,
+  crumb,
+  name,
+  onClose,
+}: {
+  kind: string;
+  crumb: string;
+  name: string;
+  onClose: () => void;
+}) {
   return (
     <>
       <div className="ph">
@@ -44,8 +68,8 @@ function Hyp({ ctx, link }: { ctx: MapCtx; link: Link }) {
   const t = objById(ctx.data, link.to);
   return (
     <div className="hyp">
-      <b>→ {t ? t.name : ''}</b>
-      {link.reason || '理由はまだ書いていない'}
+      <b>→ {t ? t.name : ""}</b>
+      {link.reason || "理由はまだ書いていない"}
       {link.cond ? (
         <>
           <br />
@@ -70,17 +94,22 @@ function Hyp({ ctx, link }: { ctx: MapCtx; link: Link }) {
 export function Panel({ ctx, onClose, onOpenTheme }: Props) {
   const { data, snap, sel } = ctx;
   if (!sel) return null;
-  const [k, a] = sel.split(':');
+  const [k, a] = sel.split(":");
   let body: ReactNode = null;
 
-  if (k === 'b') {
+  if (k === "b") {
     const b = data.bus.find((x) => x.id === a);
     if (!b) return null;
     const rs = itemRows(data, b, snap);
     const pg = progOf(data, b, snap);
     body = (
       <>
-        <Head kind="事業" crumb={data.company.name} name={b.name} onClose={onClose} />
+        <Head
+          kind="事業"
+          crumb={data.company.name}
+          name={b.name}
+          onClose={onClose}
+        />
         <h4>目指すこと</h4>
         <dl className="kv">
           <dt>対象の顧客</dt>
@@ -93,11 +122,16 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           <dd>
             {b.gap}
             <div className="split">
-              <i style={{ width: `${b.growth}%`, background: 'var(--accent)' }}>
-                {b.growth ? '収益増大 ' + b.growth + '%' : ''}
+              <i style={{ width: `${b.growth}%`, background: "var(--accent)" }}>
+                {b.growth ? "収益増大 " + b.growth + "%" : ""}
               </i>
-              <i style={{ width: `${100 - b.growth}%`, background: 'var(--gray)' }}>
-                {100 - b.growth ? '生産性 ' + (100 - b.growth) + '%' : ''}
+              <i
+                style={{
+                  width: `${100 - b.growth}%`,
+                  background: "var(--gray)",
+                }}
+              >
+                {100 - b.growth ? "生産性 " + (100 - b.growth) + "%" : ""}
               </i>
             </div>
           </dd>
@@ -117,12 +151,12 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dd>{b.industry}</dd>
             <dt>売上比率</dt>
             <dd>
-              {b.share}%{b.share ? '' : '（売上はまだない）'}
+              {b.share}%{b.share ? "" : "（売上はまだない）"}
             </dd>
             <dt>責任者</dt>
             <dd>{b.owner}</dd>
             <dt>事業側の確認</dt>
-            <dd>{b.confAt ? `${b.confBy}（${b.confAt}）` : 'まだ'}</dd>
+            <dd>{b.confAt ? `${b.confBy}（${b.confAt}）` : "まだ"}</dd>
           </dl>
           {rs.length ? (
             <ul className="checks">
@@ -132,7 +166,9 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
                   <span>
                     <b>{STAGE[IPA_STAGE[r.k]]}</b>：{IPA[r.k]}
                     <br />
-                    <span className="muted">施策：{r.its.map((i) => i.name).join('・')}</span>
+                    <span className="muted">
+                      施策：{r.its.map((i) => i.name).join("・")}
+                    </span>
                   </span>
                 </li>
               ))}
@@ -149,7 +185,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
     );
   }
 
-  if (k === 'o') {
+  if (k === "o") {
     const corp = a === data.corp.fin.id;
     const o = corp ? data.corp.fin : objById(data, a);
     if (!o) return null;
@@ -160,15 +196,22 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
     const th = b && o.theme ? b.themes.find((t) => t.id === o.theme) : null;
     const s = indState(o, snap);
     const pc = pctOf(o, snap);
-    const crumb = b ? [b.name, th ? th.name : null, PL[o.persp]].filter(Boolean).join(' › ') : '全社 › ' + PL.fi;
+    const crumb = b
+      ? [b.name, th ? th.name : null, PL[o.persp]].filter(Boolean).join(" › ")
+      : "全社 › " + PL.fi;
     const cross = (n: number) =>
       data.inits
         .filter((i) => i.digital && i.ipa === n && i.attach.length)
         .map((i) => i.name)
-        .join('・') || 'まだない';
+        .join("・") || "まだない";
     body = (
       <>
-        <Head kind={b ? '目標' : '全社の目標'} crumb={crumb} name={o.name} onClose={onClose} />
+        <Head
+          kind={b ? "目標" : "全社の目標"}
+          crumb={crumb}
+          name={o.name}
+          onClose={onClose}
+        />
         <h4>指標</h4>
         {o.kpi ? (
           <>
@@ -178,12 +221,14 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               <dt>{nowLabel(snap)}の値</dt>
               <dd>
                 <b>{curOf(o, snap)}</b>
-                {snap === 'now' && o.prev !== undefined && o.prev !== o.cur ? `（2026年3月末：${o.prev}）` : ''}
+                {snap === "now" && o.prev !== undefined && o.prev !== o.cur
+                  ? `（2026年3月末：${o.prev}）`
+                  : ""}
               </dd>
               <dt>目標値</dt>
               <dd>{o.target}</dd>
               <dt>期限</dt>
-              <dd>{o.due || '未設定'}</dd>
+              <dd>{o.due || "未設定"}</dd>
               <dt>基準値</dt>
               <dd>{o.base}</dd>
               <dt>測り方</dt>
@@ -197,7 +242,11 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               </dd>
               <dt>目標の達成状況</dt>
               <dd>
-                {pc === null ? '判定できない' : pc >= 100 ? '達成' : `未達（基準から目標までの${pc}%）`}
+                {pc === null
+                  ? "判定できない"
+                  : pc >= 100
+                    ? "達成"
+                    : `未達（基準から目標までの${pc}%）`}
                 {pc === null ? null : (
                   <div className="pbar">
                     <i style={{ width: `${pc}%` }} />
@@ -213,7 +262,10 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           <>
             <h4>実施する施策</h4>
             {its.length ? (
-              <div className="acts" style={{ border: 0, padding: 0, margin: 0 }}>
+              <div
+                className="acts"
+                style={{ border: 0, padding: 0, margin: 0 }}
+              >
                 {its.map((i) => (
                   <ActButton key={i.id} ctx={ctx} init={i} />
                 ))}
@@ -243,7 +295,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
                 <p className="st-line muted">手前の目標</p>
                 <div className="jump">
                   {inn.map((l, n) => (
-                    <button key={n} onClick={() => ctx.onSel('o:' + l.from)}>
+                    <button key={n} onClick={() => ctx.onSel("o:" + l.from)}>
                       {objById(data, l.from)?.name}
                     </button>
                   ))}
@@ -267,18 +319,20 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               <dt>主担当</dt>
               <dd>{OWN[o.owner]}</dd>
               <dt>協働</dt>
-              <dd>{o.partner ? o.partner : 'なし'}</dd>
+              <dd>{o.partner ? o.partner : "なし"}</dd>
               <dt>BSCの視点</dt>
               <dd>
                 {PERSP[o.persp]}
-                {o.cap ? `（${CAP[o.cap]}）` : ''}
-                {o.persp === 'fi' && o.kind !== undefined && FINKIND[o.kind] ? `（${FINKIND[o.kind]}）` : ''}
+                {o.cap ? `（${CAP[o.cap]}）` : ""}
+                {o.persp === "fi" && o.kind !== undefined && FINKIND[o.kind]
+                  ? `（${FINKIND[o.kind]}）`
+                  : ""}
               </dd>
             </dl>
             {o.kpi ? (
               <p className="small muted">
                 経路上の判定（他社比較の「道筋の進み」に使う）：実行中の施策からこの目標まで、途中の目標の指標が順に改善して
-                {reachedSet(data, b, snap).has(a) ? 'います' : 'いません'}
+                {reachedSet(data, b, snap).has(a) ? "います" : "いません"}
                 。指標そのものの動きとは別の判定で、施策の成果を示すものではありません。
               </p>
             ) : null}
@@ -288,18 +342,25 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
     );
   }
 
-  if (k === 'i') {
+  if (k === "i") {
     const i = data.inits.find((x) => x.id === a);
     if (!i) return null;
     const s = stAt(i, snap);
     const run = running(i, snap);
     const crumb = i.attach.length
-      ? [...new Set(i.attach.map((x) => buOfObj(data, x)?.name ?? ''))].join('・')
-      : 'どの事業の目標にも付いていない';
+      ? [...new Set(i.attach.map((x) => buOfObj(data, x)?.name ?? ""))].join(
+          "・",
+        )
+      : "どの事業の目標にも付いていない";
     const first = i.attach.length ? objById(data, i.attach[0]) : null;
     body = (
       <>
-        <Head kind="実施する施策" crumb={crumb} name={i.name} onClose={onClose} />
+        <Head
+          kind="実施する施策"
+          crumb={crumb}
+          name={i.name}
+          onClose={onClose}
+        />
         <h4>状態</h4>
         <dl className="kv">
           <dt>実行の状態</dt>
@@ -321,7 +382,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
         {i.attach.length ? (
           <div className="jump">
             {i.attach.map((x) => (
-              <button key={x} onClick={() => ctx.onSel('o:' + x)}>
+              <button key={x} onClick={() => ctx.onSel("o:" + x)}>
                 {objById(data, x)?.name}
                 <span className="muted">（{buOfObj(data, x)?.name}）</span>
               </button>
@@ -334,9 +395,11 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
         )}
         <h4>実行の準備</h4>
         <ul className="checks">
-          {(['condition', 'review'] as const).map((c) => (
+          {(["condition", "review"] as const).map((c) => (
             <li key={c}>
-              <span className={`mk ${s.checks[c] ? 'y' : 'n'}`}>{s.checks[c] ? '済' : '未'}</span>
+              <span className={`mk ${s.checks[c] ? "y" : "n"}`}>
+                {s.checks[c] ? "済" : "未"}
+              </span>
               <span>{CHECK_LABELS[c]}</span>
             </li>
           ))}
@@ -347,7 +410,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dt>主担当</dt>
             <dd>{OWN[i.owner]}</dd>
             <dt>協働</dt>
-            <dd>{i.partner ? i.partner : 'なし'}</dd>
+            <dd>{i.partner ? i.partner : "なし"}</dd>
             {i.ev ? (
               <>
                 <dt>決めた場</dt>
@@ -358,10 +421,10 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dd>
               {i.digital && i.ipa
                 ? `${STAGE[IPA_STAGE[i.ipa]]}（IPA取組項目${i.ipa}. ${IPA[i.ipa]}）`
-                : 'デジタル以外の施策'}
+                : "デジタル以外の施策"}
             </dd>
           </dl>
-          {i.digital && first?.persp === 'lg' ? (
+          {i.digital && first?.persp === "lg" ? (
             <p className="small muted">
               施策の指標（利用率・導入数など）は「準備がどれだけ整ったか」を表します。事業の成果は、先の目標の指標で見ます。
             </p>

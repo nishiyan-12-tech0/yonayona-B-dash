@@ -6,11 +6,11 @@
  * バックエンドができたら、このファイルの中身を API 呼び出しに差し替えます
  * （画面側は変えません）。そのとき src/mocks は消します。
  */
-import { seedMeti, seedPeers, seedStrategy } from '@/mocks/seed';
-import type { MetiData, PeerData, StrategyData } from './types';
+import { seedMeti, seedPeers, seedStrategy } from "@/mocks/seed";
+import type { MetiData, PeerData, StrategyData } from "./types";
 
 /** データの形を変えたら番号を上げる（古い保存内容を読まないため） */
-const STORAGE_KEY = 'michisuji.strategy.v1';
+const STORAGE_KEY = "michisuji.strategy.v1";
 
 /** 自社の申請内容（戦略マップの元データ） */
 export async function fetchStrategy(): Promise<StrategyData> {

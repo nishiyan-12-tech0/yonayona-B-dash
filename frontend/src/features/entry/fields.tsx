@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from "react";
 
 /** 文字の入力欄 */
 export function Txt({
@@ -6,16 +6,22 @@ export function Txt({
   onChange,
   placeholder,
   style,
-  type = 'text',
+  type = "text",
 }: {
   value: string | undefined;
   onChange: (v: string) => void;
   placeholder?: string;
   style?: CSSProperties;
-  type?: 'text' | 'date';
+  type?: "text" | "date";
 }) {
   return (
-    <input type={type} value={value ?? ''} placeholder={placeholder} style={style} onChange={(e) => onChange(e.target.value)} />
+    <input
+      type={type}
+      value={value ?? ""}
+      placeholder={placeholder}
+      style={style}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 }
 
@@ -38,9 +44,11 @@ export function Sel({
 }) {
   return (
     <select
-      value={value === null ? '' : String(value)}
+      value={value === null ? "" : String(value)}
       disabled={disabled}
-      onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+      onChange={(e) =>
+        onChange(e.target.value === "" ? null : Number(e.target.value))
+      }
     >
       {blank !== undefined ? <option value="">{blank}</option> : null}
       {options.map((t, i) => (
@@ -53,9 +61,20 @@ export function Sel({
 }
 
 /** ラベルと入力欄の組。wide＝表などを横いっぱいに置く */
-export function Field({ label, wide, children }: { label: string; wide?: boolean; children: ReactNode }) {
+export function Field({
+  label,
+  wide,
+  children,
+}: {
+  label: string;
+  wide?: boolean;
+  children: ReactNode;
+}) {
   return (
-    <div className="field" style={wide ? { gridTemplateColumns: '1fr' } : undefined}>
+    <div
+      className="field"
+      style={wide ? { gridTemplateColumns: "1fr" } : undefined}
+    >
       <label>{label}</label>
       {children}
     </div>
@@ -63,7 +82,13 @@ export function Field({ label, wide, children }: { label: string; wide?: boolean
 }
 
 /** 見出し行つきの表 */
-export function Table({ head, children }: { head: string[]; children: ReactNode }) {
+export function Table({
+  head,
+  children,
+}: {
+  head: string[];
+  children: ReactNode;
+}) {
   return (
     <table>
       <tbody>

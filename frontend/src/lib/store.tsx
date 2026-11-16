@@ -1,19 +1,27 @@
-'use client';
+"use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { fetchStrategy, saveStrategy } from './api';
-import type { Snap, StrategyData } from './types';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import { fetchStrategy, saveStrategy } from "./api";
+import type { Snap, StrategyData } from "./types";
 
 /** 画面の表示状態（どの事業・テーマを開いているか、など）。画面を行き来しても保ちます。 */
 export interface UiState {
   /** 戦略マップ：表示する時点 */
   snap: Snap;
   /** 戦略マップ：担当で強調 */
-  who: 'all' | 'biz' | 'dx';
+  who: "all" | "biz" | "dx";
   /** 戦略マップ：DXの段階で強調（0＝なし） */
   stg: number;
   /** 戦略マップ：テーマごと／全体マップ */
-  view: 'theme' | 'all';
+  view: "theme" | "all";
   /** 戦略マップ：開いている事業 */
   cb: string | null;
   /** 戦略マップ：開いている戦略テーマ */
@@ -27,7 +35,7 @@ export interface UiState {
   /** 戦略マップ（全体マップ）：閉じている事業 */
   collapsed: Record<string, boolean>;
   /** 他社と比べる：比べる相手 */
-  peer: 'same' | 'all';
+  peer: "same" | "all";
   /** 申請：開いているステップ */
   step: number;
   /** 申請：入力中の事業 */
@@ -35,17 +43,17 @@ export interface UiState {
 }
 
 const initialUi: UiState = {
-  snap: 'now',
-  who: 'all',
+  snap: "now",
+  who: "all",
   stg: 0,
-  view: 'theme',
+  view: "theme",
   cb: null,
   ct: null,
   opt: false,
   ipa: false,
   sel: null,
   collapsed: {},
-  peer: 'same',
+  peer: "same",
   step: 0,
   ebu: null,
 };
@@ -92,17 +100,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (data && data !== loaded) void saveStrategy(data);
   }, [data, loaded]);
 
-  const setUi = useCallback((patch: Partial<UiState>) => setUiState((cur) => ({ ...cur, ...patch })), []);
+  const setUi = useCallback(
+    (patch: Partial<UiState>) => setUiState((cur) => ({ ...cur, ...patch })),
+    [],
+  );
 
-  const store = useMemo(() => (data ? { data, update, ui, setUi } : null), [data, update, ui, setUi]);
+  const store = useMemo(
+    () => (data ? { data, update, ui, setUi } : null),
+    [data, update, ui, setUi],
+  );
 
   // データが届くまでは中身を出さない
   if (!store) return null;
-  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+  );
 }
 
 export function useStore(): Store {
   const s = useContext(StoreContext);
-  if (!s) throw new Error('useStore は StoreProvider の中で使ってください');
+  if (!s) throw new Error("useStore は StoreProvider の中で使ってください");
   return s;
 }
