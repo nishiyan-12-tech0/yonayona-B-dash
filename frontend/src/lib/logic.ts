@@ -164,6 +164,20 @@ export function stageTop(d: StrategyData, b: BusinessUnit, snap: Snap) {
   return s;
 }
 
+/**
+ * 他社と比べる表の位置。縦と横を同じ施策から測る。
+ * 縦＝その事業の実行中のデジタル施策のうち一番上の段階（DXがあればDX）。
+ * 横＝その段階の施策から、つながりをたどって指標がどこまで順に動いたか（その施策があるテーマの道筋）。
+ * 実行中のデジタル施策がなければ縦は0（表には出さない）、横は実行中の施策すべてから測る
+ */
+export function gridPos(d: StrategyData, b: BusinessUnit, snap: Snap) {
+  const st = stageTop(d, b, snap);
+  const p = st
+    ? progOf(d, b, snap, (i) => i.digital && stageOf(i) === st)
+    : progOf(d, b, snap);
+  return { st, p };
+}
+
 /** 「デジタライゼーション（項目2・3）／DX（項目5）」のような要約 */
 export function dxSummary(d: StrategyData, b: BusinessUnit) {
   const m: Record<number, Set<number>> = {
@@ -279,27 +293,47 @@ export const doneOf = (o: Objective, snap: Snap) => pctOf(o, snap) === 100;
 export const initDone = (i: Initiative, snap: Snap) => stAt(i, snap).verify === 2;
 
 /**
- * 「今ここ」の目標：道筋の先端。
- * 道筋が進んでいれば、指標が順に動いた一番先の視点の目標（まだ目標値に届いていないもの）。
- * まだどこも動いていなければ、実行中の施策が付いた目標（いま手を付けているところ）。
+ * 「今ここ」：いま動かしている施策と、その施策が次に動かそうとしている目標。
+ * 施策：実行中で、まだ「効果あり」が出ていないもの。
+ * 目標：その施策が付いた目標から矢印を先へたどり、まだ目標値に届いていない（達成していない）一番手前の目標。
+ * 付いた目標が達成していなければ、その目標自身。達成すると、光は矢印の先の目標へ移る。
  */
 export function hereSet(d: StrategyData, snap: Snap) {
-  const out = new Set<string>();
+  const objs = new Set<string>();
+  const inits = new Set<string>();
   d.bus.forEach((b) => {
-    const R = reachedSet(d, b, snap);
-    const p = progOf(d, b, snap);
-    if (p) {
-      R.forEach((id) => {
-        const o = objById(d, id);
-        if (o && PIDX[o.persp] === p && !doneOf(o, snap)) out.add(id);
-      });
-      return;
-    }
-    b.objs.forEach((o) => {
-      if (initsOn(d, o.id).some((i) => running(i, snap))) out.add(o.id);
+    const ids = new Set(b.objs.map((o) => o.id));
+    const passed = (id: string) => {
+      const o = objById(d, id);
+      return !!o && doneOf(o, snap);
+    };
+    d.inits.forEach((i) => {
+      if (!running(i, snap) || initDone(i, snap)) return;
+      const starts = i.attach.filter((a) => ids.has(a));
+      if (!starts.length) return;
+      // 付いた目標から先へ、まだ通過していない一番手前の目標を探す
+      const seen = new Set<string>();
+      const q = [...starts];
+      const found: string[] = [];
+      while (q.length) {
+        const c = q.shift() as string;
+        if (seen.has(c)) continue;
+        seen.add(c);
+        if (!passed(c)) {
+          found.push(c);
+          continue;
+        }
+        b.links.forEach((l) => {
+          if (l.from === c) q.push(l.to);
+        });
+      }
+      if (found.length) {
+        inits.add(i.id);
+        found.forEach((x) => objs.add(x));
+      }
     });
   });
-  return out;
+  return { objs, inits };
 }
 
 /** 財務の差を何で埋めるか：宣言（申請のスライダー）と実態（施策がつながる財務の目標の種類） */

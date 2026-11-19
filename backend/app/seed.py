@@ -80,6 +80,11 @@ def insert_seed(s: Session, cid: int) -> None:
     open_data.ensure_dummy(s)
     s.flush()
 
+    # デモの初期状態：申請済みで、約1年ぶんの進捗と四半期ごとの版が入った状態にする
+    from . import demo_story
+
+    demo_story.build(s, cid)
+
 
 def clear_company(s: Session, cid: int) -> None:
     for model in COMPANY_TABLES:

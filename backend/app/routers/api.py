@@ -159,7 +159,8 @@ def post_batch(s: Session = Depends(get_session)):
 
 @router.post("/demo/reset")
 def demo_reset(s: Session = Depends(get_session), c: int = Depends(cid)):
-    """A-19：初期状態に戻す（展示用）。申請・戦略マップ・進捗・版を消し、入力済みの作成中の申請だけにする"""
+    """A-19：初期状態に戻す（展示用）。申請・戦略マップ・進捗・版を消し、デモの状態
+    （入力済みの申請から約1年前に申請し、四半期ごとに進捗と版が入った状態。demo_story.py）を作り直す"""
     seed.reset(s, c)
     s.flush()
     return strategy.get_draft(s, c)

@@ -30,8 +30,8 @@ export interface MapCtx {
   focus: { objs: Set<string> | null; inits: Set<string> | null };
   /** 選択する（同じものをもう一度選ぶと解除） */
   onSel: (sel: string) => void;
-  /** 「今ここ」の目標（道筋の先端） */
-  here: Set<string>;
+  /** 「今ここ」：いま動かしている施策と、その施策が次に動かそうとしている目標 */
+  here: { objs: Set<string>; inits: Set<string> };
 }
 
 /** 施策のボタン。dimmable＝強調のときに薄くする対象か（マップ上の施策だけ） */
@@ -54,6 +54,7 @@ export function ActButton({
         "act",
         run && !done && "run",
         done && "done",
+        ctx.here.inits.has(init.id) && "here",
         dimmable && !!ctx.focus.inits && !ctx.focus.inits.has(init.id) && "dim",
         dimmable && ctx.sel === key && "sel",
       )}
@@ -73,7 +74,11 @@ export function ActButton({
         {done ? <span className="dn">完了</span> : null}
       </span>
       <span className="am">
-        担当：{OWN[init.owner]}・{EXEC[s.exec]}
+        担当：{OWN[init.owner]}
+        {init.partner ? `／協力：${init.partner}` : ""}
+      </span>
+      <span className="am">
+        {EXEC[s.exec]}
         {run ? "・効果の検証：" + VERIFY[s.verify] : ""}
       </span>
       {init.attach.length > 1 ? (
@@ -94,17 +99,18 @@ export function ObjCard({
   corp?: boolean;
 }) {
   const s = indState(obj, ctx.snap);
-  const its = initsOn(ctx.data, obj.id);
+  const all = initsOn(ctx.data, obj.id);
   const key = "o:" + obj.id;
   const dim = !!ctx.focus.objs && !corp && !ctx.focus.objs.has(obj.id);
   const pc = pctOf(obj, ctx.snap);
   const done = doneOf(obj, ctx.snap);
   const sel = ctx.sel === key;
-  const here = ctx.here.has(obj.id);
-  /** 達成した目標は、選んでいるとき以外は畳む */
+  const here = ctx.here.objs.has(obj.id);
+  /** 達成した目標は、選んでいるとき以外は畳む（今やっている施策だけは畳まずに出す） */
   const fold = done && !sel;
+  const its = fold ? all.filter((i) => ctx.here.inits.has(i.id)) : all;
   return (
-    <div className="obj" data-o={obj.id}>
+    <div className={`obj pc-${obj.persp}`} data-o={obj.id}>
       <button
         className={cls(
           "ocard",
@@ -130,13 +136,16 @@ export function ObjCard({
                 ? FINKIND[obj.kind]
                 : "目標"}
           </span>
-          <span className="own">主担当：{OWN[obj.owner]}</span>
+          <span className="own">
+            主担当：{OWN[obj.owner]}
+            {obj.partner ? `／協力：${obj.partner}` : ""}
+          </span>
         </span>
         <span className="on">{obj.name}</span>
         {fold ? (
           <span className="od">
             {obj.kpi ? `${obj.kpi}：目標 ${obj.target} に到達` : "目標に到達"}
-            {its.length ? `・施策${its.length}件` : ""}
+            {all.length ? `・施策${all.length}件` : ""}
           </span>
         ) : obj.kpi ? (
           <>
@@ -169,9 +178,9 @@ export function ObjCard({
           </>
         )}
       </button>
-      {its.length && !fold ? (
+      {its.length ? (
         <div className="acts">
-          <span className="tag t2">実施する施策</span>
+          <span className="tag t2">この目標を動かす施策</span>
           {its.map((i) => (
             <ActButton key={i.id} ctx={ctx} init={i} dimmable />
           ))}

@@ -262,7 +262,7 @@ export interface MetiData {
   cells: StageCells;
   industries: { name: string; reached: number }[];
   perspRows: { name: string; persp: PerspShare }[];
-  /** 企業一覧（自社が先頭）。updatedAt は最新の確定日 */
+  /** 企業一覧（最終更新の新しい順）。updatedAt は最新の確定日 */
   companies: {
     name: string;
     industry: string;

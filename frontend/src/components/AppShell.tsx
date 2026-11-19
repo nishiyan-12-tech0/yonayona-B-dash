@@ -59,7 +59,7 @@ function ResetLogo() {
       await refresh();
       setUi({ step: 0, ebu: null, sel: null, cb: null, ct: null, snap: "now" });
       setOpen(false);
-      router.push("/entry");
+      router.push("/map");
     } catch (e) {
       setErr(e instanceof ApiError ? e.message : "初期状態に戻せませんでした");
     } finally {
@@ -80,7 +80,7 @@ function ResetLogo() {
         <Modal title="デモを初期状態に戻す" onClose={() => setOpen(false)}>
           <p>デモを初期状態に戻しますか？</p>
           <p className="small muted">
-            申請・戦略マップ・進捗・版をすべて消し、申請が入力済みの状態に戻します。
+            今の申請・戦略マップ・進捗・版をすべて消し、デモ用の状態（約1年前に申請し、四半期ごとに進捗を入れて版を作ってきた状態）に戻します。
           </p>
           {err ? <p className="merr">{err}</p> : null}
           <div className="mfoot">

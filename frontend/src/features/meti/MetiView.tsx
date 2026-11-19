@@ -64,7 +64,7 @@ function MetiBody({ hist, onHist }: { hist: Hist; onHist: (h: Hist) => void }) {
           <h2>
             どこで詰まっているか：道筋をどこまで進んだか
             <Info>
-              参加企業の全事業を、戦略マップの道筋（学習と成長→業務プロセス→顧客→財務）で指標がどこまで順に動いたかで数えています。段を下りるごとに減った事業が、その手前で止まっている事業です。帯の色は、その事業の道筋にある実行中のデジタル施策のうち一番上の段階（IPAの3段階）です。
+              参加企業の全事業を、その事業で一番上の段階のデジタル施策から、戦略マップの道筋（学習と成長→業務プロセス→顧客→財務）を指標がどこまで順に動いたかで数えています（他社と比べる表の横と同じ数え方）。段を下りるごとに減った事業が、その手前で止まっている事業です。帯の色は、その事業の道筋にある実行中のデジタル施策のうち一番上の段階（IPAの3段階）です。
             </Info>
           </h2>
           <FlowChart flow={meti.flow} />
@@ -103,7 +103,6 @@ function MetiBody({ hist, onHist }: { hist: Hist; onHist: (h: Hist) => void }) {
                   {g}
                 </span>
               ))}
-              <span>黒い縁＝自社の事業</span>
             </div>
           </div>
           <div className="card">
@@ -202,7 +201,7 @@ function MetiBody({ hist, onHist }: { hist: Hist; onHist: (h: Hist) => void }) {
                 <th>最終更新</th>
               </tr>
               {companies.map((c) => (
-                <tr key={c.name} className={c.own ? "own" : undefined}>
+                <tr key={c.name}>
                   <td>{c.name}</td>
                   <td>{c.industry}</td>
                   <td>{c.buCount}</td>

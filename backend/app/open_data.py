@@ -68,12 +68,15 @@ def _inits_of_bu(d: dict, b: dict) -> list[dict]:
     return [i for i in d["inits"] if any(a in ids for a in i.get("attach", []))]
 
 
-def _progress(d: dict, b: dict) -> int:
-    """道筋の進み（0〜4）。実行中の施策が付いた目標から、指標が順に動いたところまで"""
+def _progress(d: dict, b: dict, only=None) -> int:
+    """道筋の進み（0〜4）。実行中の施策が付いた目標から、指標が順に動いたところまで。
+    only を渡すと、その条件に合う施策から始まる道筋だけを見る"""
     reached: set[str] = set()
 
     def started(o: dict) -> bool:
-        return any(o["id"] in i.get("attach", []) and _running(i) for i in d["inits"])
+        return any(
+            o["id"] in i.get("attach", []) and _running(i) and (only is None or only(i)) for i in d["inits"]
+        )
 
     changed = True
     while changed:
@@ -143,9 +146,16 @@ def abstract_business(d: dict, b: dict) -> dict:
         if o.get("kpi"):
             kpi[o["persp"]] += 1
     its = _inits_of_bu(d, b)
+    # 縦（段階）と横（進み）は同じ施策から測る：一番上の段階の施策から始まる道筋の進み（logic.ts の gridPos と同じ）
+    st = _stage(d, b)
+    prog = (
+        _progress(d, b, lambda i: bool(i.get("digital")) and IPA_STAGE.get(i.get("ipa") or 0, 0) == st)
+        if st
+        else _progress(d, b)
+    )
     return {
-        "stage": _stage(d, b),
-        "progress": _progress(d, b),
+        "stage": st,
+        "progress": prog,
         "obj_total": len(non_fin),
         "obj_reach_fin": reach,
         "kpi_lg": kpi["lg"],
@@ -439,9 +449,8 @@ def meti_summary(s: Session, own_cid: int, snap: list[dict] | None = None) -> di
                 "own": cid == own_cid,
             }
         )
-    companies = [c for c in companies if c["own"]] + sorted(
-        (c for c in companies if not c["own"]), key=lambda c: c["updatedAt"], reverse=True
-    )
+    # 経産省の画面なので「自社」を特別扱いしない：最終更新の新しい順
+    companies.sort(key=lambda c: c["updatedAt"], reverse=True)
 
     # どこで詰まっているか：道筋をどこまで進んだか（k 以上の事業数）を、DXの段階で分けて
     flow = []

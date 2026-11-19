@@ -94,14 +94,14 @@ export function MixScatter({ mix }: { mix: MetiMix }) {
           className="mx-pt"
           cx={q.cx}
           cy={q.cy}
-          r={q.own ? 7 : 4.5}
+          r={4.5}
           fill={GCOL[group(q.p)]}
-          fillOpacity={q.own ? 1 : 0.8}
-          stroke={q.own ? "var(--ink)" : "var(--surface)"}
-          strokeWidth={q.own ? 2 : 1}
+          fillOpacity={0.8}
+          stroke="var(--surface)"
+          strokeWidth={1}
           style={{ animationDelay: `${(i % 40) * 18}ms` }}
         >
-          <title>{`${q.own ? "自社の事業：" : ""}宣言 収益増大${q.plan}% → 実態 ${q.actual}%`}</title>
+          <title>{`宣言 収益増大${q.plan}% → 実態 ${q.actual}%`}</title>
         </circle>
       ))}
       <text

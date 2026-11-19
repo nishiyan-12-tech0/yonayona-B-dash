@@ -3170,3 +3170,117 @@ fieldset.ro-wrap {
 .mixwarn::before {
   content: "⚠ ";
 }
+
+/* ================================================================ 他社と比べる：表の出し方（左の列から順に） */
+.gc-cell {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mm-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+/* 自社の点の軌跡：表がそろったあと、左から右へ描き出す */
+.gc-wipe {
+  animation: gc-wipe 1.1s cubic-bezier(0.4, 0, 0.3, 1) 0.6s backwards;
+}
+@keyframes gc-wipe {
+  from {
+    width: 0;
+  }
+}
+.gc-pt {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mm-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+/* 最新の点は、波紋で目立たせる */
+.gc-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: gc-halo 1.8s ease-out 1.8s infinite;
+}
+@keyframes gc-halo {
+  0% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-cell,
+  .gc-wipe,
+  .gc-pt,
+  .gc-halo {
+    animation: none !important;
+  }
+}
+
+/* ================================================================ 戦略マップ：施策と目標のつながり、今やっている施策 */
+/* 施策の列を、付いている目標の箱から伸びる線でつなぐ（目標の視点の色） */
+.obj[class*="pc-"] > .acts {
+  position: relative;
+  margin-left: 12px;
+  margin-top: 0;
+  padding-top: 8px;
+  padding-left: 14px;
+  border-left: 2px solid color-mix(in srgb, var(--pc) 70%, transparent);
+}
+.obj[class*="pc-"] > .acts .tag.t2 {
+  color: color-mix(in srgb, var(--pc) 80%, var(--ink));
+  border-color: color-mix(in srgb, var(--pc) 40%, var(--line));
+  background: color-mix(in srgb, var(--pc) 8%, var(--surface));
+}
+.obj[class*="pc-"] > .acts .tag.t2::before {
+  content: "↑ ";
+}
+.obj[class*="pc-"] > .acts .act {
+  position: relative;
+  overflow: visible;
+}
+.obj[class*="pc-"] > .acts .act::before {
+  content: "";
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  width: 14px;
+  border-top: 2px solid color-mix(in srgb, var(--pc) 70%, transparent);
+}
+/* 今やっている施策：今ここの目標と同じ光で囲む */
+.act.here {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan), 0 0 14px color-mix(in srgb, var(--cyan) 40%, transparent);
+  animation: mm-actglow 1.8s ease-in-out infinite;
+}
+.map.enter .act.here {
+  animation:
+    mm-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards,
+    mm-actglow 1.8s ease-in-out 0.7s infinite;
+  animation-delay: calc(var(--col, 0) * 120ms + 120ms), 0.7s;
+}
+@keyframes mm-actglow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px var(--cyan), 0 0 6px color-mix(in srgb, var(--cyan) 25%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--cyan), 0 0 16px color-mix(in srgb, var(--cyan) 55%, transparent);
+  }
+}
+.act.here .an::after {
+  content: "今やっている";
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, var(--cyan), var(--accent));
+  border-radius: 999px;
+  padding: 0 6px;
+  vertical-align: 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .act.here,
+  .map.enter .act.here {
+    animation: none !important;
+  }
+}

@@ -10,8 +10,7 @@ import {
   dxSummary,
   objById,
   pct,
-  progOf,
-  stageTop,
+  gridPos,
 } from "@/lib/logic";
 import { useStore } from "@/lib/store";
 import type { PerspShare, StageCells, StrategyData } from "@/lib/types";
@@ -56,10 +55,8 @@ function ownPoints(ms: Moment[]): GridPoint[] {
     const trail = ms.flatMap((v) => {
       const bu = v.data.bus.find((x) => x.id === b.id);
       if (!bu) return [];
-      const st = stageTop(v.data, bu, "now");
-      return st
-        ? [{ st, p: progOf(v.data, bu, "now"), label: v.label, date: v.date }]
-        : [];
+      const { st, p } = gridPos(v.data, bu, "now");
+      return st ? [{ st, p, label: v.label, date: v.date }] : [];
     });
     if (!trail.length || trail[0].label !== ms[0].label) return [];
     return [
@@ -241,7 +238,7 @@ function CompareBody({
         <h2>
           道筋のどこまで進んだか × DXの段階
             <Info>
-              点は事業です。横は、道筋のどこまで進んだか（施策から順にたどり、指標が今（申請時点）から目標の方向へ動いたところまで。途中が動いていないと、その先は数えません）。縦は、その事業の道筋にある実行中のデジタル施策のうち、一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。
+              点は事業です。縦は、その事業の実行中のデジタル施策のうち、一番上の段階（IPAの3段階。DXの施策があればDX）。横は、その一番上の段階の施策から道筋をたどり、指標が今（申請時点）から目標の方向へ順に動いたところまで（途中が動いていないと、その先は数えません）。縦と横は同じ施策から測ります。マスの濃さと数字は、比べる相手の事業がそこにいる割合（分母は比べる相手の事業数）です。どちらも戦略マップから自動で出します。
             </Info>
           </h2>
           <div id="grid">
@@ -277,9 +274,10 @@ function CompareBody({
           </h2>
           <div className="bul" id="bulist">
             {data.bus.map((b, n) => {
-              const p = progOf(data, b, "now");
+              // 上の表と同じく、一番上の段階の施策から測る
+              const p = gridPos(data, b, "now").p;
               const old = before?.bus.find((x) => x.id === b.id);
-              const p0 = before && old ? progOf(before, old, "now") : p;
+              const p0 = before && old ? gridPos(before, old, "now").p : p;
               return (
                 <div key={b.id}>
                   <h3>
@@ -290,7 +288,7 @@ function CompareBody({
                     道筋にあるDX：{dxSummary(data, b)}
                   </div>
                   <div className="small">
-                    道筋の進み：{p0 !== p ? PROG[p0] + " → " : ""}
+                    道筋の進み（一番上の段階の施策から）：{p0 !== p ? PROG[p0] + " → " : ""}
                     <b>{p ? PROG[p] + "まで" : PROG[0]}</b>
                   </div>
                   <Track p={p} was={p0} />

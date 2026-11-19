@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { PROG, STAGE } from "@/lib/constants";
 import type { Stage, StageCells } from "@/lib/types";
 
@@ -226,6 +226,8 @@ function WideGrid({
   label: string;
 }) {
   const wrap = useRef<HTMLDivElement>(null);
+  /** 線を左から描き出すための切り抜きのID（useId の「:」は url() で使えないので外す） */
+  const clipId = "gw" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const [W, setW] = useState(1200);
   const [vh, setVh] = useState(900);
   useEffect(() => {
@@ -323,7 +325,11 @@ function WideGrid({
               {STAGE[st]}
             </text>
             {cells[st].map((v, p) => (
-              <g key={p}>
+              <g
+                key={p}
+                className="gc-cell"
+                style={{ animationDelay: `${p * 110 + (3 - st) * 45}ms` }}
+              >
                 <rect
                   x={cx0(p) + 2}
                   y={T + CH * (3 - st) + 2}
@@ -346,6 +352,12 @@ function WideGrid({
             ))}
           </g>
         ))}
+        <defs>
+          <clipPath id={clipId}>
+            <rect className="gc-wipe" x={0} y={0} width={W} height={H} />
+          </clipPath>
+        </defs>
+        <g clipPath={`url(#${clipId})`}>
         {pts.map((q) => (
           <polyline
             key={q.name + "-line"}
@@ -357,17 +369,31 @@ function WideGrid({
             strokeOpacity={0.7}
           />
         ))}
-        {pts.map((q) =>
+        </g>
+        {pts.map((q, n) =>
           q.steps.map((s, j) => {
             // 混んでいるマスでは、日付はマスの最初・最後と最新の点だけに書く
             const showDate =
               s.step >= 22 || s.latest || s.idx === 0 || s.idx === s.cnt - 1;
             const up = j % 2 === 0;
             const tip = `${q.name}（${s.label}${s.date ? "・" + shortDate(s.date) : ""}）：${STAGE[s.st]}・${PROG[s.p]}`;
+            // 表がそろったあと、古い点から順に左から右へ現れる（線の描き出しとそろえる）
+            const delay = 650 + (s.x / W) * 900 + n * 40;
             return (
-              <g key={q.name + j}>
+              <g
+                key={q.name + j}
+                className="gc-pt"
+                style={{ animationDelay: `${Math.round(delay)}ms` } as CSSProperties}
+              >
                 {s.latest ? (
-                  <circle cx={s.x} cy={s.y} r={9} fill={q.color} opacity={0.18} />
+                  <circle
+                    className="gc-halo"
+                    cx={s.x}
+                    cy={s.y}
+                    r={9}
+                    fill={q.color}
+                    opacity={0.18}
+                  />
                 ) : null}
                 <circle
                   cx={s.x}
