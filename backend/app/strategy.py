@@ -1,7 +1,9 @@
-"""StrategyData の組み立て（設計書 6-3・7章）と、申請・進捗・確定の保存（6-4〜6-7）。
+"""StrategyData の組み立てと、申請・作成中の申請・日々の進捗・版の保存（設計書 v0.4 の 5章・6章）。
 
-画面の計算（道筋の進み・DXの段階など）はフロントの logic.ts が行うので、ここでは
-DB の内容を画面と同じ形に並べ替えるだけにする。
+- 戦略のテーブル（事業・テーマ・目標・つながり・施策）と進捗のテーブルには、現在の申請だけを入れる
+- 過去の申請は strategy_application（申請の内容）と map_version（版）に JSON で残る
+- 画面の計算（道筋の進み・DXの段階など）はフロントの logic.ts が行うので、ここでは
+  DB の内容を画面と同じ形に並べ替えるだけにする
 """
 
 from __future__ import annotations
@@ -12,23 +14,36 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from fastapi import HTTPException
-from sqlalchemy import delete, select
+from pydantic import ValidationError
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
 from . import models as m
 from . import open_data
 from .schemas import (
-    ConfirmIn,
     InitiativeProgressIn,
     ObjectiveIn,
     ObjectiveProgressIn,
     StrategyIn,
+    VersionIn,
 )
 
 JST = ZoneInfo("Asia/Tokyo")
-EXEC = ["検討中", "試行中", "実行中", "中止"]
-NOW_LABEL = "現在"
 MAX_VERSIONS = 6
+START_LABEL = "作成時点"
+END_LABEL = "置き換え時点"
+
+# 戦略と日々の進捗のテーブル（消す順）
+STRATEGY_TABLES = [
+    m.ObjectiveProgress,
+    m.InitiativeProgress,
+    m.InitiativeObjective,
+    m.Initiative,
+    m.Link,
+    m.Objective,
+    m.Theme,
+    m.BusinessUnit,
+]
 
 
 def now() -> datetime:
@@ -37,7 +52,11 @@ def now() -> datetime:
 
 
 def _iso(d: date | datetime | None) -> str:
-    return d.isoformat() if d else ""
+    if d is None:
+        return ""
+    if isinstance(d, datetime):
+        return d.replace(microsecond=0).isoformat()
+    return d.isoformat()
 
 
 def _put(d: dict, key: str, value: Any) -> None:
@@ -46,28 +65,49 @@ def _put(d: dict, key: str, value: Any) -> None:
         d[key] = value
 
 
+def _company(s: Session, cid: int) -> m.Company:
+    company = s.get(m.Company, cid)
+    if company is None:
+        raise HTTPException(404, "会社のデータがありません（初期データが入っていません）")
+    return company
+
+
+def empty_strategy(company: m.Company) -> dict:
+    """空の申請（全社の財務目標の枠だけ。事業は0件）"""
+    return {
+        "company": {"name": company.name, "industry": company.industry},
+        "corp": {
+            "fin": {
+                "id": "cfin",
+                "persp": "fi",
+                "name": "",
+                "kpi": "",
+                "base": "",
+                "target": "",
+                "due": "",
+                "owner": "mgmt",
+                "partner": "",
+            }
+        },
+        "bus": [],
+        "inits": [],
+    }
+
+
 # ================================================================ 読む
 
 
-def _latest_confirmation(s: Session, cid: int) -> m.ProgressConfirmation | None:
+def current_application(s: Session, cid: int) -> m.StrategyApplication | None:
     return s.scalars(
-        select(m.ProgressConfirmation)
-        .where(m.ProgressConfirmation.company_id == cid)
-        .order_by(m.ProgressConfirmation.as_of.desc(), m.ProgressConfirmation.confirmed_at.desc())
+        select(m.StrategyApplication)
+        .where(m.StrategyApplication.company_id == cid, m.StrategyApplication.replaced_at.is_(None))
+        .order_by(m.StrategyApplication.id.desc())
         .limit(1)
     ).first()
 
 
-def _index_body(body: dict | None) -> tuple[dict[str, dict], dict[str, dict]]:
-    """確定版の中身から、目標と施策をIDで引けるようにする"""
-    if not body:
-        return {}, {}
-    objs = {body["corp"]["fin"]["id"]: body["corp"]["fin"]}
-    for b in body.get("bus", []):
-        for o in b.get("objs", []):
-            objs[o["id"]] = o
-    inits = {i["id"]: i for i in body.get("inits", [])}
-    return objs, inits
+def _app_ref(a: m.StrategyApplication | None) -> dict | None:
+    return {"id": a.id, "submittedAt": _iso(a.submitted_at)} if a else None
 
 
 def _objective_dict(o: m.Objective, prog: m.ObjectiveProgress | None) -> dict:
@@ -85,8 +125,9 @@ def _objective_dict(o: m.Objective, prog: m.ObjectiveProgress | None) -> dict:
     _put(d, "theme", o.theme_id)
     _put(d, "cap", o.cap)
     _put(d, "kind", o.fin_kind)
+    # 今の値：担当者が入れていなければ、今（申請時点）の値
+    d["cur"] = prog.value if prog is not None else o.base
     if prog is not None:
-        d["cur"] = prog.value
         d["progress"] = {
             "at": _iso(prog.at),
             "reason": prog.reason,
@@ -97,12 +138,9 @@ def _objective_dict(o: m.Objective, prog: m.ObjectiveProgress | None) -> dict:
     return d
 
 
-def _current(s: Session, cid: int) -> dict:
-    """今の戦略と保存中の進捗（比べる時点・変わったことは入れない）"""
-    company = s.get(m.Company, cid)
-    if company is None:
-        raise HTTPException(404, "会社のデータがありません（初期データが入っていません）")
-
+def current_data(s: Session, cid: int) -> dict | None:
+    """現在の申請の戦略と日々の進捗。申請がなければ None"""
+    company = _company(s, cid)
     oprog = {p.objective_id: p for p in s.scalars(select(m.ObjectiveProgress).where(m.ObjectiveProgress.company_id == cid))}
     iprog = {p.initiative_id: p for p in s.scalars(select(m.InitiativeProgress).where(m.InitiativeProgress.company_id == cid))}
 
@@ -113,7 +151,7 @@ def _current(s: Session, cid: int) -> dict:
     ).all()
     corp = next((o for o in objs if o.bu_id is None), None)
     if corp is None:
-        raise HTTPException(500, "全社の目標がありません")
+        return None
 
     themes = s.scalars(
         select(m.Theme).where(m.Theme.company_id == cid, m.Theme.deleted_at.is_(None)).order_by(m.Theme.sort_order)
@@ -185,13 +223,14 @@ def _current(s: Session, cid: int) -> dict:
             "kpi": i.kpi,
             "base": i.base,
             "target": i.target,
-            "exec": p.exec if p else 0,
+            "exec": p.exec if p else i.exec0,
             "verify": p.verify if p else 0,
             "checks": {"condition": i.chk_condition, "review": i.chk_review},
         }
-        if p is not None:
-            if p.kpi_cur:
-                d["cur"] = p.kpi_cur
+        cur = p.kpi_cur if p is not None and p.kpi_cur else i.base
+        if cur:
+            d["cur"] = cur
+        if p is not None and (p.did or p.author):
             d["progress"] = {
                 "did": p.did,
                 "result": p.result,
@@ -205,141 +244,212 @@ def _current(s: Session, cid: int) -> dict:
         "corp": {"fin": _objective_dict(corp, oprog.get(corp.id))},
         "bus": bus_out,
         "inits": inits_out,
-        "diffs": [],
     }
 
 
-def _diffs(cur: dict, conf: m.ProgressConfirmation, notes: list[str]) -> list[str]:
-    """直近の確定版から変わったこと（設計書 7-2）。確定のあとに保存した進捗だけを見る"""
-    bobjs, binits = _index_body(conf.body)
-    after = conf.confirmed_at.isoformat()
-    lines: list[tuple[str, str]] = []
-
-    all_objs = [cur["corp"]["fin"]] + [o for b in cur["bus"] for o in b["objs"]]
-    for o in all_objs:
-        p = o.get("progress")
-        if not p or p["updatedAt"] <= after or not o.get("kpi"):
-            continue
-        old = bobjs.get(o["id"], {}).get("cur")
-        new = o.get("cur")
-        if old != new:
-            lines.append((p["updatedAt"], f"{o['name']}：{o['kpi']} {old or '未測定'} → {new}"))
-
-    for i in cur["inits"]:
-        p = i.get("progress")
-        if not p or p["updatedAt"] <= after:
-            continue
-        b = binits.get(i["id"], {})
-        if "exec" in b and b["exec"] != i["exec"]:
-            lines.append((p["updatedAt"], f"{i['name']}：{EXEC[b['exec']]} → {EXEC[i['exec']]}"))
-        if p["did"] and p["did"] != (b.get("progress") or {}).get("did"):
-            lines.append((p["updatedAt"], f"{i['name']}：{p['did']}"))
-
-    lines.sort(key=lambda x: x[0], reverse=True)
-    return [t for _, t in lines] + notes
-
-
 def build_strategy(s: Session, cid: int) -> dict:
-    """A-2：戦略マップ・申請で使う StrategyData。比べる時点は直近の確定版"""
-    d = _current(s, cid)
-    conf = _latest_confirmation(s, cid)
-    d["snap"] = {"now": NOW_LABEL, "prev": conf.label if conf else None}
-    if conf is None:
+    """A-2：現在の申請の戦略と日々の進捗。申請がなければ、事業が空の形で返す"""
+    d = current_data(s, cid)
+    app = current_application(s, cid)
+    if d is None or app is None:
+        d = empty_strategy(_company(s, cid))
+        d["application"] = None
         return d
-
-    bobjs, binits = _index_body(conf.body)
-    for o in [d["corp"]["fin"]] + [o for b in d["bus"] for o in b["objs"]]:
-        old = bobjs.get(o["id"])
-        if old is not None and old.get("cur") is not None:
-            o["prev"] = old["cur"]
-    for i in d["inits"]:
-        old = binits.get(i["id"])
-        if old is not None:
-            i["prev"] = {"exec": old["exec"], "verify": old["verify"], "checks": old["checks"]}
-
-    notes = [
-        n.text
-        for n in s.scalars(
-            select(m.ChangeNote)
-            .where(m.ChangeNote.company_id == cid, m.ChangeNote.confirmation_id == conf.id)
-            .order_by(m.ChangeNote.sort_order)
-        )
-    ]
-    d["diffs"] = _diffs(d, conf, notes)
+    d["application"] = _app_ref(app)
     return d
 
 
-def list_confirmations(s: Session, cid: int) -> list[dict]:
-    rows = s.scalars(
-        select(m.ProgressConfirmation)
-        .where(m.ProgressConfirmation.company_id == cid)
-        .order_by(m.ProgressConfirmation.as_of.desc(), m.ProgressConfirmation.confirmed_at.desc())
+def _version_meta(v: m.MapVersion) -> dict:
+    return {
+        "id": v.id,
+        "no": v.no,
+        "label": v.label,
+        "asOf": _iso(v.as_of),
+        "kind": v.kind,
+        "createdBy": v.created_by,
+        "createdAt": _iso(v.created_at),
+    }
+
+
+def _versions(s: Session, app_id: int) -> list[m.MapVersion]:
+    return s.scalars(
+        select(m.MapVersion).where(m.MapVersion.application_id == app_id).order_by(m.MapVersion.no.desc())
+    ).all()
+
+
+def list_applications(s: Session, cid: int) -> list[dict]:
+    """A-3：申請の一覧と、申請ごとの版の一覧（どちらも新しい順）"""
+    apps = s.scalars(
+        select(m.StrategyApplication)
+        .where(m.StrategyApplication.company_id == cid)
+        .order_by(m.StrategyApplication.id.desc())
     ).all()
     return [
         {
-            "id": r.id,
-            "label": r.label,
-            "asOf": _iso(r.as_of),
-            "confirmedBy": r.confirmed_by,
-            "confirmedAt": _iso(r.confirmed_at),
-            "isSeed": r.is_seed,
+            "id": a.id,
+            "submittedAt": _iso(a.submitted_at),
+            "replacedAt": _iso(a.replaced_at) or None,
+            "current": a.replaced_at is None,
+            "versions": [_version_meta(v) for v in _versions(s, a.id)],
         }
-        for r in rows
+        for a in apps
     ]
 
 
-def confirmed_versions(s: Session, cid: int) -> dict:
-    """A-9：他社と比べる画面に出す確定版（新しい順に最大6つ）"""
-    rows = s.scalars(
-        select(m.ProgressConfirmation)
-        .where(m.ProgressConfirmation.company_id == cid)
-        .order_by(m.ProgressConfirmation.as_of.desc(), m.ProgressConfirmation.confirmed_at.desc())
-        .limit(MAX_VERSIONS)
-    ).all()
-    out = []
-    for r in rows:
-        data = copy.deepcopy(r.body)
-        data["snap"] = {"now": r.label, "prev": None}
-        data["diffs"] = []
-        out.append({"id": r.id, "label": r.label, "asOf": _iso(r.as_of), "data": data})
-    return {"versions": out}
+def _get_app(s: Session, cid: int, app_id: int) -> m.StrategyApplication:
+    a = s.get(m.StrategyApplication, app_id)
+    if a is None or a.company_id != cid:
+        raise HTTPException(404, "申請が見つかりません")
+    return a
 
 
-# ================================================================ 申請の保存（A-3）
+def get_application(s: Session, cid: int, app_id: int) -> dict:
+    """A-4：その申請の内容"""
+    a = _get_app(s, cid, app_id)
+    return {
+        "id": a.id,
+        "submittedAt": _iso(a.submitted_at),
+        "replacedAt": _iso(a.replaced_at) or None,
+        "current": a.replaced_at is None,
+        "body": a.body,
+    }
 
 
-def _apply_objective(s: Session, cid: int, o: ObjectiveIn, bu_id: str | None, order: int, ts: datetime) -> None:
-    row = s.get(m.Objective, (cid, o.id))
+def _version_data(v: m.MapVersion, app: m.StrategyApplication) -> dict:
+    data = copy.deepcopy(v.body)
+    data["application"] = _app_ref(app)
+    return data
+
+
+def application_versions(s: Session, cid: int, app_id: int) -> dict:
+    """A-12：その申請の版（戦略マップのJSONつき）。新しい順に最大6つ"""
+    a = _get_app(s, cid, app_id)
+    rows = _versions(s, a.id)[:MAX_VERSIONS]
+    return {"versions": [_version_meta(v) | {"data": _version_data(v, a)} for v in rows]}
+
+
+def _get_version(s: Session, cid: int, vid: int) -> m.MapVersion:
+    v = s.get(m.MapVersion, vid)
+    if v is None or v.company_id != cid:
+        raise HTTPException(404, "版が見つかりません")
+    return v
+
+
+def get_version(s: Session, cid: int, vid: int) -> dict:
+    """A-14：その版の戦略マップ"""
+    v = _get_version(s, cid, vid)
+    a = s.get(m.StrategyApplication, v.application_id)
+    return _version_meta(v) | {"applicationId": v.application_id, "data": _version_data(v, a)}
+
+
+def version_open_rows(s: Session, cid: int, vid: int) -> list[dict]:
+    """その版を作ったときの抽象化の断面"""
+    return _get_version(s, cid, vid).open_body or []
+
+
+# ================================================================ 作成中の申請（A-6〜A-9）
+
+
+def _strip_progress(body: dict) -> dict:
+    """戦略マップのJSONから、日々の進捗の項目を外して申請の形にする"""
+    b = copy.deepcopy(body)
+    b.pop("application", None)
+    for o in [b["corp"]["fin"]] + [o for bu in b.get("bus", []) for o in bu.get("objs", [])]:
+        for k in ("cur", "prev", "progress"):
+            o.pop(k, None)
+    for i in b.get("inits", []):
+        for k in ("cur", "prev", "progress", "verify"):
+            i.pop(k, None)
+    return b
+
+
+def get_draft(s: Session, cid: int) -> dict | None:
+    row = s.get(m.StrategyDraft, cid)
     if row is None:
-        row = m.Objective(company_id=cid, id=o.id)
+        return None
+    return {"body": row.body, "savedAt": _iso(row.updated_at), "carryFrom": row.carry_from}
+
+
+def put_draft(s: Session, cid: int, body: dict) -> dict:
+    """A-7：作成中の申請を上書き（中身は作成のときに確かめる）"""
+    if not isinstance(body, dict) or "corp" not in body or "bus" not in body or "inits" not in body:
+        raise HTTPException(422, "申請の形が正しくありません")
+    row = s.get(m.StrategyDraft, cid)
+    if row is None:
+        if current_application(s, cid) is not None:
+            raise HTTPException(409, "作成中の申請がありません。「新しい戦略マップを作る」から始めてください")
+        row = m.StrategyDraft(company_id=cid, body={}, carry_from=None)
         s.add(row)
-    row.bu_id = bu_id
-    row.persp = o.persp
-    row.name = o.name
-    row.kpi = o.kpi or ""
-    row.base = o.base or ""
-    row.target = o.target or ""
-    row.due = o.due or ""
-    row.owner = o.owner
-    row.partner = o.partner or ""
-    row.theme_id = o.theme or None
-    row.cap = o.cap if o.persp == "lg" else None
-    row.fin_kind = o.kind if o.persp == "fi" else None
-    row.sort_order = order
-    row.deleted_at = None
+    row.body = _strip_progress(body)
+    row.updated_at = now()
+    s.flush()
+    return {"savedAt": _iso(row.updated_at)}
 
 
-def _soft_delete_missing(s: Session, model, cid: int, keep: set[str], ts: datetime) -> None:
-    for row in s.scalars(select(model).where(model.company_id == cid, model.deleted_at.is_(None))):
-        if row.id not in keep:
-            row.deleted_at = ts
+def start_draft(s: Session, cid: int, carry_over: bool) -> dict:
+    """A-8：作り直しを始める。
+    はい：現在の申請の内容をコピーする。今（申請時点）と申請時点の状態は、日々の進捗の最新の値にする
+    いいえ：空の申請から始める"""
+    if s.get(m.StrategyDraft, cid) is not None:
+        raise HTTPException(409, "作成中の申請がすでにあります")
+    app = current_application(s, cid)
+    if app is None:
+        raise HTTPException(409, "まだ申請がありません")
+    if carry_over:
+        cur = current_data(s, cid) or app.body
+        body = copy.deepcopy(cur)
+        for o in [body["corp"]["fin"]] + [o for bu in body["bus"] for o in bu["objs"]]:
+            if o.get("cur"):
+                o["base"] = o["cur"]
+        for i in body["inits"]:
+            if i.get("cur"):
+                i["base"] = i["cur"]
+            i["exec"] = 1 if i.get("exec") == 1 else 0
+        body = _strip_progress(body)
+    else:
+        body = empty_strategy(_company(s, cid))
+    s.add(m.StrategyDraft(company_id=cid, body=body, carry_from=app.id if carry_over else None, updated_at=now()))
+    s.flush()
+    return get_draft(s, cid)
 
 
-def save_strategy(s: Session, cid: int, body: StrategyIn) -> None:
-    """申請の内容で戦略だけを上書きする（担当者の進捗には触らない）"""
-    ts = now()
+def discard_draft(s: Session, cid: int) -> None:
+    """A-9：作り直しをやめる"""
+    if current_application(s, cid) is None:
+        raise HTTPException(409, "初めての申請は捨てられません")
+    row = s.get(m.StrategyDraft, cid)
+    if row is not None:
+        s.delete(row)
+    s.flush()
 
-    # ---- 確かめる
+
+# ================================================================ 戦略マップを作成（A-5）
+
+
+def _apply_objective(s: Session, cid: int, o: ObjectiveIn, bu_id: str | None, order: int) -> None:
+    s.add(
+        m.Objective(
+            company_id=cid,
+            id=o.id,
+            bu_id=bu_id,
+            persp=o.persp,
+            name=o.name,
+            kpi=o.kpi or "",
+            base=o.base or "",
+            target=o.target or "",
+            due=o.due or "",
+            owner=o.owner,
+            partner=o.partner or "",
+            theme_id=o.theme or None,
+            cap=o.cap if o.persp == "lg" else None,
+            fin_kind=o.kind if o.persp == "fi" else None,
+            sort_order=order,
+        )
+    )
+
+
+def _insert_strategy(s: Session, cid: int, body: StrategyIn, ts: datetime) -> None:
+    """申請の内容を、空にした戦略のテーブルに入れる。施策の進捗は申請時点の状態で作る"""
     obj_ids: set[str] = {body.corp.fin.id}
     for b in body.bus:
         if len(b.themes) > 3:
@@ -348,45 +458,50 @@ def save_strategy(s: Session, cid: int, body: StrategyIn) -> None:
             obj_ids.add(o.id)
     if len(obj_ids) != 1 + sum(len(b.objs) for b in body.bus):
         raise HTTPException(422, "目標のIDが重なっています")
+    if len({b.id for b in body.bus}) != len(body.bus):
+        raise HTTPException(422, "事業のIDが重なっています")
 
-    # ---- 事業・テーマ・目標
-    _apply_objective(s, cid, body.corp.fin, None, 0, ts)
-    bu_ids, theme_ids = set(), set()
+    _apply_objective(s, cid, body.corp.fin, None, 0)
     obj_order = 1
+    theme_ids: set[str] = set()
     for bi, b in enumerate(body.bus):
-        bu_ids.add(b.id)
-        row = s.get(m.BusinessUnit, (cid, b.id))
-        if row is None:
-            row = m.BusinessUnit(company_id=cid, id=b.id)
-            s.add(row)
-        row.name, row.industry, row.share = b.name, b.industry, b.share
-        row.owner_name, row.cvp, row.customer, row.future = b.owner, b.cvp, b.customer, b.future
-        row.gap, row.growth, row.conf_by = b.gap, b.growth, b.confBy
         try:
-            row.conf_at = date.fromisoformat(b.confAt) if b.confAt else None
+            conf_at = date.fromisoformat(b.confAt) if b.confAt else None
         except ValueError:
-            row.conf_at = None
-        row.sort_order, row.deleted_at = bi, None
-
+            conf_at = None
+        s.add(
+            m.BusinessUnit(
+                company_id=cid,
+                id=b.id,
+                name=b.name,
+                industry=b.industry,
+                share=b.share,
+                owner_name=b.owner,
+                cvp=b.cvp,
+                customer=b.customer,
+                future=b.future,
+                gap=b.gap,
+                growth=b.growth,
+                conf_by=b.confBy,
+                conf_at=conf_at,
+                sort_order=bi,
+            )
+        )
         own_themes = set()
         for ti, t in enumerate(b.themes):
+            if t.id in theme_ids:
+                raise HTTPException(422, "戦略テーマのIDが重なっています")
             theme_ids.add(t.id)
             own_themes.add(t.id)
-            tr = s.get(m.Theme, (cid, t.id))
-            if tr is None:
-                tr = m.Theme(company_id=cid, id=t.id)
-                s.add(tr)
-            tr.bu_id, tr.name, tr.hz, tr.sort_order, tr.deleted_at = b.id, t.name, t.hz, ti, None
+            s.add(m.Theme(company_id=cid, id=t.id, bu_id=b.id, name=t.name, hz=t.hz, sort_order=ti))
 
         bu_obj_ids = {o.id for o in b.objs}
         for o in b.objs:
             if o.theme and o.theme not in own_themes:
                 o.theme = None  # 同じ事業にないテーマは付けない
-            _apply_objective(s, cid, o, b.id, obj_order, ts)
+            _apply_objective(s, cid, o, b.id, obj_order)
             obj_order += 1
 
-        # つながり：事業ごとに入れ直す（同じ事業の目標を指していないものは空にする）
-        s.execute(delete(m.Link).where(m.Link.company_id == cid, m.Link.bu_id == b.id))
         for li, lk in enumerate(b.links):
             s.add(
                 m.Link(
@@ -402,63 +517,117 @@ def save_strategy(s: Session, cid: int, body: StrategyIn) -> None:
                 )
             )
 
-    s.flush()
-    _soft_delete_missing(s, m.BusinessUnit, cid, bu_ids, ts)
-    _soft_delete_missing(s, m.Theme, cid, theme_ids, ts)
-    _soft_delete_missing(s, m.Objective, cid, obj_ids, ts)
-    # 消した事業のつながりも消す
-    s.execute(delete(m.Link).where(m.Link.company_id == cid, m.Link.bu_id.not_in(bu_ids or {""})))
-
-    # ---- 施策
-    # 出発点（最初の確定版）を作る前は、申請で選んだ「申請時点の状態」を施策の状態に入れる。
-    # 出発点を作ったあとは、施策の状態は担当者が戦略マップで更新する（新しく足した施策だけ申請の値で始める）
-    before_start = _latest_confirmation(s, cid) is None
     init_ids = set()
-    s.execute(delete(m.InitiativeObjective).where(m.InitiativeObjective.company_id == cid))
     for ii, i in enumerate(body.inits):
         if i.id in init_ids:
             raise HTTPException(422, "施策のIDが重なっています")
         init_ids.add(i.id)
-        row = s.get(m.Initiative, (cid, i.id))
-        if row is None:
-            row = m.Initiative(company_id=cid, id=i.id)
-            s.add(row)
-        row.name, row.owner, row.partner = i.name, i.owner, i.partner or ""
-        row.digital = i.digital
-        row.ipa = i.ipa if i.digital else None
-        row.ev = i.ev
-        row.chk_condition, row.chk_review = i.checks.condition, i.checks.review
-        row.kpi, row.base, row.target = i.kpi or "", i.base or "", i.target or ""
-        row.sort_order, row.deleted_at = ii, None
+        s.add(
+            m.Initiative(
+                company_id=cid,
+                id=i.id,
+                name=i.name,
+                owner=i.owner,
+                partner=i.partner or "",
+                digital=i.digital,
+                ipa=i.ipa if i.digital else None,
+                ev=i.ev,
+                chk_condition=i.checks.condition,
+                chk_review=i.checks.review,
+                kpi=i.kpi or "",
+                base=i.base or "",
+                target=i.target or "",
+                exec0=i.exec,
+                sort_order=ii,
+            )
+        )
         for ai, oid in enumerate(dict.fromkeys(i.attach)):
             if oid in obj_ids:  # ない目標への紐づけは保存しない
                 s.add(m.InitiativeObjective(company_id=cid, initiative_id=i.id, objective_id=oid, sort_order=ai))
-        # 新しい施策は、申請時点の状態・「未測定」から始める
-        prog = s.get(m.InitiativeProgress, (cid, i.id))
-        if prog is None:
-            s.add(m.InitiativeProgress(company_id=cid, initiative_id=i.id, exec=i.exec, verify=0, updated_at=ts))
-        elif before_start and prog.exec != i.exec:
-            prog.exec, prog.updated_at = i.exec, ts
+        s.add(m.InitiativeProgress(company_id=cid, initiative_id=i.id, exec=i.exec, verify=0, updated_at=ts))
     s.flush()
-    _soft_delete_missing(s, m.Initiative, cid, init_ids, ts)
 
+
+def _add_version(
+    s: Session, cid: int, app: m.StrategyApplication, label: str, as_of: date, kind: str, by: str, ts: datetime
+) -> m.MapVersion:
+    """版を足す（同じ申請に同じ時点の版があれば上書き）。その時点の抽象化の断面も残す"""
+    body = current_data(s, cid)
+    if body is None:
+        raise HTTPException(409, "戦略マップがありません")
+    open_data.extract_company(s, cid)
+    snap = open_data.snapshot_rows(s)
+    row = s.scalars(
+        select(m.MapVersion).where(m.MapVersion.application_id == app.id, m.MapVersion.label == label)
+    ).first()
+    if row is None:
+        no = (s.scalar(select(func.max(m.MapVersion.no)).where(m.MapVersion.application_id == app.id)) or 0) + 1
+        row = m.MapVersion(company_id=cid, application_id=app.id, no=no, label=label, kind=kind)
+        s.add(row)
+    elif row.kind != "manual":
+        raise HTTPException(409, f"{label}の版は上書きできません")
+    row.as_of, row.body, row.open_body = as_of, body, snap
+    row.created_by, row.created_at = by, ts
+    s.flush()
+    return row
+
+
+def create_application(s: Session, cid: int) -> dict:
+    """A-5：作成中の申請から、新しい申請と戦略マップを作る（設計書 5-4 の①〜⑦）"""
+    draft = s.get(m.StrategyDraft, cid)
+    if draft is None:
+        raise HTTPException(409, "作成中の申請がありません")
+    try:
+        body = StrategyIn.model_validate(draft.body)
+    except ValidationError as e:
+        first = e.errors()[0] if e.errors() else {}
+        where = ".".join(str(x) for x in first.get("loc", []))
+        raise HTTPException(422, f"申請の内容が正しくありません（{where}：{first.get('msg', '')}）") from e
+    if not body.bus:
+        raise HTTPException(422, "ステップ0で事業を追加してください")
+    ts = now()
+
+    # ① 現在の申請があれば、置き換え時点の版を作ってから置き換える
+    old = current_application(s, cid)
+    if old is not None:
+        _add_version(s, cid, old, END_LABEL, ts.date(), "end", "申請の作り直し", ts)
+        old.replaced_at = ts
+
+    # ② 戦略と日々の進捗を全部消す（前の申請との紐付きを外す）
+    for model in STRATEGY_TABLES:
+        s.execute(delete(model).where(model.company_id == cid))
+    s.flush()
+
+    # ③④ 申請の中身を入れる
+    _insert_strategy(s, cid, body, ts)
+
+    # ⑤ 新しい申請
+    app = m.StrategyApplication(company_id=cid, submitted_at=ts, body=_strip_progress(current_data(s, cid)))
+    s.add(app)
+    s.flush()
+
+    # ⑥⑦ 抽象化テーブルの自社の行を作り直し、第1版（作成時点）を作る。作成中の申請を消す
+    _add_version(s, cid, app, START_LABEL, ts.date(), "start", "申請", ts)
+    s.delete(draft)
     company = s.get(m.Company, cid)
     if company:
         company.updated_at = ts
-
-
-def save_version(s: Session, cid: int) -> dict:
-    ts = now()
-    row = m.StrategyVersion(company_id=cid, saved_at=ts, body=_current(s, cid))
-    s.add(row)
     s.flush()
-    return {"id": row.id, "savedAt": ts.replace(tzinfo=JST, microsecond=0).isoformat()}
+    return build_strategy(s, cid)
 
 
-# ================================================================ 進捗（A-5・A-6）
+# ================================================================ 日々の進捗（A-10・A-11）
+
+
+def _require_current(s: Session, cid: int) -> m.StrategyApplication:
+    app = current_application(s, cid)
+    if app is None:
+        raise HTTPException(409, "まだ戦略マップがありません")
+    return app
 
 
 def save_objective_progress(s: Session, cid: int, oid: str, body: ObjectiveProgressIn) -> None:
+    _require_current(s, cid)
     o = s.get(m.Objective, (cid, oid))
     if o is None or o.deleted_at is not None:
         raise HTTPException(404, "目標が見つかりません")
@@ -468,73 +637,51 @@ def save_objective_progress(s: Session, cid: int, oid: str, body: ObjectiveProgr
         s.add(row)
     row.value, row.at, row.reason = body.value, body.at, body.reason
     row.memo, row.author, row.updated_at = body.memo, body.author, now()
+    # MVP：抽象化テーブルの自社の今の行をその場で作り直す（本番は毎晩のバッチ）
+    open_data.extract_company(s, cid)
 
 
 def save_initiative_progress(s: Session, cid: int, iid: str, body: InitiativeProgressIn) -> None:
+    _require_current(s, cid)
     i = s.get(m.Initiative, (cid, iid))
     if i is None or i.deleted_at is not None:
         raise HTTPException(404, "施策が見つかりません")
     row = s.get(m.InitiativeProgress, (cid, iid))
     if row is None:
-        row = m.InitiativeProgress(company_id=cid, initiative_id=iid)
+        row = m.InitiativeProgress(company_id=cid, initiative_id=iid, exec=i.exec0)
         s.add(row)
-    row.exec = body.exec
-    # 検討中・中止のときは、効果の検証は「未測定」にそろえる
-    row.verify = body.verify if body.exec in (1, 2) else 0
+    # 進捗を入れたら、未着手の施策は実行中になる
+    row.exec = 1
+    row.verify = body.verify
     row.kpi_cur = body.kpiCur or None
     row.did, row.result, row.author, row.updated_at = body.did, body.result, body.author, now()
-
-
-# ================================================================ 確定（A-8・A-12）
-
-
-def confirm(s: Session, cid: int, body: ConfirmIn) -> None:
-    snapshot = _current(s, cid)
-    ts = now()
-    row = s.scalars(
-        select(m.ProgressConfirmation).where(
-            m.ProgressConfirmation.company_id == cid, m.ProgressConfirmation.label == body.label
-        )
-    ).first()
-    if row is not None and row.is_seed:
-        raise HTTPException(409, f"{body.label}は出発点の確定版なので上書きできません")
-    if row is None:
-        row = m.ProgressConfirmation(company_id=cid, label=body.label, is_seed=False)
-        s.add(row)
-    row.as_of, row.body = body.asOf, snapshot
-    row.confirmed_by, row.confirmed_at = body.confirmedBy, ts
-    # 抽象化テーブル（オープンなDBの代わり）の自社の行を作り直す。本番は夜間バッチで行う
     open_data.extract_company(s, cid)
 
 
-def submit(s: Session, cid: int) -> None:
-    """A-15：申請を初めて出し終えたとき、その内容を出発点の確定版にする（2回目以降は何もしない）。
-    出発点は消せない・上書きできない（is_seed）。抽象化テーブルの自社の行もここで作る"""
-    if _latest_confirmation(s, cid) is not None:
-        return
-    ts = now()
-    s.add(
-        m.ProgressConfirmation(
-            company_id=cid,
-            label=f"{ts.year}年{ts.month}月 申請時点",
-            as_of=ts.date(),
-            body=_current(s, cid),
-            confirmed_by="申請",
-            confirmed_at=ts,
-            is_seed=True,
-        )
-    )
+# ================================================================ 版（A-13・A-15）
+
+
+def create_version(s: Session, cid: int, body: VersionIn) -> dict:
+    app = _require_current(s, cid)
+    v = _add_version(s, cid, app, body.label, body.asOf, "manual", body.createdBy, now())
+    return _version_meta(v)
+
+
+def delete_version(s: Session, cid: int, vid: int) -> None:
+    v = _get_version(s, cid, vid)
+    if v.kind != "manual":
+        raise HTTPException(409, "作成時点・置き換え時点の版は消せません")
+    app = s.get(m.StrategyApplication, v.application_id)
+    if app is None or app.replaced_at is not None:
+        raise HTTPException(409, "過去の申請の版は消せません")
+    no = v.no
+    s.delete(v)
     s.flush()
-    open_data.extract_company(s, cid)
-
-
-def delete_confirmation(s: Session, cid: int, conf_id: int) -> None:
-    row = s.get(m.ProgressConfirmation, conf_id)
-    if row is None or row.company_id != cid:
-        raise HTTPException(404, "確定版が見つかりません")
-    if row.is_seed:
-        raise HTTPException(409, "出発点の確定版は消せません")
-    s.execute(delete(m.ChangeNote).where(m.ChangeNote.confirmation_id == conf_id))
-    s.delete(row)
-    # 最新の確定版が変わるので、抽象化テーブルの自社の行も作り直す
-    open_data.extract_company(s, cid)
+    # 番号を詰める（第1版・第2版…が飛ばないように）
+    for later in s.scalars(
+        select(m.MapVersion)
+        .where(m.MapVersion.application_id == app.id, m.MapVersion.no > no)
+        .order_by(m.MapVersion.no)
+    ):
+        later.no -= 1
+        s.flush()

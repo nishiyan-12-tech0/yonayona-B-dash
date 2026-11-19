@@ -31,7 +31,7 @@ import {
 } from "@/lib/logic";
 import type { Link } from "@/lib/types";
 import { Info } from "@/components/Info";
-import { ActButton, nowLabel, prevLabel, type MapCtx } from "./cards";
+import { ActButton, type MapCtx } from "./cards";
 import { InitiativeProgressModal } from "./InitiativeProgressModal";
 import { ObjectiveProgressModal } from "./ObjectiveProgressModal";
 
@@ -134,8 +134,8 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
   /** 開いている「進捗を入力」（選択中の目標・施策） */
   const [editing, setEditing] = useState<string | null>(null);
   if (!sel) return null;
-  /** 比べる時点（過去）を表示中は見るだけ */
-  const editable = snap === "now";
+  /** 過去（版・過去の申請）を表示中は見るだけ */
+  const editable = ctx.editable;
   const [k, a] = sel.split(":");
   let body: ReactNode = null;
   let modal: ReactNode = null;
@@ -222,7 +222,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           <p className="small">
             経路上の判定：{progText(pg)}
             <Info>
-              他社比較の「道筋の進み」に使う値です。実行中の施策から順に、途中の指標が基準値より改善しているところまでを数えたもので、事業全体の順調さや施策の成果を示すものではありません。
+              他社比較の「道筋の進み」に使う値です。実行中の施策から順に、途中の指標が申請時点より改善しているところまでを数えたもので、事業全体の順調さや施策の成果を示すものではありません。
             </Info>
           </p>
         </details>
@@ -277,18 +277,15 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dl className="kv">
               <dt>指標名</dt>
               <dd>{o.kpi}</dd>
-              <dt>{nowLabel(snap, data)}の値</dt>
+              <dt>今の値</dt>
               <dd>
                 <b>{curOf(o, snap)}</b>
-                {snap === "now" && o.prev !== undefined && o.prev !== o.cur
-                  ? `（${prevLabel(data)}：${o.prev}）`
-                  : ""}
               </dd>
               <dt>目標値</dt>
               <dd>{o.target}</dd>
               <dt>期限</dt>
               <dd>{o.due || "未設定"}</dd>
-              <dt>基準値</dt>
+              <dt>申請時点の値</dt>
               <dd>{o.base}</dd>
               {o.progress?.reason !== null &&
               o.progress?.reason !== undefined ? (
@@ -314,7 +311,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dl className="kv">
               <dt>指標の動き</dt>
               <dd>
-                <span className={`is ${s}`}>{IS[s]}</span> 基準値との比較
+                <span className={`is ${s}`}>{IS[s]}</span> 申請時点との比較
               </dd>
               <dt>目標の達成状況</dt>
               <dd>
@@ -322,7 +319,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
                   ? "判定できない"
                   : pc >= 100
                     ? "達成"
-                    : `未達（基準から目標までの${pc}%）`}
+                    : `未達（申請時点から目標までの${pc}%）`}
                 {pc === null ? null : (
                   <div className="pbar">
                     <i style={{ width: `${pc}%` }} />
@@ -473,7 +470,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
             <dd>
               {i.kpi}
               <br />
-              現在 <b>{i.cur}</b> ／ 目標 {i.target}（基準 {i.base}）
+              今 <b>{i.cur}</b> ／ 目標 {i.target}（申請時点 {i.base}）
             </dd>
           ) : (
             <dd className="muted">未登録</dd>

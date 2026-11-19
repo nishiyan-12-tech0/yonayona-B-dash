@@ -58,7 +58,8 @@ export const STAGE = [
   "DX",
 ];
 export const STAGES: Stage[] = [1, 2, 3];
-export const EXEC = ["検討中", "試行中", "実行中", "中止"];
+/** 施策の状態（0＝未着手、1＝実行中） */
+export const EXEC = ["未着手", "実行中"];
 export const VERIFY = ["未測定", "確認中", "効果あり", "効果なし"];
 export const OWN: Record<Owner, string> = {
   biz: "事業部",
@@ -88,9 +89,11 @@ export const PROG = [
 ];
 export const PROGS = ["まだ", "学習と成長", "業務", "顧客", "財務"];
 export const PIDX: Record<Persp, number> = { lg: 1, pr: 2, cu: 3, fi: 4 };
-/** 指標の動き（基準値と現在値の比較） */
+/** 指標の動き（今（申請時点）と今の値の比較） */
 export const IS = {
   up: "改善",
+  /** 担当者がまだ今の値を入れていない（今＝今（申請時点）） */
+  start: "申請時点のまま",
   flat: "横ばい",
   worse: "悪化",
   none: "未測定",

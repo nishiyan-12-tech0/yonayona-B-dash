@@ -1,25 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import {
   Fragment,
+  useEffect,
   useMemo,
   useRef,
   useState,
   type MouseEvent,
   type ReactNode,
 } from "react";
+import { fetchVersion } from "@/lib/api";
 import { HZ, OWN, PCOL, PERSP, PERSPS, PL, STAGE } from "@/lib/constants";
 import { focusSets, themeFin } from "@/lib/logic";
 import { useStore } from "@/lib/store";
-import type { BusinessUnit, Objective, Persp } from "@/lib/types";
-import {
-  ActButton,
-  cls,
-  MetButton,
-  ObjCard,
-  prevLabel,
-  type MapCtx,
-} from "./cards";
+import type { BusinessUnit, Objective, Persp, StrategyData } from "@/lib/types";
+import { History, type Hist } from "@/components/HistoryDrawer";
+import { ActButton, cls, MetButton, ObjCard, type MapCtx } from "./cards";
 import { ConfirmModal } from "./ConfirmModal";
 import { Info } from "@/components/Info";
 import { Panel } from "./Panel";
@@ -27,29 +24,68 @@ import { useLinks } from "./useLinks";
 
 const BODY_PERSPS: Persp[] = ["lg", "pr", "cu"];
 
-/** ② 戦略マップ。事業がまだ1つもなければ、申請への案内だけを出す */
+/**
+ * ② 戦略マップ。いつもは現在の申請の日々の進捗を出す。
+ * 左上の「過去を見る」で版を選ぶと、その版の戦略マップを見るだけで出す。
+ * 申請がまだなければ、申請への案内だけを出す
+ */
 export function MapView() {
-  const { data } = useStore();
-  if (!data.bus.length) {
-    return (
-      <section className="view on" aria-label="戦略マップ">
+  const { data, setUi } = useStore();
+  const [hist, setHist] = useState<Hist>({ kind: "now" });
+  const [past, setPast] = useState<StrategyData | null>(null);
+  const vid = hist.kind === "version" ? hist.id : null;
+
+  useEffect(() => {
+    if (!vid) return;
+    let alive = true;
+    fetchVersion(vid)
+      .then((v) => alive && setPast(v.data))
+      .catch(() => alive && setPast(null));
+    return () => {
+      alive = false;
+    };
+  }, [vid]);
+
+  const choose = (h: Hist) => {
+    setPast(null);
+    setUi({ sel: null, cb: null, ct: null });
+    setHist(h);
+  };
+
+  const shown = vid ? past : data;
+  return (
+    <section className="view on" id="v-map" aria-label="戦略マップ">
+      <History mode="map" value={hist} onChange={choose} />
+      {!shown ? (
+        <div className="card muted">読み込み中…</div>
+      ) : !shown.bus.length ? (
         <div className="card">
-          まだ事業がありません。「申請」で事業と目標を入力すると、ここに戦略マップが出ます。
+          まだ戦略マップがありません。「申請」のステップ8で「戦略マップを作成」を押すと、ここに出ます。
+          <div style={{ marginTop: 8 }}>
+            <Link className="btn pri" href="/entry">
+              申請へ ›
+            </Link>
+          </div>
         </div>
-      </section>
-    );
-  }
-  return <MapBody />;
+      ) : (
+        <MapBody data={shown} editable={!vid} />
+      )}
+    </section>
+  );
 }
 
-function MapBody() {
-  const { data, ui, setUi } = useStore();
+function MapBody({
+  data,
+  editable,
+}: {
+  data: StrategyData;
+  editable: boolean;
+}) {
+  const { ui, setUi } = useStore();
   const mapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  /** 「進捗を確定」のポップアップを開いているか */
+  /** 「版を作る」のポップアップを開いているか */
   const [confirming, setConfirming] = useState(false);
-  /** 比べる時点（直近の確定版）の名前 */
-  const prev = prevLabel(data);
 
   const co = data.company;
   const b = data.bus.find((x) => x.id === ui.cb) ?? data.bus[0];
@@ -66,7 +102,8 @@ function MapBody() {
 
   const ctx: MapCtx = {
     data,
-    snap: ui.snap,
+    snap: "now",
+    editable,
     showIpa: ui.ipa,
     sel: ui.sel,
     focus,
@@ -111,12 +148,7 @@ function MapBody() {
     os.map((o) => <ObjCard key={o.id} ctx={ctx} obj={o} />);
 
   return (
-    <section
-      className="view on"
-      id="v-map"
-      aria-label="戦略マップ"
-      onClick={onBackgroundClick}
-    >
+    <div onClick={onBackgroundClick}>
       <div className="mnav">
         <div className="seg" id="butabs" aria-label="事業">
           {data.bus.map((x) => (
@@ -152,13 +184,13 @@ function MapBody() {
         >
           表示オプション
         </button>
-        {ui.snap === "now" ? (
+        {editable ? (
           <button
             className="btn sm pri"
             onClick={() => setConfirming(true)}
-            title="今の進捗を確定版にして、他社と比べる画面に反映します"
+            title="今の進捗を、この時点の版（断面）として残します"
           >
-            進捗を確定
+            版を作る
           </button>
         ) : null}
         <span className="co" id="m-co">
@@ -167,25 +199,6 @@ function MapBody() {
       </div>
 
       <div className="card opts" id="opts" hidden={!ui.opt}>
-        <div className="grp">
-          <b>表示する時点</b>
-          <div className="seg" id="snap">
-            <button
-              aria-pressed={ui.snap === "now"}
-              onClick={() => setUi({ snap: "now" })}
-            >
-              現在
-            </button>
-            {data.snap?.prev ? (
-              <button
-                aria-pressed={ui.snap === "mar"}
-                onClick={() => setUi({ snap: "mar" })}
-              >
-                {prev}（前回の確定）
-              </button>
-            ) : null}
-          </div>
-        </div>
         <div className="grp">
           <b>担当で強調</b>
           <div className="seg" id="who">
@@ -238,14 +251,6 @@ function MapBody() {
       </div>
 
       <div id="fnotes">
-        {ui.snap === "mar" ? (
-          <div className="fnote on">
-            <span>
-              <b>{prev}</b>（前回の確定）を表示中
-            </span>
-            <button onClick={() => setUi({ snap: "now" })}>現在に戻す</button>
-          </div>
-        ) : null}
         {highlight ? (
           <div className="fnote on">
             <span>
@@ -430,22 +435,10 @@ function MapBody() {
         </aside>
       </div>
 
-      <details className="card dbox" id="diffbox" hidden={ui.snap !== "now"}>
-        <summary>{prev}（前回の確定）から変わったこと</summary>
-        <ul className="diff">
-          {data.diffs.length ? (
-            data.diffs.map((d, n) => <li key={n}>{d}</li>)
-          ) : (
-            <li className="muted">
-              なし
-            </li>
-          )}
-        </ul>
-      </details>
       {confirming ? (
         <ConfirmModal onClose={() => setConfirming(false)} />
       ) : null}
-    </section>
+    </div>
   );
 }
 

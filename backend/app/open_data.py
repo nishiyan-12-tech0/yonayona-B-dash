@@ -1,13 +1,15 @@
 """抽象化テーブル（open_business_snapshot）への抜き出しと、そこからの集計。
 
-本番の想定：会社ごとのセキュアなDB（生データ）から、夜間バッチで段階・進み・件数だけを
-抜き出し、オープンなDBに置く。他社と比べる画面と参加企業の集計画面（経産省）は、
-オープンなDBだけを見る。
+本番の想定：会社ごとのセキュアなDB（生データ）から、毎晩のバッチで、今の戦略と日々の進捗の
+段階・進み・件数だけを抜き出し、オープンなDBに置く（企業が増えたら四半期に1回でもよい）。
+他社と比べる画面と参加企業の集計画面（経産省）は、オープンなDBだけを見る。
 
 MVP：DBは1つ。open_business_snapshot をオープンなDBの代わりにする。
-- 自社：確定（・確定版の削除・デモのリセット）のたびに、自社の行だけをその場で作り直す
+- 自社：日々の進捗の保存・申請の作成・版を作るたびに、自社の今の行だけをその場で作り直す
+- 版を作るときは、そのときの全社の行を断面（map_version.open_body）として残す。
+  過去の版を選んだ他社比較・集計は、この断面から集計する
 - 手動：python -m app.open_data（または POST /api/batch/open-data）で全社ぶんを作り直す
-        （本番の夜間バッチにあたる）
+        （本番の毎晩のバッチにあたる）
 - 他社：ダミーの41社・117事業を、初めて起動したときに入れる
 
 計算はフロントの logic.ts（progOf・stageTop など）と同じにしている。
@@ -18,6 +20,7 @@ from __future__ import annotations
 import random
 import re
 from collections import defaultdict
+from types import SimpleNamespace
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -56,7 +59,8 @@ def _moved(o: dict) -> bool:
 
 
 def _running(i: dict) -> bool:
-    return i.get("exec") in (1, 2)
+    """実行中の施策か（0＝未着手、1＝実行中）"""
+    return i.get("exec") == 1
 
 
 def _inits_of_bu(d: dict, b: dict) -> list[dict]:
@@ -65,7 +69,7 @@ def _inits_of_bu(d: dict, b: dict) -> list[dict]:
 
 
 def _progress(d: dict, b: dict) -> int:
-    """道筋の進み（0〜4）。試行・実行中の施策が付いた目標から、指標が順に動いたところまで"""
+    """道筋の進み（0〜4）。実行中の施策が付いた目標から、指標が順に動いたところまで"""
     reached: set[str] = set()
 
     def started(o: dict) -> bool:
@@ -85,7 +89,7 @@ def _progress(d: dict, b: dict) -> int:
 
 
 def _stage(d: dict, b: dict) -> int:
-    """道筋にある試行・実行中のデジタル施策のうち、一番上の段階"""
+    """道筋にある実行中のデジタル施策のうち、一番上の段階"""
     return max(
         (IPA_STAGE.get(i.get("ipa") or 0, 0) for i in _inits_of_bu(d, b) if i.get("digital") and _running(i)),
         default=0,
@@ -130,27 +134,28 @@ def abstract_business(d: dict, b: dict) -> dict:
     }
 
 
-# ================================================================ 抜き出し（夜間バッチにあたる）
+# ================================================================ 抜き出し（毎晩のバッチにあたる）
 
-
-def _latest_confirmation(s: Session, cid: int) -> m.ProgressConfirmation | None:
-    return s.scalars(
-        select(m.ProgressConfirmation)
-        .where(m.ProgressConfirmation.company_id == cid)
-        .order_by(m.ProgressConfirmation.as_of.desc(), m.ProgressConfirmation.confirmed_at.desc())
-        .limit(1)
-    ).first()
+NOW_LABEL = "現在"
+SNAP_FIELDS = [
+    "company_id", "company_name", "company_industry", "bu_id", "bu_name", "bu_industry",
+    "as_of_label", "stage", "progress", "obj_total", "obj_reach_fin",
+    "kpi_lg", "kpi_pr", "kpi_cu", "kpi_fi", "init_total", "init_condition", "init_review", "init_verified",
+]
 
 
 def extract_company(s: Session, cid: int) -> int:
-    """1社ぶんを作り直す：最新の確定版から、事業ごとに1行。確定版がなければ行を消すだけ。作った行数を返す"""
+    """1社ぶんの今の行を作り直す：現在の申請の戦略と日々の進捗から、事業ごとに1行。
+    申請がなければ行を消すだけ。作った行数を返す"""
+    from .strategy import current_data  # strategy が open_data を使うので、ここで読む
+
     s.flush()
     s.execute(delete(OBS).where(OBS.company_id == cid))
     company = s.get(m.Company, cid)
-    conf = _latest_confirmation(s, cid)
-    if company is None or conf is None:
+    d = current_data(s, cid) if company is not None else None
+    if company is None or d is None:
+        s.flush()
         return 0
-    d = conf.body
     ts = _now()
     for b in d.get("bus", []):
         s.add(
@@ -161,9 +166,9 @@ def extract_company(s: Session, cid: int) -> int:
                 bu_id=b["id"],
                 bu_name=b.get("name", ""),
                 bu_industry=b.get("industry", "") or company.industry,
-                as_of_label=conf.label,
-                as_of=conf.as_of,
-                confirmed_at=conf.confirmed_at,
+                as_of_label=NOW_LABEL,
+                as_of=ts.date(),
+                confirmed_at=ts,
                 extracted_at=ts,
                 **abstract_business(d, b),
             )
@@ -172,8 +177,31 @@ def extract_company(s: Session, cid: int) -> int:
     return len(d.get("bus", []))
 
 
+def snapshot_rows(s: Session) -> list[dict]:
+    """今の抽象化テーブル（全社の行）を、版に残す断面の形（JSON）にする"""
+    s.flush()
+    out = []
+    for r in s.scalars(select(OBS).order_by(OBS.company_id, OBS.id)):
+        d = {k: getattr(r, k) for k in SNAP_FIELDS}
+        d["confirmed_at"] = r.confirmed_at.isoformat()
+        d["extracted_at"] = r.extracted_at.isoformat()
+        out.append(d)
+    return out
+
+
+def rows_from_snapshot(snap: list[dict]) -> list[SimpleNamespace]:
+    """版に残した断面を、テーブルの行と同じように読める形に戻す"""
+    rows = []
+    for d in snap:
+        x = dict(d)
+        x["confirmed_at"] = datetime.fromisoformat(x["confirmed_at"])
+        x["extracted_at"] = datetime.fromisoformat(x["extracted_at"])
+        rows.append(SimpleNamespace(**x))
+    return rows
+
+
 def run_batch(s: Session) -> dict:
-    """全社ぶんを作り直す（本番の夜間バッチにあたる。MVPで生データを持つのは company テーブルの会社だけ）"""
+    """全社ぶんを作り直す（本番の毎晩のバッチにあたる。MVPで生データを持つのは company テーブルの会社だけ）"""
     out = {}
     for cid in s.scalars(select(m.Company.id)):
         out[cid] = extract_company(s, cid)
@@ -291,9 +319,16 @@ def _persp_share(rows) -> dict:
     return {p: _pct(v, all_) for p, v in tot.items()}
 
 
-def peers(s: Session, own_cid: int) -> dict:
-    """A-10 他社と比べる：自社以外の各社の点（匿名）と平均"""
-    rows = s.scalars(select(OBS).where(OBS.company_id != own_cid)).all()
+def _rows(s: Session, snap: list[dict] | None):
+    """今の行（snap なし）か、版に残した断面の行"""
+    if snap is None:
+        return s.scalars(select(OBS)).all()
+    return rows_from_snapshot(snap)
+
+
+def peers(s: Session, own_cid: int, snap: list[dict] | None = None) -> dict:
+    """A-16 他社と比べる：自社以外の各社の点（匿名）と平均。snap があれば、その断面から"""
+    rows = [r for r in _rows(s, snap) if r.company_id != own_cid]
     return {
         "points": [{"ind": r.bu_industry, "st": r.stage, "p": r.progress} for r in rows if r.stage > 0],
         "avg": {
@@ -311,9 +346,9 @@ def _best_text(r: m.OpenBusinessSnapshot) -> str:
     return f"{r.bu_name}：{STAGE[r.stage]}・{tail}"
 
 
-def meti_summary(s: Session, own_cid: int) -> dict:
-    """A-11 参加企業の集計（経産省）：全社（自社を含む）の行から集計する"""
-    rows = s.scalars(select(OBS)).all()
+def meti_summary(s: Session, own_cid: int, snap: list[dict] | None = None) -> dict:
+    """A-17 参加企業の集計（経産省）：全社（自社を含む）の行から集計する。snap があれば、その断面から"""
+    rows = list(_rows(s, snap))
     n = len(rows)
     by_co: dict[int, list] = defaultdict(list)
     for r in rows:
@@ -349,7 +384,7 @@ def meti_summary(s: Session, own_cid: int) -> dict:
     return {
         "stats": [
             {"value": f"{len(by_co)}社", "label": f"参加企業（{n}事業）"},
-            {"value": f"{recent}社", "label": "直近1年以内に確定"},
+            {"value": f"{recent}社", "label": "直近1年以内に更新"},
             {"value": f"{_pct(sum(1 for r in rows if r.progress >= 3), n)}%", "label": "顧客・財務まで道筋が進んだ事業"},
             {"value": f"{_pct(sum(1 for r in rows if r.progress == 2), n)}%", "label": "業務プロセスで止まっている事業"},
             {
@@ -367,7 +402,7 @@ def meti_summary(s: Session, own_cid: int) -> dict:
 
 
 def main() -> None:
-    """python -m app.open_data ：全社ぶんを作り直す（夜間バッチの手動実行）"""
+    """python -m app.open_data ：全社ぶんを作り直す（毎晩のバッチの手動実行）"""
     from .db import SessionLocal, engine
 
     m.Base.metadata.create_all(engine)

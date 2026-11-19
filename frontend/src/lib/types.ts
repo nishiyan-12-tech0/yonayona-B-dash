@@ -4,7 +4,7 @@ export type Persp = "lg" | "pr" | "cu" | "fi";
 export type Owner = "biz" | "dx" | "mgmt";
 /** 学習と成長の資本の種類：人的／情報／組織 */
 export type Cap = "hum" | "inf" | "org";
-/** 表示する時点：現在／比べる時点（直近の確定版）。"mar" は 2026年3月末だったころの名残り */
+/** 表示する時点。画面はいつも "now"（過去は左のサイドメニューから版を選んで見る）。"mar" は旧版の名残り */
 export type Snap = "now" | "mar";
 /** DXの段階：1＝デジタイゼーション、2＝デジタライゼーション、3＝DX */
 export type Stage = 1 | 2 | 3;
@@ -16,10 +16,11 @@ export interface Objective {
   name: string;
   /** 指標名。空なら「指標が未設定」 */
   kpi: string;
+  /** 今（申請時点）の値。進みの起点 */
   base?: string;
-  /** 比べる時点（直近の確定版）の値 */
+  /** 旧版の名残り（使わない） */
   prev?: string;
-  /** 今の値（担当者が戦略マップで入力） */
+  /** 今の値（担当者が戦略マップで入力。入力するまでは今（申請時点）と同じ） */
   cur?: string;
   target?: string;
   due?: string;
@@ -104,7 +105,7 @@ export interface Checks {
 
 /** 施策の状態（時点ごとに変わる部分） */
 export interface InitState {
-  /** EXEC の番号 */
+  /** EXEC の番号（0＝未着手、1＝実行中）。申請では「申請時点の状態」 */
   exec: number;
   /** VERIFY の番号 */
   verify: number;
@@ -124,10 +125,11 @@ export interface Initiative extends InitState {
   /** 決めた場（会議体・日付・資料） */
   ev: string;
   kpi: string;
+  /** 今（申請時点）の値 */
   base?: string;
   cur?: string;
   target?: string;
-  /** 比べる時点（直近の確定版）の状態 */
+  /** 旧版の名残り（使わない） */
   prev?: InitState;
   progress?: InitiativeProgress;
 }
@@ -138,29 +140,43 @@ export interface StrategyData {
   corp: { fin: Objective };
   bus: BusinessUnit[];
   inits: Initiative[];
-  /** 比べる時点から変わったこと */
-  diffs: string[];
-  /** 時点の名前。now＝現在（または確定版の期間）、prev＝比べる時点（直近の確定版の期間） */
-  snap?: { now: string; prev: string | null };
+  /** どの申請の戦略か（申請の内容・作成中の申請では null か、ない） */
+  application?: { id: number; submittedAt: string } | null;
 }
 
-/** 確定版の一覧の1行 */
-export interface Confirmation {
+/** 版（戦略マップと進捗の断面）。申請の中で第1版・第2版…と数える */
+export interface MapVersionMeta {
   id: number;
+  no: number;
+  /** 時点（例：2026年12月末、作成時点、置き換え時点） */
   label: string;
   asOf: string;
-  confirmedBy: string;
-  confirmedAt: string;
-  /** 初期データの確定版（出発点。消せない） */
-  isSeed: boolean;
+  /** start＝作成時点、manual＝手で作った、end＝置き換え時点 */
+  kind: "start" | "manual" | "end";
+  createdBy: string;
+  createdAt: string;
 }
 
-/** 他社と比べる画面に出す確定版（新しい順） */
-export interface ConfirmedVersion {
+/** 申請（日付で呼ぶ） */
+export interface ApplicationMeta {
   id: number;
-  label: string;
-  asOf: string;
+  submittedAt: string;
+  replacedAt: string | null;
+  current: boolean;
+  /** 新しい順 */
+  versions: MapVersionMeta[];
+}
+
+/** 版と、その時点の戦略マップ */
+export interface MapVersion extends MapVersionMeta {
   data: StrategyData;
+}
+
+/** 作成中の申請 */
+export interface Draft {
+  body: StrategyData;
+  savedAt: string;
+  carryFrom: number | null;
 }
 
 export interface ObjectiveProgressInput {
@@ -172,7 +188,6 @@ export interface ObjectiveProgressInput {
 }
 
 export interface InitiativeProgressInput {
-  exec: number;
   verify: number;
   kpiCur: string;
   did: string;

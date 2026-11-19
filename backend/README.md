@@ -13,7 +13,8 @@ uvicorn app.main:app --reload
 ```
 
 - http://localhost:8000/docs で API を試せます
-- 起動したとき、テーブルがなければ作り、会社のデータがなければ初期データ（`app/seed_data.json`）を入れます
+- 起動したとき、スキーマの版が古ければテーブルを全部作り直し、会社のデータがなければ初期データ（`app/seed_data.json`）を入れます
+- 初期状態は、申請・戦略マップがなく、作成中の申請に全項目入力済みの申請だけが入った状態です（申請のステップ8で「戦略マップを作成」を押すと戦略マップができます）
 - DB を用意せずに試すだけなら、`.env` に `DATABASE_URL=sqlite:///./local.db` と書けば SQLite で動きます
 
 ## 初期データに戻す
@@ -22,7 +23,7 @@ uvicorn app.main:app --reload
 python -m app.seed --reset
 ```
 
-画面の「進捗を確定」→「デモを初期状態に戻す」も同じ処理です（`POST /api/demo/reset`）。
+画面の右上のロゴを押して「デモを初期状態に戻す」も同じ処理です（`POST /api/demo/reset`）。
 
 ## Azure（App Service Web App）
 
@@ -36,8 +37,9 @@ python -m app.seed --reset
 | ファイル | 中身 |
 |---|---|
 | `app/main.py` | 起動、CORS、エラーの返し方 |
-| `app/routers/api.py` | API（設計書 6章の A-1〜A-13） |
-| `app/strategy.py` | 画面の形（StrategyData）の組み立て、申請・進捗・確定の保存 |
+| `app/routers/api.py` | API（設計書 v0.4 の 6章の A-1〜A-19） |
+| `app/strategy.py` | 画面の形（StrategyData）の組み立て、作成中の申請・申請の作成・日々の進捗・版の保存 |
+| `app/open_data.py` | 抽象化テーブルへの抜き出しと、他社比較・参加企業の集計 |
 | `app/models.py` | テーブル（設計書 8章） |
 | `app/schemas.py` | API の入力の形 |
 | `app/seed.py` / `app/seed_data.json` | 初期データ |

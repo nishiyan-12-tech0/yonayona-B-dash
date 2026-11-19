@@ -36,7 +36,7 @@ export interface FormProps {
 
 /** 指標の欄。今の値は担当者が戦略マップで入れるので、申請では聞かない */
 const KPI_KEYS = ["kpi", "base", "target", "due"] as const;
-const KPI_HEAD = ["指標", "基準（申請時点）", "目標", "期限"];
+const KPI_HEAD = ["指標", "今（申請時点）", "目標", "期限"];
 /** 主担当の選択肢（事業部・DX推進部・経営） */
 const OWNER_KEYS: Owner[] = ["biz", "dx", "mgmt"];
 const OWNER_OPTIONS = OWNER_KEYS.map((k) => OWN[k]);
@@ -121,7 +121,7 @@ function AddBtn({
 }) {
   return (
     <div
-      className="btns"
+      className="btns ro-hide"
       style={{ justifyContent: "flex-start", marginTop: 6 }}
     >
       <button className="btn" onClick={onClick} disabled={disabled}>
@@ -143,7 +143,7 @@ function DelCell({
   return (
     <td>
       <button
-        className="btn"
+        className="btn ro-hide"
         style={{ padding: "2px 8px", whiteSpace: "nowrap" }}
         onClick={onClick}
         disabled={disabled}
@@ -170,7 +170,7 @@ function Hint({
   );
 }
 
-/** 指標・基準・今・目標・期限の5つのセル */
+/** 指標・今（申請時点）・目標・期限のセル */
 function KpiCells({
   obj,
   onEdit,
@@ -702,7 +702,7 @@ function Step4({ data, bu, update }: FormProps) {
       </Field>
       <Field
         label="足りない力を埋めるために、何をしますか？ それはどの目標のための施策ですか？"
-        desc="すでに動いている施策は、申請時点の状態（試行中・実行中）を選びます。申請を出し終えた時点の内容が出発点になり、すぐ他社と比べられます。そのあとの状態は、担当者が戦略マップで更新します。システムを入れる施策には、使う人の育成や役割の見直しもセットで考えます。IPA項目は、施策が何を変えるかで選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で出ます。"
+        desc="すでに動いている施策は、申請時点の状態を「実行中」、まだ始めていない施策は「未着手」にします。戦略マップを作った時点の内容が第1版（作成時点）になり、すぐ他社と比べられます。そのあとの進捗は、担当者が戦略マップで入力します。システムを入れる施策には、使う人の育成や役割の見直しもセットで考えます。IPA項目は、施策が何を変えるかで選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で出ます。"
         wide
       >
         <Table
@@ -714,7 +714,7 @@ function Step4({ data, bu, update }: FormProps) {
             "デジタル",
             "IPA項目",
             "施策の指標",
-            "基準",
+            "今（申請時点）",
             "目標",
             "",
           ]}
@@ -759,11 +759,9 @@ function Step4({ data, bu, update }: FormProps) {
                   />
                 </td>
                 <td>
-                  {/* 出発点を作ったあとは、担当者が戦略マップで更新する */}
                   <Sel
-                    options={EXEC.slice(0, 3)}
-                    value={Math.min(i.exec, 2)}
-                    disabled={i.prev !== undefined}
+                    options={EXEC}
+                    value={i.exec === 1 ? 1 : 0}
                     onChange={(v) => edit((x) => void (x.exec = v ?? 0))}
                   />
                 </td>
@@ -901,7 +899,7 @@ function Step5({ bu, update }: FormProps) {
             ))}
             <td>
               <button
-                className="btn"
+                className="btn ro-hide"
                 style={{ padding: "2px 8px" }}
                 onClick={() => editBuLinks((ls) => void ls.splice(n, 1))}
               >
@@ -911,7 +909,7 @@ function Step5({ bu, update }: FormProps) {
           </tr>
         ))}
       </Table>
-      <div className="btns" style={{ justifyContent: "flex-start" }}>
+      <div className="btns ro-hide" style={{ justifyContent: "flex-start" }}>
         <button
           className="btn"
           onClick={() =>

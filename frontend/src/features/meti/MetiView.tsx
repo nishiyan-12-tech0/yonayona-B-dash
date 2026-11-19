@@ -1,28 +1,49 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { fetchMetiSummary } from "@/lib/api";
 import { useAsync } from "@/lib/useAsync";
 import { GridChart } from "@/components/GridChart";
+import { History, type Hist } from "@/components/HistoryDrawer";
 import { Info } from "@/components/Info";
 import { PerspStack } from "@/components/PerspStack";
 
 const swatch = (color: string) =>
   ({ "--c": color, "--cs": color }) as CSSProperties;
 
-/** ④ 経産省の画面 */
+/** ④ 参加企業の集計（経産省）。左上の「過去を見る」で版の時点を選ぶと、その時点の断面から集計する */
 export function MetiView() {
-  const meti = useAsync(fetchMetiSummary);
-  if (!meti) return null;
+  const [hist, setHist] = useState<Hist>({ kind: "now" });
+  return (
+    <MetiBody
+      key={hist.kind === "version" ? hist.id : "now"}
+      hist={hist}
+      onHist={setHist}
+    />
+  );
+}
+
+function MetiBody({ hist, onHist }: { hist: Hist; onHist: (h: Hist) => void }) {
+  const vid = hist.kind === "version" ? hist.id : undefined;
+  const load = useCallback(() => fetchMetiSummary(vid), [vid]);
+  const meti = useAsync(load);
+  if (!meti) {
+    return (
+      <section className="view on" aria-label="参加企業の集計">
+        <History mode="meti" value={hist} onChange={onHist} />
+      </section>
+    );
+  }
   const companies = meti.companies;
 
   return (
-    <section className="view on" aria-label="経産省の画面">
+    <section className="view on" aria-label="参加企業の集計">
+      <History mode="meti" value={hist} onChange={onHist} />
       <div className="card">
         <h2>
-          参加企業の現在地（各社の最新の確定版）
+          参加企業の現在地{vid ? "（この時点の断面）" : ""}
           <Info>
-            各社が確定した戦略から、段階・道筋の進み・件数だけを抜き出したデータ（抽象化データ）を集計しています。戦略の中身は含みません。本番は毎晩のバッチで更新します（最終更新：
+            各社の今の戦略と日々の進捗から、段階・道筋の進み・件数だけを抜き出したデータ（抽象化データ）を集計しています。戦略の中身は含みません。本番は毎晩のバッチで更新します。過去の時点は、版を作ったときに残した断面から集計します（集計した日時：
             {meti.extractedAt.replace("T", " ")}）。
           </Info>
         </h2>

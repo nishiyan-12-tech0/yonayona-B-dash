@@ -41,17 +41,14 @@ export function objById(d: StrategyData, id: string): Objective | null {
 export const buOfObj = (d: StrategyData, id: string) =>
   d.bus.find((b) => b.objs.some((o) => o.id === id));
 
-/** その時点の指標の値 */
+/** その時点の指標の値（担当者がまだ入れていなければ、今（申請時点）の値） */
 export const curOf = (o: Objective, snap: Snap) =>
-  snap === "mar" && o.prev !== undefined ? o.prev : o.cur;
+  (snap === "mar" && o.prev !== undefined ? o.prev : o.cur) ?? o.base;
 /** その時点の施策の状態 */
 export const stAt = (i: Initiative, snap: Snap): InitState =>
   snap === "mar" && i.prev ? i.prev : i;
-/** 試行中・実行中の施策か */
-export const running = (i: Initiative, snap: Snap) => {
-  const e = stAt(i, snap).exec;
-  return e === 1 || e === 2;
-};
+/** 実行中の施策か（0＝未着手、1＝実行中） */
+export const running = (i: Initiative, snap: Snap) => stAt(i, snap).exec === 1;
 
 export const initsOn = (d: StrategyData, objId: string) =>
   d.inits.filter((i) => i.attach.includes(objId));
@@ -80,7 +77,7 @@ export const down = (b: BusinessUnit, id: string) => walk(b, id, "down");
 /** つながりを手前（学習と成長の側）へたどった目標 */
 export const up = (b: BusinessUnit, id: string) => walk(b, id, "up");
 
-/** 指標が基準値から目標の方向へ動いたか */
+/** 指標が今（申請時点）から目標の方向へ動いたか */
 export function moved(o: Objective, snap: Snap) {
   const c = num(curOf(o, snap));
   const b = num(o.base);
@@ -89,7 +86,7 @@ export function moved(o: Objective, snap: Snap) {
   return (c - b) * (t - b) > 0;
 }
 
-/** 指標の事実：基準値と現在値の比較だけで決める（道筋の進みの判定とは別） */
+/** 指標の事実：今（申請時点）と今の値の比較だけで決める（道筋の進みの判定とは別） */
 export function indState(o: Objective, snap: Snap): IndState {
   if (!o.kpi) return "nokpi";
   const c = num(curOf(o, snap));
@@ -97,10 +94,11 @@ export function indState(o: Objective, snap: Snap): IndState {
   const t = num(o.target);
   if (c === null || b === null || t === null || t === b) return "none";
   const d = (c - b) * (t - b);
+  if (d === 0 && !o.progress) return "start";
   return d > 0 ? "up" : d < 0 ? "worse" : "flat";
 }
 
-/** 基準値から目標値までの何%まで来たか（0〜100）。判定できないときは null */
+/** 今（申請時点）から目標値までの何%まで来たか（0〜100）。判定できないときは null */
 export function pctOf(o: Objective, snap: Snap) {
   const c = num(curOf(o, snap));
   const b = num(o.base);
@@ -111,7 +109,7 @@ export function pctOf(o: Objective, snap: Snap) {
 
 /**
  * 道筋の順に指標が動いた目標。
- * 試行・実行中の施策が付いた目標から始め、手前の目標が動いていないと先は数えません。
+ * 実行中の施策が付いた目標から始め、手前の目標が動いていないと先は数えません。
  */
 export function reachedSet(
   d: StrategyData,
@@ -155,7 +153,7 @@ export function progOf(
 
 const stageOf = (i: Initiative) => (i.ipa ? IPA_STAGE[i.ipa] : 0);
 
-/** 事業の段階＝その事業の道筋にある（試行・実行中の）デジタル施策のうち、一番上の段階 */
+/** 事業の段階＝その事業の道筋にある（実行中の）デジタル施策のうち、一番上の段階 */
 export function stageTop(d: StrategyData, b: BusinessUnit, snap: Snap) {
   let s = 0;
   initsOfBu(d, b)

@@ -18,7 +18,7 @@ class _In(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
 
 
-# ---------------------------------------------------------------- 申請（A-3）
+# ---------------------------------------------------------------- 申請（作成のときに確かめる形）
 
 
 class ObjectiveIn(_In):
@@ -87,8 +87,8 @@ class InitiativeIn(_In):
     base: str | None = ""
     target: str | None = ""
     checks: ChecksIn = ChecksIn()
-    # 申請時点の状態（0 検討中・1 試行中・2 実行中）。出発点を作る前と、新しく足した施策にだけ使う
-    exec: int = Field(default=0, ge=0, le=2)
+    # 申請時点の状態（0＝未着手、1＝実行中）
+    exec: int = Field(default=0, ge=0, le=1)
 
 
 class CorpIn(_In):
@@ -101,7 +101,13 @@ class StrategyIn(_In):
     inits: list[InitiativeIn]
 
 
-# ---------------------------------------------------------------- 進捗（A-5・A-6）
+class DraftStartIn(_In):
+    """A-8：作り直しを始める。carryOver＝前回の申請内容を引き継ぐか"""
+
+    carryOver: bool
+
+
+# ---------------------------------------------------------------- 日々の進捗（A-10・A-11）
 
 
 class ObjectiveProgressIn(_In):
@@ -113,7 +119,7 @@ class ObjectiveProgressIn(_In):
 
 
 class InitiativeProgressIn(_In):
-    exec: int = Field(ge=0, le=3)
+    # 状態は送らない（未着手の施策に保存したら、実行中にする）
     verify: int = Field(ge=0, le=3)
     kpiCur: str | None = Field(default=None, max_length=100)
     did: str = Field(min_length=1)
@@ -121,10 +127,10 @@ class InitiativeProgressIn(_In):
     author: str = Field(min_length=1, max_length=100)
 
 
-# ---------------------------------------------------------------- 確定（A-8）
+# ---------------------------------------------------------------- 版（A-13）
 
 
-class ConfirmIn(_In):
+class VersionIn(_In):
     label: str = Field(min_length=1, max_length=50)
     asOf: date
-    confirmedBy: str = Field(min_length=1, max_length=100)
+    createdBy: str = Field(min_length=1, max_length=100)

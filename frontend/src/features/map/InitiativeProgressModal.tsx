@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ApiError, saveInitiativeProgress } from "@/lib/api";
-import { EXEC, VERIFY } from "@/lib/constants";
+import { VERIFY } from "@/lib/constants";
 import { useStore } from "@/lib/store";
 import type { Initiative } from "@/lib/types";
 import { lastAuthor, MRow, Modal, rememberAuthor } from "@/components/Modal";
@@ -20,7 +20,6 @@ export function InitiativeProgressModal({
   const { replace } = useStore();
   const p = it.progress;
   const start = {
-    exec: it.exec,
     verify: it.verify,
     kpiCur: it.cur ?? "",
     did: p?.did ?? "",
@@ -32,8 +31,6 @@ export function InitiativeProgressModal({
   const [err, setErr] = useState<string | null>(null);
   const set = (patch: Partial<typeof f>) => setF((x) => ({ ...x, ...patch }));
   const dirty = JSON.stringify(f) !== JSON.stringify(start);
-  /** 試行中・実行中のときだけ、効果の検証を選べる */
-  const canVerify = f.exec === 1 || f.exec === 2;
 
   const missing = [
     !f.did.trim() && "やったこと",
@@ -49,8 +46,7 @@ export function InitiativeProgressModal({
     setErr(null);
     try {
       const d = await saveInitiativeProgress(it.id, {
-        exec: f.exec,
-        verify: canVerify ? f.verify : 0,
+        verify: f.verify,
         kpiCur: f.kpiCur.trim(),
         did: f.did.trim(),
         result: f.result.trim(),
@@ -75,27 +71,15 @@ export function InitiativeProgressModal({
       <p className="crumb small muted">
         上が決めた施策を、今の期間にどう進めたかを書きます。
       </p>
-      <MRow label="実行の状態" req htmlFor="ip-e">
-        <select
-          id="ip-e"
-          value={f.exec}
-          onChange={(e) => {
-            const exec = Number(e.target.value);
-            set({ exec, verify: exec === 1 || exec === 2 ? f.verify : 0 });
-          }}
-        >
-          {EXEC.map((x, n) => (
-            <option key={n} value={n}>
-              {x}
-            </option>
-          ))}
-        </select>
-      </MRow>
+      {it.exec === 0 ? (
+        <p className="small" style={{ margin: "0 0 8px" }}>
+          この施策は今「未着手」です。進捗を保存すると「実行中」になります。
+        </p>
+      ) : null}
       <MRow label="効果の検証" req htmlFor="ip-v">
         <select
           id="ip-v"
-          value={canVerify ? f.verify : 0}
-          disabled={!canVerify}
+          value={f.verify}
           onChange={(e) => set({ verify: Number(e.target.value) })}
         >
           {VERIFY.map((x, n) => (
@@ -104,9 +88,6 @@ export function InitiativeProgressModal({
             </option>
           ))}
         </select>
-        {canVerify ? null : (
-          <div className="hint">試行中・実行中のときに選べます</div>
-        )}
       </MRow>
       {it.kpi ? (
         <MRow label="施策の指標の今の値" htmlFor="ip-k">
@@ -117,7 +98,7 @@ export function InitiativeProgressModal({
             onChange={(e) => set({ kpiCur: e.target.value })}
           />
           <div className="hint">
-            {it.kpi}　基準 {it.base || "—"} → 目標 {it.target || "—"}
+            {it.kpi}　申請時点 {it.base || "—"} → 目標 {it.target || "—"}
           </div>
         </MRow>
       ) : null}
@@ -147,7 +128,7 @@ export function InitiativeProgressModal({
       </MRow>
       {err ? <p className="merr">{err}</p> : null}
       <p className="small muted" style={{ margin: "8px 0 0" }}>
-        保存すると戦略マップにすぐ出ます。他社と比べる画面には、「進捗を確定」したときに出ます。
+        保存すると、戦略マップと他社と比べる画面にすぐ出ます。
       </p>
       <div className="mfoot">
         <button className="btn" onClick={onClose} disabled={busy}>

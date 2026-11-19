@@ -1,7 +1,7 @@
 "use client";
 
-import type { CSSProperties } from "react";
-import { fetchConfirmedVersions, fetchPeers } from "@/lib/api";
+import { useCallback, useState, type CSSProperties } from "react";
+import { fetchPeers, fetchVersions } from "@/lib/api";
 import { BCOL, PROG, STAGES } from "@/lib/constants";
 import {
   allObjs,
@@ -14,15 +14,15 @@ import {
   stageTop,
 } from "@/lib/logic";
 import { useStore } from "@/lib/store";
-import type {
-  ConfirmedVersion,
-  PerspShare,
-  StageCells,
-  StrategyData,
-} from "@/lib/types";
+import type { PerspShare, StageCells, StrategyData } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { GridChart, type GridPoint } from "@/components/GridChart";
 import { Heat } from "@/components/Heat";
+import {
+  History,
+  versionName,
+  type Hist,
+} from "@/components/HistoryDrawer";
 import { Info } from "@/components/Info";
 import { PerspStack } from "@/components/PerspStack";
 import { Track } from "@/components/Track";
@@ -34,21 +34,27 @@ const swatch = (color: string, round = false) =>
     ...(round ? { borderRadius: "50%" } : {}),
   }) as CSSProperties;
 
+/** 点を打つ1つの時点 */
+interface Moment {
+  label: string;
+  data: StrategyData;
+}
+
 /**
- * 自社の事業の点。確定版ごとに位置を計算して、事業ごとの軌跡にする（新しい順）。
- * 試行・実行中のデジタル施策がない時点は点を出さない。
+ * 自社の事業の点。時点ごとに位置を計算して、事業ごとの軌跡にする（新しい順。[0] が塗りの点）。
+ * 実行中のデジタル施策がない時点は点を出さない。
  */
-function ownPoints(vs: ConfirmedVersion[]): GridPoint[] {
-  const latest = vs[0]?.data;
+function ownPoints(ms: Moment[]): GridPoint[] {
+  const latest = ms[0]?.data;
   if (!latest) return [];
   return latest.bus.flatMap((b, n) => {
-    const trail = vs.flatMap((v) => {
+    const trail = ms.flatMap((v) => {
       const bu = v.data.bus.find((x) => x.id === b.id);
       if (!bu) return [];
       const st = stageTop(v.data, bu, "now");
       return st ? [{ st, p: progOf(v.data, bu, "now"), label: v.label }] : [];
     });
-    if (!trail.length || trail[0].label !== vs[0].label) return [];
+    if (!trail.length || trail[0].label !== ms[0].label) return [];
     return [
       {
         name: b.name,
@@ -63,27 +69,76 @@ function ownPoints(vs: ConfirmedVersion[]): GridPoint[] {
   });
 }
 
-/** ③ 他社と比べる */
+/** ③ 他社と比べる。塗りの点＝表示している時点（ふだんは日々の進捗）、白抜きの点＝それより前の版 */
 export function CompareView() {
-  const { ui, setUi } = useStore();
-  const peerData = useAsync(fetchPeers);
-  /** 確定版（新しい順）。この画面は確定版だけで描く（ふだんの保存は出さない） */
-  const versions = useAsync(fetchConfirmedVersions);
-  if (!peerData || !versions) return null;
-  if (!versions.length) {
+  const { data: live } = useStore();
+  const [hist, setHist] = useState<Hist>({ kind: "now" });
+  if (!live.application) {
     return (
       <section className="view on" aria-label="他社と比べる">
+        <History mode="map" value={hist} onChange={setHist} />
         <div className="card">
-          まだ確定した進捗がありません。戦略マップで「進捗を確定」すると、ここに出ます。
+          まだ戦略マップがありません。「申請」のステップ8で「戦略マップを作成」を押すと、ここで他社と比べられます。
         </div>
       </section>
     );
   }
-  /** いちばん新しい確定版 */
-  const data: StrategyData = versions[0].data;
-  /** その1つ前の確定版 */
-  const before: StrategyData | null = versions[1]?.data ?? null;
-  const latestLabel = versions[0].label;
+  const key =
+    hist.kind === "version"
+      ? `v${hist.id}`
+      : `now-${live.application.id}`;
+  return (
+    <CompareBody key={key} hist={hist} onHist={setHist} live={live} />
+  );
+}
+
+function CompareBody({
+  hist,
+  onHist,
+  live,
+}: {
+  hist: Hist;
+  onHist: (h: Hist) => void;
+  live: StrategyData;
+}) {
+  const { ui, setUi } = useStore();
+  const vid = hist.kind === "version" ? hist.id : undefined;
+  const appId =
+    hist.kind === "version" ? hist.appId : (live.application?.id ?? 0);
+  const loadPeers = useCallback(() => fetchPeers(vid), [vid]);
+  const loadVersions = useCallback(() => fetchVersions(appId), [appId]);
+  const peerData = useAsync(loadPeers);
+  const versions = useAsync(loadVersions);
+
+  const shell = (body: React.ReactNode) => (
+    <section className="view on" aria-label="他社と比べる">
+      <History mode="map" value={hist} onChange={onHist} />
+      {body}
+    </section>
+  );
+  if (!peerData || !versions) return shell(<div className="card muted">読み込み中…</div>);
+
+  /** 点を打つ時点（新しい順）。現在なら日々の進捗＋この申請の版、過去の版ならその版とそれより前の版 */
+  let moments: Moment[];
+  if (vid) {
+    const i = versions.findIndex((v) => v.id === vid);
+    moments = (i >= 0 ? versions.slice(i) : []).map((v) => ({
+      label: versionName(v),
+      data: v.data,
+    }));
+  } else {
+    moments = [
+      { label: "現在", data: live },
+      ...versions.slice(0, 5).map((v) => ({ label: versionName(v), data: v.data })),
+    ];
+  }
+  if (!moments.length) return shell(<div className="card muted">この版は見つかりませんでした</div>);
+
+  /** 表示している時点 */
+  const data: StrategyData = moments[0].data;
+  /** その1つ前の時点 */
+  const before: StrategyData | null = moments[1]?.data ?? null;
+  const latestLabel = moments[0].label;
 
   const inds = new Set(data.bus.map((b) => b.industry));
   const peers = peerData.points.filter(
@@ -143,14 +198,16 @@ export function CompareView() {
     ]),
   ) as PerspShare;
 
-  return (
-    <section className="view on" aria-label="他社と比べる">
+  return shell(
+    <>
       <div className="card row">
         <div>
           <b>他社と比べる</b>
-          <span className="muted small">　最新の確定：{latestLabel}</span>
+          <span className="muted small">　自社：{latestLabel}</span>
           <Info>
-            他社は年度末の集計（2026年3月末）、自社は確定した進捗で比べます。ふだんの保存は出ません。戦略マップで「進捗を確定」すると、ここに反映されます。
+            {vid
+              ? "自社はこの版の値、他社はこの版を作ったときに残した集計（抽象化データの断面）で比べます。"
+              : "自社は戦略マップに入力した日々の進捗、他社は一斉集計（本番は毎晩のバッチ）で比べます。戦略マップで「版を作る」と、その時点が白抜きの点として残ります。"}
           </Info>
         </div>
         <span className="small muted" style={{ marginLeft: "auto" }}>
@@ -171,19 +228,19 @@ export function CompareView() {
           </button>
         </div>
       </div>
-      <div className="cmpgrid">
-        <div className="card">
-          <h2>
-            道筋のどこまで進んだか × DXの段階
+      <div className="card cmpwide">
+        <h2>
+          道筋のどこまで進んだか × DXの段階
             <Info>
-              点は事業です。横は、道筋のどこまで進んだか（施策から順にたどり、指標が基準値から目標の方向へ動いたところまで。途中が動いていないと、その先は数えません）。縦は、その事業の道筋にある試行・実行中のデジタル施策のうち、一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。
+              点は事業です。横は、道筋のどこまで進んだか（施策から順にたどり、指標が今（申請時点）から目標の方向へ動いたところまで。途中が動いていないと、その先は数えません）。縦は、その事業の道筋にある実行中のデジタル施策のうち、一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。
             </Info>
           </h2>
           <div id="grid">
             <GridChart
               cells={cells}
-              points={ownPoints(versions)}
+              points={ownPoints(moments)}
               label="道筋の進みとDXの段階のマス目"
+              size="lg"
             />
             <div className="legend" style={{ marginTop: 6 }}>
               {data.bus.map((b, n) => (
@@ -194,17 +251,18 @@ export function CompareView() {
               ))}
               <span>
                 塗り＝{latestLabel}
-                {versions.length > 1 ? "　白抜き＝前回まで" : ""}
+                {moments.length > 1 ? "　白抜き＝それより前の版" : ""}
               </span>
               <span>数字＝比べる相手の割合（%）</span>
             </div>
           </div>
         </div>
+      <div className="cmpgrid">
         <div className="card">
           <h2>
             自社の事業
             <Info>
-              試行・実行中のデジタル施策がない事業は、左のマス目には出ません。
+              実行中のデジタル施策がない事業は、上のマス目には出ません。
             </Info>
           </h2>
           <div className="bul" id="bulist">
@@ -231,8 +289,6 @@ export function CompareView() {
             })}
           </div>
         </div>
-      </div>
-      <div className="cmpgrid">
         <div className="card">
           <h2>
             項目ごとの比較
@@ -299,6 +355,7 @@ export function CompareView() {
             </span>
           </div>
         </div>
+      </div>
         <div className="card">
           <h2>
             道筋にあるDX（IPAの7項目）
@@ -314,7 +371,6 @@ export function CompareView() {
             <Heat data={data} snap="now" />
           </div>
         </div>
-      </div>
-    </section>
+    </>,
   );
 }

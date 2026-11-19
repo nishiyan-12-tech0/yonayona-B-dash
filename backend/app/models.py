@@ -1,8 +1,10 @@
 """テーブルの定義（設計書 8章）。
 
 - 戦略（トップが申請で入力）：company / business_unit / theme / objective / link / initiative / initiative_objective
-- 進捗（担当者が戦略マップで入力。上書き）：objective_progress / initiative_progress
-- 確定版・その他：progress_confirmation / strategy_version / change_note / reference_data
+  （現在の申請の戦略だけを持つ。過去の申請は strategy_application・map_version にJSONで残る）
+- 日々の進捗（担当者が戦略マップで入力。上書き）：objective_progress / initiative_progress
+- 申請・版・作成中の申請：strategy_application / map_version / strategy_draft
+- その他：reference_data / schema_meta
 - 抽象化（オープンなDBの代わり）：open_business_snapshot
 """
 
@@ -97,6 +99,7 @@ class Objective(Base):
     persp: Mapped[str] = mapped_column(PERSP)
     name: Mapped[str] = mapped_column(String(200), default="")
     kpi: Mapped[str] = mapped_column(String(200), default="")
+    # 今（申請時点）の値。進みの起点
     base: Mapped[str] = mapped_column(String(100), default="")
     target: Mapped[str] = mapped_column(String(100), default="")
     due: Mapped[str] = mapped_column(String(100), default="")
@@ -138,8 +141,11 @@ class Initiative(Base):
     chk_condition: Mapped[bool] = mapped_column(Boolean, default=False)
     chk_review: Mapped[bool] = mapped_column(Boolean, default=False)
     kpi: Mapped[str] = mapped_column(String(200), default="")
+    # 今（申請時点）の値
     base: Mapped[str] = mapped_column(String(100), default="")
     target: Mapped[str] = mapped_column(String(100), default="")
+    # 申請時点の状態（0＝未着手、1＝実行中）
+    exec0: Mapped[int] = mapped_column(SmallInteger, default=0)
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
@@ -174,6 +180,7 @@ class InitiativeProgress(Base):
     __table_args__ = (TABLE_ARGS | {"comment": "施策の進捗（担当者の入力。上書き）"},)
     company_id: Mapped[int] = _company_fk()
     initiative_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    # 0＝未着手、1＝実行中
     exec: Mapped[int] = mapped_column(SmallInteger, default=0)
     verify: Mapped[int] = mapped_column(SmallInteger, default=0)
     kpi_cur: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -183,43 +190,66 @@ class InitiativeProgress(Base):
     updated_at: Mapped[datetime] = mapped_column(PRECISE)
 
 
-# ---------------------------------------------------------------- 確定版・その他
+# ---------------------------------------------------------------- 申請・版・作成中の申請
+
+BIGID = BigInteger().with_variant(Integer, "sqlite")
 
 
-class ProgressConfirmation(Base):
-    __tablename__ = "progress_confirmation"
-    __table_args__ = (
-        UniqueConstraint("company_id", "label", name="uq_confirmation_label"),
-        TABLE_ARGS | {"comment": "進捗の確定版（他社と比べる画面に出る）"},
-    )
-    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
+class StrategyApplication(Base):
+    __tablename__ = "strategy_application"
+    __table_args__ = (TABLE_ARGS | {"comment": "申請（作り直すたびに増える。日付で呼ぶ）"},)
+    id: Mapped[int] = mapped_column(BIGID, primary_key=True, autoincrement=True)
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey("company.id"), index=True)
+    submitted_at: Mapped[datetime] = mapped_column(PRECISE)
+    # 置き換わった日時（現在の申請は NULL）
+    replaced_at: Mapped[datetime | None] = mapped_column(PRECISE, nullable=True)
+    # 申請の内容（StrategyData）
+    body: Mapped[dict] = mapped_column(JSON)
+
+
+class MapVersion(Base):
+    __tablename__ = "map_version"
+    __table_args__ = (
+        UniqueConstraint("application_id", "no", name="uq_version_no"),
+        UniqueConstraint("application_id", "label", name="uq_version_label"),
+        TABLE_ARGS | {"comment": "版（戦略マップと進捗の断面。申請の中で第1版・第2版…）"},
+    )
+    id: Mapped[int] = mapped_column(BIGID, primary_key=True, autoincrement=True)
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("company.id"), index=True)
+    application_id: Mapped[int] = mapped_column(BIGID, ForeignKey("strategy_application.id"), index=True)
+    no: Mapped[int] = mapped_column(Integer)
     label: Mapped[str] = mapped_column(String(50))
     as_of: Mapped[date] = mapped_column(Date)
+    # start＝作成時点、manual＝手で作った、end＝置き換え時点
+    kind: Mapped[str] = mapped_column(
+        Enum("start", "manual", "end", name="version_kind", native_enum=True, create_constraint=False)
+    )
+    # その時点の戦略＋進捗（StrategyData）
     body: Mapped[dict] = mapped_column(JSON)
-    confirmed_by: Mapped[str] = mapped_column(String(100), default="")
-    confirmed_at: Mapped[datetime] = mapped_column(PRECISE)
-    # 初期データの確定版（出発点。消せない）
-    is_seed: Mapped[bool] = mapped_column(Boolean, default=False)
+    # その時点の抽象化テーブル（全社の行）
+    open_body: Mapped[list] = mapped_column(JSON)
+    created_by: Mapped[str] = mapped_column(String(100), default="")
+    created_at: Mapped[datetime] = mapped_column(PRECISE)
 
 
-class StrategyVersion(Base):
-    __tablename__ = "strategy_version"
-    __table_args__ = (TABLE_ARGS | {"comment": "申請の版"},)
-    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
-    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("company.id"), index=True)
-    saved_at: Mapped[datetime] = mapped_column(DateTime)
+class StrategyDraft(Base):
+    __tablename__ = "strategy_draft"
+    __table_args__ = (TABLE_ARGS | {"comment": "作成中の申請（会社ごとに1行）"},)
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("company.id"), primary_key=True)
     body: Mapped[dict] = mapped_column(JSON)
+    # 引き継いだ申請のID（空から作ったときは NULL）
+    carry_from: Mapped[int | None] = mapped_column(BIGID, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(PRECISE)
 
 
-class ChangeNote(Base):
-    __tablename__ = "change_note"
-    __table_args__ = (TABLE_ARGS | {"comment": "初期データの「変わったこと」"},)
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    company_id: Mapped[int] = mapped_column(Integer, ForeignKey("company.id"), index=True)
-    confirmation_id: Mapped[int | None] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), nullable=True)
-    text: Mapped[str] = mapped_column(String(500))
-    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+class SchemaMeta(Base):
+    __tablename__ = "schema_meta"
+    __table_args__ = (TABLE_ARGS | {"comment": "スキーマの版（古ければ起動時に作り直す）"},)
+    key: Mapped[str] = mapped_column(String(40), primary_key=True)
+    value: Mapped[str] = mapped_column(String(40))
+
+
+# ---------------------------------------------------------------- その他
 
 
 class ReferenceData(Base):
@@ -234,7 +264,7 @@ class ReferenceData(Base):
 
 
 class OpenBusinessSnapshot(Base):
-    """各社の最新の確定版から、事業ごとに段階・進み・件数だけを抜き出したもの。
+    """各社の今の戦略と日々の進捗から、事業ごとに段階・進み・件数だけを抜き出したもの。
 
     本番は「会社ごとのセキュアなDB → 夜間バッチ → オープンなDB」の想定。
     MVPは1つのDBの中のこのテーブルを、オープンなDBの代わりにする。
@@ -255,9 +285,10 @@ class OpenBusinessSnapshot(Base):
     bu_id: Mapped[str] = mapped_column(String(40))
     bu_name: Mapped[str] = mapped_column(String(100), default="")
     bu_industry: Mapped[str] = mapped_column(String(100), default="")
-    # どの確定版から抜いたか
+    # 「現在」（日々の進捗から抜いた）。ダミーは「2026年3月末」など
     as_of_label: Mapped[str] = mapped_column(String(50), default="")
     as_of: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # その会社のデータを最後に更新した日時
     confirmed_at: Mapped[datetime] = mapped_column(DateTime)
     # 段階：道筋にある試行・実行中のデジタル施策のうち一番上（0＝なし、1〜3）
     stage: Mapped[int] = mapped_column(SmallInteger, default=0)

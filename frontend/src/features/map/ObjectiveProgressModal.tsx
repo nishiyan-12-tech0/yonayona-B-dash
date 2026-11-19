@@ -40,7 +40,9 @@ export function ObjectiveProgressModal({
   const dirty = JSON.stringify(f) !== JSON.stringify(init);
 
   // 入力した値で「指標の動き」を先に計算する。横ばい・悪化なら理由を必須に
-  const st = indState({ ...obj, cur: f.value }, "now");
+  // （保存すると担当者の入力になるので、申請時点と同じ値は「横ばい」として扱う）
+  const st0 = indState({ ...obj, cur: f.value }, "now");
+  const st = st0 === "start" ? "flat" : st0;
   const needReason = st === "flat" || st === "worse";
 
   const missing = [
@@ -82,7 +84,7 @@ export function ObjectiveProgressModal({
       onClose={onClose}
     >
       <p className="crumb small muted">
-        指標：{obj.kpi}　基準 {obj.base || "—"} → 目標 {obj.target || "—"}（
+        指標：{obj.kpi}　申請時点 {obj.base || "—"} → 目標 {obj.target || "—"}（
         {obj.due || "期限未設定"}）
       </p>
       <MRow label="指標の今の値" req htmlFor="op-v">
@@ -93,7 +95,7 @@ export function ObjectiveProgressModal({
           onChange={(e) => set({ value: e.target.value })}
         />
         <div className="hint">
-          単位まで書きます（例：月42件、91%）。基準値と比べると
+          単位まで書きます（例：月42件、91%）。申請時点と比べると
           <span className={`is ${st}`} style={{ marginLeft: 4 }}>
             {IS[st]}
           </span>
@@ -145,7 +147,7 @@ export function ObjectiveProgressModal({
       </MRow>
       {err ? <p className="merr">{err}</p> : null}
       <p className="small muted" style={{ margin: "8px 0 0" }}>
-        保存すると戦略マップにすぐ出ます。他社と比べる画面には、「進捗を確定」したときに出ます。
+        保存すると、戦略マップと他社と比べる画面にすぐ出ます。
       </p>
       <div className="mfoot">
         <button className="btn" onClick={onClose} disabled={busy}>

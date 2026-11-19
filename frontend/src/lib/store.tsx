@@ -10,12 +10,18 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ApiError, fetchStrategy, saveStrategy } from "./api";
-import type { Snap, StrategyData } from "./types";
+import {
+  ApiError,
+  fetchApplications,
+  fetchDraft,
+  fetchStrategy,
+  saveDraft,
+} from "./api";
+import type { ApplicationMeta, Snap, StrategyData } from "./types";
 
 /** 画面の表示状態（どの事業・テーマを開いているか、など）。画面を行き来しても保ちます。 */
 export interface UiState {
-  /** 戦略マップ：表示する時点 */
+  /** 戦略マップ：表示する時点（いつも現在。過去は左のサイドメニューから見る） */
   snap: Snap;
   /** 戦略マップ：担当で強調 */
   who: "all" | "biz" | "dx";
@@ -59,22 +65,33 @@ const initialUi: UiState = {
   ebu: null,
 };
 
-/** 申請の保存の状態 */
+/** 作成中の申請の保存の状態 */
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 /** 入力が止まってから保存するまでの時間（ミリ秒） */
 const SAVE_DELAY = 800;
 
 interface Store {
+  /** 現在の申請の戦略と日々の進捗（申請がなければ application が null、事業は空） */
   data: StrategyData;
-  /** 申請内容を書き換えて保存する（入力が止まってから送る）。draft を直接変更してよい */
-  update: (mutate: (draft: StrategyData) => void) => void;
-  /** サーバーから届いたデータで置き換える（保存はしない） */
+  /** サーバーから届いた現在の戦略で置き換える（保存はしない） */
   replace: (data: StrategyData) => void;
-  /** 書きかけの申請があれば、すぐに保存して終わるのを待つ */
+  /** 申請と版の一覧（新しい順。サイドメニューに使う） */
+  apps: ApplicationMeta[];
+  /** 現在の戦略・申請と版の一覧・作成中の申請を読み直す */
+  refresh: () => Promise<void>;
+
+  /** 作成中の申請（なければ null） */
+  draft: StrategyData | null;
+  /** 作成中の申請を書き換えて保存する（入力が止まってから送る）。draft を直接変更してよい */
+  updateDraft: (mutate: (draft: StrategyData) => void) => void;
+  /** 作成中の申請を、サーバーから届いた内容で置き換える（保存はしない。null で消す） */
+  setDraft: (d: StrategyData | null) => void;
+  /** 書きかけがあれば、すぐに保存して終わるのを待つ。失敗したら例外 */
   flush: () => Promise<void>;
   saveState: SaveState;
   saveError: string | null;
+
   ui: UiState;
   setUi: (patch: Partial<UiState>) => void;
 }
@@ -83,30 +100,56 @@ const StoreContext = createContext<Store | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<StrategyData | null>(null);
+  const [apps, setApps] = useState<ApplicationMeta[]>([]);
+  const [draft, setDraftState] = useState<StrategyData | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [ui, setUiState] = useState<UiState>(initialUi);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  /** 最新の申請内容（保存するときに読む） */
+  /** 最新の作成中の申請（保存するときに読む） */
   const latest = useRef<StrategyData | null>(null);
   /** 保存待ちのタイマー */
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** 送っている途中の保存（順番に送る） */
   const chain = useRef<Promise<void>>(Promise.resolve());
+  /** 最後の保存が失敗したか */
+  const failed = useRef<ApiError | null>(null);
+
+  /** 読み込んだものを入れる */
+  const apply = useCallback(
+    (d: StrategyData, a: ApplicationMeta[], dr: StrategyData | null) => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      latest.current = dr;
+      setDraftState(dr);
+      setApps(a);
+      setData(d);
+      setSaveState("idle");
+    },
+    [],
+  );
+
+  const refresh = useCallback(async () => {
+    const [d, a, dr] = await Promise.all([
+      fetchStrategy(),
+      fetchApplications(),
+      fetchDraft(),
+    ]);
+    apply(d, a, dr?.body ?? null);
+  }, [apply]);
 
   const load = useCallback(() => {
-    fetchStrategy()
-      .then((d) => {
-        latest.current = d;
-        setData(d);
-      })
+    Promise.all([fetchStrategy(), fetchApplications(), fetchDraft()])
+      .then(([d, a, dr]) => apply(d, a, dr?.body ?? null))
       .catch((e: unknown) =>
         setLoadError(
           e instanceof ApiError ? e.message : "データを読み込めませんでした",
         ),
       );
-  }, []);
+  }, [apply]);
 
   useEffect(load, [load]);
   const retry = () => {
@@ -120,29 +163,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     if (!snapshot) return chain.current;
     setSaveState("saving");
     chain.current = chain.current
-      .then(() => saveStrategy(snapshot))
+      .then(() => saveDraft(snapshot))
       .then(() => {
+        failed.current = null;
         // 送ったあとに入力が続いていなければ「保存しました」
         if (!timer.current) setSaveState("saved");
         setSaveError(null);
       })
       .catch((e: unknown) => {
+        const err =
+          e instanceof ApiError ? e : new ApiError("保存できませんでした", 0);
+        failed.current = err;
         setSaveState("error");
-        setSaveError(
-          e instanceof ApiError ? e.message : "保存できませんでした",
-        );
+        setSaveError(err.message);
       });
     return chain.current;
   }, []);
 
-  const update = useCallback(
+  const updateDraft = useCallback(
     (mutate: (draft: StrategyData) => void) => {
       const cur = latest.current;
       if (!cur) return;
-      const draft = structuredClone(cur);
-      mutate(draft);
-      latest.current = draft;
-      setData(draft);
+      const next = structuredClone(cur);
+      mutate(next);
+      latest.current = next;
+      setDraftState(next);
       setSaveState("saving");
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(send, SAVE_DELAY);
@@ -150,9 +195,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [send],
   );
 
-  const replace = useCallback((d: StrategyData) => {
+  const setDraft = useCallback((d: StrategyData | null) => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = null;
+    }
     latest.current = d;
-    setData(d);
+    setDraftState(d);
+    setSaveState("idle");
   }, []);
 
   const flush = useCallback(async () => {
@@ -162,7 +212,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } else {
       await chain.current;
     }
+    if (failed.current) throw failed.current;
   }, [send]);
+
+  const replace = useCallback((d: StrategyData) => setData(d), []);
 
   const setUi = useCallback(
     (patch: Partial<UiState>) => setUiState((cur) => ({ ...cur, ...patch })),
@@ -172,9 +225,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const store = useMemo(
     () =>
       data
-        ? { data, update, replace, flush, saveState, saveError, ui, setUi }
+        ? {
+            data,
+            replace,
+            apps,
+            refresh,
+            draft,
+            updateDraft,
+            setDraft,
+            flush,
+            saveState,
+            saveError,
+            ui,
+            setUi,
+          }
         : null,
-    [data, update, replace, flush, saveState, saveError, ui, setUi],
+    [
+      data,
+      replace,
+      apps,
+      refresh,
+      draft,
+      updateDraft,
+      setDraft,
+      flush,
+      saveState,
+      saveError,
+      ui,
+      setUi,
+    ],
   );
 
   if (loadError) {
