@@ -71,7 +71,7 @@ export function GridChart({
         </text>
       ))}
       <text x={L + CW} y={28} fontSize="10.5" fill="var(--muted)">
-        道筋の進み（先行）
+        道筋の進み
       </text>
       <text
         x={W - 8}
@@ -80,7 +80,7 @@ export function GridChart({
         fontSize="10.5"
         fill="var(--muted)"
       >
-        （遅行）→
+        →
       </text>
       {ROWS.map((st) => (
         <g key={st}>

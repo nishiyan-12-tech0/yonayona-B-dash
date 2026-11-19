@@ -69,7 +69,16 @@ export function CompareView() {
   const peerData = useAsync(fetchPeers);
   /** 確定版（新しい順）。この画面は確定版だけで描く（ふだんの保存は出さない） */
   const versions = useAsync(fetchConfirmedVersions);
-  if (!peerData || !versions || !versions.length) return null;
+  if (!peerData || !versions) return null;
+  if (!versions.length) {
+    return (
+      <section className="view on" aria-label="他社と比べる">
+        <div className="card">
+          まだ確定した進捗がありません。戦略マップで「進捗を確定」すると、ここに出ます。
+        </div>
+      </section>
+    );
+  }
   /** いちばん新しい確定版 */
   const data: StrategyData = versions[0].data;
   /** その1つ前の確定版 */
@@ -92,17 +101,21 @@ export function CompareView() {
 
   // 項目ごとの比較（自社は単純な割合。売上での重み付けはしない）
   const objs = allObjs(data).filter((o) => o.persp !== "fi");
-  const reach =
+  /** 分母が0のときは0（入力の途中で確定しても NaN にしない） */
+  const ratio = (n: number, d: number) => (d ? n / d : 0);
+  const reach = ratio(
     objs.filter((o) => {
       const bu = buOfObj(data, o.id);
       return (
         !!bu &&
         [...down(bu, o.id)].some((id) => objById(data, id)?.persp === "fi")
       );
-    }).length / objs.length;
+    }).length,
+    objs.length,
+  );
   const its = data.inits.filter((i) => i.attach.length);
   const share = (fn: (i: (typeof its)[number]) => boolean) =>
-    its.filter(fn).length / its.length;
+    ratio(its.filter(fn).length, its.length);
   const avg = peerData.avg;
   const rows: [string, number, number][] = [
     ["財務までつながる目標", pct(reach), avg.reach],
@@ -126,7 +139,7 @@ export function CompareView() {
   const own = Object.fromEntries(
     (["lg", "pr", "cu", "fi"] as const).map((p) => [
       p,
-      Math.round((kp.filter((o) => o.persp === p).length / kp.length) * 100),
+      Math.round(ratio(kp.filter((o) => o.persp === p).length, kp.length) * 100),
     ]),
   ) as PerspShare;
 

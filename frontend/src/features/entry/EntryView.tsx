@@ -78,7 +78,9 @@ export function EntryView() {
           <div id="form">
             <h2>
               {step}. {s.t}
-              {needBu ? <span className="small muted">　{bu.name}</span> : null}
+              {needBu && bu ? (
+                <span className="small muted">　{bu.name}</span>
+              ) : null}
             </h2>
             <p className="stepq">{s.q}</p>
             <div className="lead">
@@ -89,7 +91,13 @@ export function EntryView() {
               <b>決まると</b>
               <span>{s.then}</span>
             </div>
-            <Form data={data} bu={bu} update={update} />
+            {needBu && !bu ? (
+              <p className="muted">
+                まず「0. 会社と事業」で、戦略を描く事業を追加してください。
+              </p>
+            ) : (
+              <Form data={data} bu={bu} update={update} />
+            )}
           </div>
           <div className="btns">
             <button

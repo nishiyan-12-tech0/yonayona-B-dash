@@ -27,8 +27,22 @@ import { useLinks } from "./useLinks";
 
 const BODY_PERSPS: Persp[] = ["lg", "pr", "cu"];
 
-/** ② 戦略マップ */
+/** ② 戦略マップ。事業がまだ1つもなければ、申請への案内だけを出す */
 export function MapView() {
+  const { data } = useStore();
+  if (!data.bus.length) {
+    return (
+      <section className="view on" aria-label="戦略マップ">
+        <div className="card">
+          まだ事業がありません。「申請」で事業と目標を入力すると、ここに戦略マップが出ます。
+        </div>
+      </section>
+    );
+  }
+  return <MapBody />;
+}
+
+function MapBody() {
   const { data, ui, setUi } = useStore();
   const mapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -330,10 +344,12 @@ export function MapView() {
                 {allv ? <div className="x" /> : null}
                 {PERSPS.map((p) => (
                   <div className="c" key={p}>
-                    <b>{PL[p]}</b>
-                    <Info>
-                      バランス・スコアカード（BSC）の「{PERSP[p]}の視点」にあたる列です。
-                    </Info>
+                    <b>
+                      {PL[p]}
+                      <Info>
+                        バランス・スコアカード（BSC）の「{PERSP[p]}の視点」にあたる列です。
+                      </Info>
+                    </b>
                   </div>
                 ))}
               </div>
