@@ -21,6 +21,7 @@ import {
   type MapCtx,
 } from "./cards";
 import { ConfirmModal } from "./ConfirmModal";
+import { Info } from "@/components/Info";
 import { Panel } from "./Panel";
 import { useLinks } from "./useLinks";
 
@@ -172,7 +173,7 @@ export function MapView() {
           </div>
         </div>
         <div className="grp">
-          <b>担当で強調（もう一度押すと解除）</b>
+          <b>担当で強調</b>
           <div className="seg" id="who">
             {(["biz", "dx"] as const).map((w) => (
               <button
@@ -188,7 +189,7 @@ export function MapView() {
           </div>
         </div>
         <div className="grp">
-          <b>DXの段階で強調（もう一度押すと解除）</b>
+          <b>DXの段階で強調</b>
           <div className="seg" id="stg">
             {[
               { s: 1, n: "1" },
@@ -226,8 +227,7 @@ export function MapView() {
         {ui.snap === "mar" ? (
           <div className="fnote on">
             <span>
-              <b>{prev}</b>
-              （前回の確定）の時点を表示しています。進捗の入力は「現在」に戻すとできます
+              <b>{prev}</b>（前回の確定）を表示中
             </span>
             <button onClick={() => setUi({ snap: "now" })}>現在に戻す</button>
           </div>
@@ -293,9 +293,7 @@ export function MapView() {
                 <dd>{b.future}</dd>
               </dl>
               <div>
-                <div className="hl2">
-                  主要な成果指標（このテーマの先にある目標）
-                </div>
+                <div className="hl2">主要な成果指標</div>
                 <div className="mets">
                   {b.objs
                     .filter((o) => o.theme === cur.id && o.persp === "cu")
@@ -333,7 +331,9 @@ export function MapView() {
                 {PERSPS.map((p) => (
                   <div className="c" key={p}>
                     <b>{PL[p]}</b>
-                    <span>{PERSP[p]}の視点</span>
+                    <Info>
+                      バランス・スコアカード（BSC）の「{PERSP[p]}の視点」にあたる列です。
+                    </Info>
                   </div>
                 ))}
               </div>
@@ -347,9 +347,7 @@ export function MapView() {
                         全社
                         <span>{co.name.replace("株式会社（架空）", "")}</span>
                       </div>
-                      <div className="goal">
-                        各事業の「売上・利益への貢献」の先にある、全社の目標
-                      </div>
+                      <div className="goal" />
                       <div>
                         <ObjCard ctx={ctx} obj={data.corp.fin} corp />
                       </div>
@@ -423,7 +421,7 @@ export function MapView() {
             data.diffs.map((d, n) => <li key={n}>{d}</li>)
           ) : (
             <li className="muted">
-              まだありません。進捗を入力すると、ここに出ます
+              なし
             </li>
           )}
         </ul>
@@ -462,9 +460,7 @@ function ThemeCell({ col, children }: { col: number; children: ReactNode[] }) {
       {children.length ? (
         children
       ) : (
-        <div className="empty">
-          このテーマでは、ここに目標は登録されていません
-        </div>
+        <div className="empty">—</div>
       )}
     </div>
   );

@@ -7,10 +7,10 @@ import { StoreProvider } from "@/lib/store";
 import { Logo } from "./Logo";
 
 const TABS = [
-  { href: "/entry", label: "① 申請" },
-  { href: "/map", label: "② 戦略マップ" },
-  { href: "/compare", label: "③ 他社と比べる" },
-  { href: "/meti", label: "④ 経産省の画面" },
+  { href: "/entry", label: "申請" },
+  { href: "/map", label: "戦略マップ" },
+  { href: "/compare", label: "他社と比べる" },
+  { href: "/meti", label: "参加企業の集計" },
 ];
 
 /** 全画面で共通の枠（ロゴと画面の切り替え） */
@@ -21,9 +21,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="bar">
         <div className="brand">
           <Logo />
-          <div className="sub">
-            <b>DX戦略マップ</b>事業の目標までの道筋を描く
-          </div>
         </div>
       </div>
       <nav className="tabs" aria-label="画面の切り替え">

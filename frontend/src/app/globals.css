@@ -95,13 +95,11 @@ textarea {
   gap: 22px;
   flex-wrap: nowrap;
 }
-.brand svg {
+.brand .logo {
   height: 48px;
-  width: 159px;
-  min-width: 159px;
+  width: auto;
   flex: none;
   display: block;
-  overflow: visible;
 }
 .brand .lt {
   fill: var(--ink);
@@ -2170,4 +2168,50 @@ td input[type="checkbox"] {
 }
 .savest.err {
   color: var(--ng);
+}
+
+/* ----- 補足の「ⓘ」（components/Info.tsx） ----- */
+span.info {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.info .info-btn {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--faint);
+  background: #fff;
+  color: var(--muted);
+  font: italic 700 10.5px/1 Georgia, "Times New Roman", serif;
+  padding: 0;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.info .info-btn:hover,
+.info .info-btn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+.info .info-pop {
+  position: fixed;
+  z-index: 1000;
+  display: block;
+  background: var(--ink);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.65;
+  letter-spacing: normal;
+  text-align: left;
+  white-space: normal;
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(20, 33, 61, 0.18);
+  pointer-events: none;
 }

@@ -30,6 +30,7 @@ import {
   stAt,
 } from "@/lib/logic";
 import type { Link } from "@/lib/types";
+import { Info } from "@/components/Info";
 import { ActButton, nowLabel, prevLabel, type MapCtx } from "./cards";
 import { InitiativeProgressModal } from "./InitiativeProgressModal";
 import { ObjectiveProgressModal } from "./ObjectiveProgressModal";
@@ -216,11 +217,13 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               ))}
             </ul>
           ) : (
-            <p className="small muted">デジタルの施策はまだ付いていません。</p>
+            <p className="small muted">デジタルの施策：なし</p>
           )}
-          <p className="small muted">
-            経路上の判定（他社比較の「道筋の進み」に使う値）：{progText(pg)}
-            。実行中の施策から順に、途中の指標が基準値より改善しているところまでを数えたもので、事業全体の順調さや施策の成果を示すものではありません。
+          <p className="small">
+            経路上の判定：{progText(pg)}
+            <Info>
+              他社比較の「道筋の進み」に使う値です。実行中の施策から順に、途中の指標が基準値より改善しているところまでを数えたもので、事業全体の順調さや施策の成果を示すものではありません。
+            </Info>
           </p>
         </details>
       </>
@@ -345,7 +348,7 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               </div>
             ) : (
               <p className="small muted" style={{ margin: 0 }}>
-                この目標に直接付いている施策はありません。
+                なし
               </p>
             )}
           </>
@@ -403,10 +406,14 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               </dd>
             </dl>
             {o.kpi ? (
-              <p className="small muted">
-                経路上の判定（他社比較の「道筋の進み」に使う）：実行中の施策からこの目標まで、途中の目標の指標が順に改善して
-                {reachedSet(data, b, snap).has(a) ? "います" : "いません"}
-                。指標そのものの動きとは別の判定で、施策の成果を示すものではありません。
+              <p className="small">
+                経路上の判定：
+                {reachedSet(data, b, snap).has(a)
+                  ? "施策からここまで、指標が順に改善"
+                  : "ここまでは届いていない"}
+                <Info>
+                  他社比較の「道筋の進み」に使う判定です。実行中の施策からこの目標まで、途中の目標の指標が順に改善しているかを見ます。指標そのものの動きとは別の判定で、施策の成果を示すものではありません。
+                </Info>
               </p>
             ) : null}
           </details>
@@ -454,7 +461,14 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           <dd>{EXEC[s.exec]}</dd>
           <dt>効果の検証</dt>
           <dd>{run ? VERIFY[s.verify] : `まだ対象外（${EXEC[s.exec]}）`}</dd>
-          <dt>施策の指標</dt>
+          <dt>
+            施策の指標
+            {i.digital && first?.persp === "lg" ? (
+              <Info>
+                施策の指標（利用率・導入数など）は「準備がどれだけ整ったか」を表します。事業の成果は、先の目標の指標で見ます。
+              </Info>
+            ) : null}
+          </dt>
           {i.kpi ? (
             <dd>
               {i.kpi}
@@ -526,11 +540,6 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
                 : "デジタル以外の施策"}
             </dd>
           </dl>
-          {i.digital && first?.persp === "lg" ? (
-            <p className="small muted">
-              施策の指標（利用率・導入数など）は「準備がどれだけ整ったか」を表します。事業の成果は、先の目標の指標で見ます。
-            </p>
-          ) : null}
         </details>
       </>
     );

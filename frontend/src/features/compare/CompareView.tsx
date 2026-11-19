@@ -23,6 +23,7 @@ import type {
 import { useAsync } from "@/lib/useAsync";
 import { GridChart, type GridPoint } from "@/components/GridChart";
 import { Heat } from "@/components/Heat";
+import { Info } from "@/components/Info";
 import { PerspStack } from "@/components/PerspStack";
 import { Track } from "@/components/Track";
 
@@ -104,19 +105,19 @@ export function CompareView() {
     its.filter(fn).length / its.length;
   const avg = peerData.avg;
   const rows: [string, number, number][] = [
-    ["財務の目標までつながっている目標", pct(reach), avg.reach],
+    ["財務までつながる目標", pct(reach), avg.reach],
     [
-      "実行条件（予算・工数・権限・データの提供者）の確保がある施策",
+      "実行条件の確保がある施策",
       pct(share((i) => i.checks.condition)),
       avg.condition,
     ],
     [
-      "検証と次の判断日が決まっている施策",
+      "検証日が決まっている施策",
       pct(share((i) => i.checks.review)),
       avg.review,
     ],
     [
-      "検証が済んだ施策（効果あり・なし）",
+      "検証が済んだ施策",
       pct(share((i) => i.verify >= 2)),
       avg.verified,
     ],
@@ -134,11 +135,10 @@ export function CompareView() {
       <div className="card row">
         <div>
           <b>他社と比べる</b>
-          <span className="muted small">
-            　他社：年度末の集計（2026年3月末）／自社：確定した進捗（最新：
-            {latestLabel}
-            ）。ふだんの保存は、戦略マップで「進捗を確定」すると出ます
-          </span>
+          <span className="muted small">　最新の確定：{latestLabel}</span>
+          <Info>
+            他社は年度末の集計（2026年3月末）、自社は確定した進捗で比べます。ふだんの保存は出ません。戦略マップで「進捗を確定」すると、ここに反映されます。
+          </Info>
         </div>
         <span className="small muted" style={{ marginLeft: "auto" }}>
           比べる相手
@@ -160,7 +160,12 @@ export function CompareView() {
       </div>
       <div className="cmpgrid">
         <div className="card">
-          <h2>道筋のどこまで進んだか × DXの段階</h2>
+          <h2>
+            道筋のどこまで進んだか × DXの段階
+            <Info>
+              点は事業です。横は、道筋のどこまで進んだか（施策から順にたどり、指標が基準値から目標の方向へ動いたところまで。途中が動いていないと、その先は数えません）。縦は、その事業の道筋にある試行・実行中のデジタル施策のうち、一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。
+            </Info>
+          </h2>
           <div id="grid">
             <GridChart
               cells={cells}
@@ -176,31 +181,24 @@ export function CompareView() {
               ))}
               <span>
                 塗り＝{latestLabel}
-                {versions.length > 1
-                  ? `／白抜き＝それより前の確定版（${versions
-                      .slice(1)
-                      .map((v) => v.label)
-                      .join("・")}）`
-                  : ""}
+                {versions.length > 1 ? "　白抜き＝前回まで" : ""}
               </span>
-              <span>数字＝比べる相手（{peers.length}事業・匿名）の割合</span>
+              <span>数字＝比べる相手の割合（%）</span>
             </div>
           </div>
-          <p className="small muted" style={{ margin: "6px 0 0" }}>
-            点＝事業。<b>横</b>
-            ：道筋のどこまで進んだか。施策から順にたどり、指標が基準値から目標の方向へ動いたところまで（途中が動いていないと、その先は数えません）。
-            <b>縦</b>
-            ：その事業の道筋にある、試行・実行中のデジタル施策のうち一番上の段階（IPAの3段階）。マスの濃さと数字は、比べる相手の事業がそこにいる割合です。どちらも戦略マップから自動で出します。
-          </p>
         </div>
         <div className="card">
-          <h2>自社の事業</h2>
+          <h2>
+            自社の事業
+            <Info>
+              試行・実行中のデジタル施策がない事業は、左のマス目には出ません。
+            </Info>
+          </h2>
           <div className="bul" id="bulist">
             {data.bus.map((b, n) => {
               const p = progOf(data, b, "now");
               const old = before?.bus.find((x) => x.id === b.id);
               const p0 = before && old ? progOf(before, old, "now") : p;
-              const st = stageTop(data, b, "now");
               return (
                 <div key={b.id}>
                   <h3>
@@ -213,9 +211,6 @@ export function CompareView() {
                   <div className="small">
                     道筋の進み：{p0 !== p ? PROG[p0] + " → " : ""}
                     <b>{p ? PROG[p] + "まで" : PROG[0]}</b>
-                    {st
-                      ? ""
-                      : "（試行・実行中のデジタル施策がないため、マス目には出ません）"}
                   </div>
                   <Track p={p} was={p0} />
                 </div>
@@ -226,7 +221,12 @@ export function CompareView() {
       </div>
       <div className="cmpgrid">
         <div className="card">
-          <h2>項目ごとの比較</h2>
+          <h2>
+            項目ごとの比較
+            <Info>
+              施策・目標の件数は会社ごとに切り分け方が違うため、割合だけで比べます。財務までつながる目標＝財務の目標まで矢印がつながっている目標。実行条件＝予算・工数・権限・データの提供者。検証日＝検証と次の判断をする日。検証が済んだ＝効果あり・なしのどちらかが出たもの。
+            </Info>
+          </h2>
           <div className="bars" id="bars">
             {rows.map(([t, a, b]) => (
               <div key={t}>
@@ -248,8 +248,24 @@ export function CompareView() {
               </div>
             ))}
             <div>
-              <div className="bt">
-                指標の視点別の構成（学習と成長／業務プロセス／顧客／財務）
+              <div className="bt">指標の視点別の構成</div>
+              <div className="legend" style={{ marginBottom: 4 }}>
+                <span>
+                  <span className="sw" style={swatch("var(--cyan)")} />
+                  学習と成長
+                </span>
+                <span>
+                  <span className="sw" style={swatch("var(--accent-2)")} />
+                  業務プロセス
+                </span>
+                <span>
+                  <span className="sw" style={swatch("var(--accent)")} />
+                  顧客
+                </span>
+                <span>
+                  <span className="sw" style={swatch("var(--gray)")} />
+                  財務
+                </span>
               </div>
               <PerspStack share={own} />
               <div style={{ height: 4 }} />
@@ -269,25 +285,21 @@ export function CompareView() {
               比べる相手の平均
             </span>
           </div>
-          <p className="small muted" style={{ margin: "8px 0 0" }}>
-            施策・目標の件数は会社ごとに切り分け方が違うため、割合だけで比べます。
-          </p>
         </div>
         <div className="card">
-          <h2>道筋にあるDX（IPAの7項目）</h2>
+          <h2>
+            道筋にあるDX（IPAの7項目）
+            <Info>
+              その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「—」は、その項目の施策がまだないところ。
+              <br />
+              1. アナログ・物理データのデジタル化／2. 業務の効率化による生産性の向上／3. 既存製品・サービスの高付加価値化／4. 新規製品・サービスの創出／5. 組織横断／全体の業務・製造プロセスのデジタル化／6. 顧客起点の価値創出によるビジネスモデルの根本的な変革／7. 企業文化や組織マインドの根本的な変革
+              <br />
+              出典：IPA『DX動向2026』データ集 p.2
+            </Info>
+          </h2>
           <div id="heat">
             <Heat data={data} snap="now" />
           </div>
-          <p className="small muted" style={{ margin: "8px 0 0" }}>
-            その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「—」は、その項目の施策がまだないところ。項目：1.
-            アナログ・物理データのデジタル化／2.
-            業務の効率化による生産性の向上／3.
-            既存製品・サービスの高付加価値化／4. 新規製品・サービスの創出／5.
-            組織横断／全体の業務・製造プロセスのデジタル化／6.
-            顧客起点の価値創出によるビジネスモデルの根本的な変革／7.
-            企業文化や組織マインドの根本的な変革（IPA『DX動向2026』データ集
-            p.2）
-          </p>
         </div>
       </div>
     </section>
