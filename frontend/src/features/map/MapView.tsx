@@ -12,7 +12,7 @@ import {
   type ReactNode,
 } from "react";
 import { fetchVersion } from "@/lib/api";
-import { HZ, OWN, PCOL, PERSP, PERSPS, PIDX, PL, STAGE } from "@/lib/constants";
+import { HZ, PCOL, PERSP, PERSPS, PIDX, PL } from "@/lib/constants";
 import { focusSets, hereSet, objById, themeFin } from "@/lib/logic";
 import { useStore } from "@/lib/store";
 import type { BusinessUnit, Objective, Persp, StrategyData } from "@/lib/types";
@@ -96,8 +96,8 @@ function MapBody({
   const allv = !cur;
 
   const focus = useMemo(
-    () => focusSets(data, { sel: ui.sel, stg: ui.stg, who: ui.who }),
-    [data, ui.sel, ui.stg, ui.who],
+    () => focusSets(data, { sel: ui.sel, stg: 0, who: "all" }),
+    [data, ui.sel],
   );
   /** 表示が切り替わったら、箱と矢印を左から順に出し直す */
   const enterKey = `${ui.view}-${b.id}-${t?.id ?? ""}`;
@@ -109,7 +109,7 @@ function MapBody({
     data,
     snap: "now",
     editable,
-    showIpa: ui.ipa,
+    showIpa: false,
     sel: ui.sel,
     focus,
     here,
@@ -144,12 +144,6 @@ function MapBody({
     }
   };
 
-  const highlight =
-    ui.who !== "all"
-      ? `${OWN[ui.who]}が主担当の目標・施策`
-      : ui.stg
-        ? `${STAGE[ui.stg]}の施策`
-        : "";
   const cards = (os: Objective[]) =>
     os.map((o) => <ObjCard key={o.id} ctx={ctx} obj={o} />);
 
@@ -181,15 +175,6 @@ function MapBody({
             全体マップ
           </button>
         </div>
-        <button
-          className="lnk"
-          id="optbtn"
-          aria-controls="opts"
-          aria-expanded={ui.opt}
-          onClick={() => setUi({ opt: !ui.opt })}
-        >
-          表示オプション
-        </button>
         {editable ? (
           <button
             className="btn sm pri"
@@ -202,69 +187,6 @@ function MapBody({
         <span className="co" id="m-co">
           {co.name}
         </span>
-      </div>
-
-      <div className="card opts" id="opts" hidden={!ui.opt}>
-        <div className="grp">
-          <b>担当で強調</b>
-          <div className="seg" id="who">
-            {(["biz", "dx"] as const).map((w) => (
-              <button
-                key={w}
-                aria-pressed={ui.who === w}
-                onClick={() =>
-                  setUi({ who: ui.who === w ? "all" : w, stg: 0, sel: null })
-                }
-              >
-                {OWN[w]}の担当
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="grp">
-          <b>DXの段階で強調</b>
-          <div className="seg" id="stg">
-            {[
-              { s: 1, n: "1" },
-              { s: 2, n: "2・3" },
-              { s: 3, n: "4〜7" },
-            ].map(({ s, n }) => (
-              <button
-                key={s}
-                aria-pressed={ui.stg === s}
-                onClick={() =>
-                  setUi({ stg: ui.stg === s ? 0 : s, who: "all", sel: null })
-                }
-              >
-                <span className={`ipa s${s}`}>{n}</span>
-                {STAGE[s]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="grp">
-          <b>分類</b>
-          <div className="seg">
-            <button
-              id="ipatog"
-              aria-pressed={ui.ipa}
-              onClick={() => setUi({ ipa: !ui.ipa })}
-            >
-              施策にIPAの取組項目の番号を表示
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div id="fnotes">
-        {highlight ? (
-          <div className="fnote on">
-            <span>
-              <b>{highlight}</b>と、そこから先の道筋を強調しています
-            </span>
-            <button onClick={() => setUi({ who: "all", stg: 0 })}>解除</button>
-          </div>
-        ) : null}
       </div>
 
       <div id="hero">

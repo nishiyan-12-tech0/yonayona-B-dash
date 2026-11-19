@@ -514,7 +514,7 @@
           "condition": true,
           "review": false
         },
-        "ev": "産業機器事業 事業計画会議（2026-04-15）",
+        "ev": "産業機器事業 事業計画会議（2025-10-15）",
         "kpi": "連携できた設備の台数",
         "base": "0台",
         "cur": "1,800台",
@@ -539,25 +539,17 @@
         "partner": "情報システム部",
         "digital": true,
         "ipa": 5,
-        "exec": 2,
-        "verify": 1,
+        "exec": 0,
+        "verify": 0,
         "checks": {
           "condition": true,
           "review": false
         },
-        "ev": "経営会議（2026-02-10）",
+        "ev": "経営会議（2025-10-10）",
         "kpi": "基盤につながった事業の数",
         "base": "0",
         "cur": "2",
-        "target": "3",
-        "prev": {
-          "exec": 2,
-          "verify": 0,
-          "checks": {
-            "condition": false,
-            "review": false
-          }
-        }
+        "target": "3"
       },
       {
         "id": "i2",
@@ -575,7 +567,7 @@
           "condition": true,
           "review": true
         },
-        "ev": "産業機器事業 営業会議（2026-05-08）",
+        "ev": "産業機器事業 営業会議（2025-10-08）",
         "kpi": "新しいルールで出した提案の割合",
         "prev": {
           "exec": 0,
@@ -604,7 +596,7 @@
           "condition": false,
           "review": false
         },
-        "ev": "産業機器事業 事業計画会議（2026-04-15）",
+        "ev": "産業機器事業 事業計画会議（2025-10-15）",
         "kpi": "設計した予防型メニューの数",
         "base": "0件",
         "target": "3件"
@@ -625,7 +617,7 @@
           "condition": true,
           "review": false
         },
-        "ev": "製造部 定例（2026-03-12）",
+        "ev": "製造部 定例（2025-10-12）",
         "kpi": "自動収集を始めた工程の数",
         "base": "0",
         "cur": "6",
@@ -655,7 +647,7 @@
           "condition": true,
           "review": false
         },
-        "ev": "製造部 定例（2026-03-12）",
+        "ev": "製造部 定例（2025-10-12）",
         "kpi": "標準手順で段取りできる作業者の割合",
         "prev": {
           "exec": 1,
@@ -678,25 +670,17 @@
         "partner": "計測機器事業部",
         "digital": true,
         "ipa": 4,
-        "exec": 1,
-        "verify": 1,
+        "exec": 0,
+        "verify": 0,
         "checks": {
           "condition": false,
           "review": false
         },
-        "ev": "計測機器事業 開発会議（2026-04-22）",
+        "ev": "計測機器事業 開発会議（2025-10-22）",
         "kpi": "PoCで見つけた改良点",
         "base": "0件",
         "cur": "4件",
-        "target": "10件",
-        "prev": {
-          "exec": 0,
-          "verify": 0,
-          "checks": {
-            "condition": false,
-            "review": false
-          }
-        }
+        "target": "10件"
       },
       {
         "id": "i7",
@@ -708,13 +692,13 @@
         "partner": "計測機器事業部",
         "digital": true,
         "ipa": 7,
-        "exec": 2,
+        "exec": 0,
         "verify": 0,
         "checks": {
           "condition": true,
           "review": false
         },
-        "ev": "計測機器事業 開発会議（2026-04-22）",
+        "ev": "計測機器事業 開発会議（2025-10-22）",
         "kpi": "受講者数",
         "base": "0人",
         "cur": "26人",
@@ -730,22 +714,14 @@
         "partner": "事業部",
         "digital": true,
         "ipa": 4,
-        "exec": 1,
-        "verify": 1,
+        "exec": 0,
+        "verify": 0,
         "checks": {
           "condition": false,
           "review": false
         },
-        "ev": "新事業推進会議（2026-05-20）",
+        "ev": "新事業推進会議（2025-10-20）",
         "kpi": "故障予知の的中率",
-        "prev": {
-          "exec": 0,
-          "verify": 0,
-          "checks": {
-            "condition": false,
-            "review": false
-          }
-        },
         "base": "0%",
         "target": "80%"
       },
@@ -765,10 +741,54 @@
           "condition": false,
           "review": false
         },
-        "ev": "新事業推進会議（2026-05-20）",
+        "ev": "新事業推進会議（2025-10-20）",
         "kpi": "ポータルに登録した顧客の数",
         "base": "0社",
         "target": "50社"
+      },
+      {
+        "id": "i12",
+        "name": "点検記録の電子化",
+        "attach": [
+          "b3lg1"
+        ],
+        "owner": "dx",
+        "partner": "事業部",
+        "digital": true,
+        "ipa": 1,
+        "exec": 2,
+        "verify": 0,
+        "checks": {
+          "condition": true,
+          "review": true
+        },
+        "ev": "新事業推進会議（2025-10-15）",
+        "kpi": "電子化した点検記録の割合",
+        "base": "30%",
+        "cur": "30%",
+        "target": "100%"
+      },
+      {
+        "id": "i13",
+        "name": "検査成績書の電子化",
+        "attach": [
+          "b2lg2"
+        ],
+        "owner": "dx",
+        "partner": "計測機器事業部",
+        "digital": true,
+        "ipa": 1,
+        "exec": 2,
+        "verify": 0,
+        "checks": {
+          "condition": true,
+          "review": true
+        },
+        "ev": "計測機器事業 開発会議（2025-10-22）",
+        "kpi": "電子化した検査成績書の割合",
+        "base": "20%",
+        "cur": "20%",
+        "target": "100%"
       }
     ],
     "diffs": [
