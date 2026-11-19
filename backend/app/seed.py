@@ -107,24 +107,6 @@ def _schema_is_current(conn) -> bool:
     return row is not None and row[0] == SCHEMA_VERSION
 
 
-# あとから足した列。スキーマの版を上げる（＝全データを消して作り直す）代わりに、なければ足す
-ADDED_COLUMNS = {
-    "open_business_snapshot": [("mix_plan", "SMALLINT NULL"), ("mix_actual", "SMALLINT NULL")],
-}
-
-
-def _add_missing_columns(conn) -> None:
-    insp = inspect(conn)
-    for table, cols in ADDED_COLUMNS.items():
-        if not insp.has_table(table):
-            continue
-        have = {c["name"] for c in insp.get_columns(table)}
-        for name, ddl in cols:
-            if name not in have:
-                log.warning("列を追加します：%s.%s", table, name)
-                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}"))
-
-
 def rebuild_schema(conn) -> None:
     """テーブルを全部消して作り直す（中のデータは消える。MVPなので初期データに戻してよい）"""
     is_mysql = conn.dialect.name == "mysql"
@@ -152,12 +134,10 @@ def ensure_seeded(cid: int) -> bool:
                 log.warning("スキーマが古いので、テーブルを作り直します（版 %s）", SCHEMA_VERSION)
                 rebuild_schema(conn)
             m.Base.metadata.create_all(conn)
-            _add_missing_columns(conn)
             conn.commit()
             with Session(bind=conn) as s:
                 if s.scalars(select(m.Company).where(m.Company.id == cid)).first() is not None:
                     open_data.ensure_dummy(s)
-                    open_data.backfill_mix(s)
                     s.commit()
                     conn.commit()
                     return False

@@ -2242,11 +2242,6 @@ span.info {
   pointer-events: none;
 }
 
-/* 参加企業の集計：企業一覧の自社の行 */
-#cos tr.own td {
-  font-weight: 700;
-  background: var(--accent-soft);
-}
 
 /* ---------------------------------------------------------------- 過去を見る（サイドメニュー） */
 .hbar {
@@ -2741,8 +2736,7 @@ fieldset.ro-wrap {
 
 /* 開いたとき：左の列から順に箱が浮かび上がる */
 .map.enter .ocard,
-.map.enter .act,
-.map.enter .fmix {
+.map.enter .act {
   animation: mm-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
   animation-delay: calc(var(--col, 0) * 120ms);
 }
@@ -2780,88 +2774,9 @@ fieldset.ro-wrap {
   filter: drop-shadow(0 0 4px var(--cyan));
 }
 
-/* 財務の差を何で埋めるか（宣言と実態） */
-.fmix {
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  padding: 8px 10px;
-  display: grid;
-  gap: 5px;
-  margin-bottom: 8px;
-  box-shadow: var(--shadow);
-}
-.fmix.gap {
-  border-color: color-mix(in srgb, var(--amber) 60%, var(--line));
-  background: linear-gradient(
-    100deg,
-    color-mix(in srgb, var(--amber) 9%, var(--surface)),
-    var(--surface) 70%
-  );
-}
-.fm-h {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.fm-row {
-  display: grid;
-  grid-template-columns: 30px 1fr;
-  align-items: center;
-  gap: 6px;
-}
-.fm-l {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--muted);
-}
-.fm-bar {
-  display: flex;
-  height: 18px;
-  border-radius: 5px;
-  overflow: hidden;
-  background: var(--gray-soft);
-}
-.fm-bar i {
-  display: grid;
-  place-items: center;
-  font-style: normal;
-  font-size: 10.5px;
-  color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  animation: mm-grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s backwards;
-}
-.fm-bar i.rev {
-  background: var(--accent);
-}
-.fm-bar i.prod {
-  background: var(--gray);
-  animation: none;
-}
-.fm-note {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 8px;
-  align-items: center;
-  font-size: 11px;
-}
-.fm-tag {
-  font-weight: 700;
-  color: var(--ok);
-}
-.fmix.gap .fm-tag {
-  color: var(--amber);
-}
-.fmix:not(.compact) {
-  box-shadow: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .map.enter .ocard,
   .map.enter .act,
-  .map.enter .fmix,
   .ocard.here::before,
   .ocard.here::after,
   .here-b,
@@ -2869,7 +2784,6 @@ fieldset.ro-wrap {
   .act.run .an::before,
   .ocard .ob i,
   .met .mb i,
-  .fm-bar i,
   #links path.lk-in {
     animation: none !important;
   }
@@ -2877,28 +2791,7 @@ fieldset.ro-wrap {
     stroke-dashoffset: 0;
   }
 }
-.fm-key {
-  display: flex;
-  gap: 10px;
-  font-size: 10.5px;
-  color: var(--muted);
-}
-.fm-key u {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 2px;
-  margin-right: 3px;
-  vertical-align: -1px;
-}
-.fm-key u.rev {
-  background: var(--accent);
-}
-.fm-key u.prod {
-  background: var(--gray);
-}
-
-/* ================================================================ 参加企業の集計：詰まり・宣言と実態・次の一手 */
+/* ================================================================ 参加企業の集計：どこで詰まっているか */
 .flow2 {
   display: grid;
   gap: 0;
@@ -2996,142 +2889,13 @@ fieldset.ro-wrap {
     transform: translateY(6px);
   }
 }
-.meti2 {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-}
-.mx-sum {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.mx-sum > div {
-  background: var(--amber-soft);
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-size: 12px;
-  color: var(--ink);
-  line-height: 1.45;
-}
-.mx-sum b {
-  display: block;
-  font-size: 22px;
-  color: var(--amber);
-}
-.mx-pt {
-  animation: mm-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
-  transform-box: fill-box;
-  transform-origin: center;
-}
 @keyframes mm-pop {
   from {
     opacity: 0;
     transform: scale(0);
   }
 }
-.hints {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-.hints li {
-  display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 10px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: var(--surface);
-  animation: mm-fade 0.5s ease backwards;
-  animation-delay: var(--d, 0ms);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
-}
-.hints li:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow);
-}
-.hints li.top {
-  border-color: color-mix(in srgb, var(--amber) 55%, var(--line));
-  background: linear-gradient(100deg, var(--amber-soft), var(--surface) 60%);
-}
-.hn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-weight: 800;
-  color: #fff;
-  background: var(--accent);
-}
-.hints li.top .hn {
-  background: var(--amber);
-}
-.hw {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-.hwhere {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 0 8px;
-}
-.hints li.top .hwhere {
-  color: var(--amber);
-  border-color: var(--amber);
-}
-.hshare {
-  margin-left: auto;
-}
-.hshare b {
-  font-size: 18px;
-}
-.ht {
-  font-weight: 700;
-  font-size: 13.5px;
-  margin-top: 2px;
-}
-.hbar {
-  height: 5px;
-  border-radius: 3px;
-  background: var(--gray-soft);
-  overflow: hidden;
-  margin: 5px 0 4px;
-}
-.hbar i {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  animation: mm-grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s backwards;
-}
-.hints li.top .hbar i {
-  background: var(--amber);
-}
-.hm {
-  margin-top: 6px;
-  font-size: 12.5px;
-  background: var(--accent-soft);
-  border-radius: 8px;
-  padding: 6px 9px;
-}
-.hm span {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent);
-}
 @media (max-width: 1000px) {
-  .meti2 {
-    grid-template-columns: 1fr;
-  }
   .fl-row {
     grid-template-columns: 130px 1fr 90px;
   }
@@ -3143,10 +2907,7 @@ fieldset.ro-wrap {
   .fl-row,
   .fl-bar,
   .fl-drop,
-  .fl-tag,
-  .mx-pt,
-  .hints li,
-  .hbar i {
+  .fl-tag {
     animation: none !important;
   }
 }

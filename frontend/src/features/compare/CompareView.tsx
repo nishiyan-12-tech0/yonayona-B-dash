@@ -2,12 +2,11 @@
 
 import { useCallback, useState, type CSSProperties } from "react";
 import { fetchPeers, fetchVersions } from "@/lib/api";
-import { BCOL, PROG, STAGES } from "@/lib/constants";
+import { BCOL, STAGES } from "@/lib/constants";
 import {
   allObjs,
   buOfObj,
   down,
-  dxSummary,
   objById,
   pct,
   gridPos,
@@ -16,7 +15,6 @@ import { useStore } from "@/lib/store";
 import type { PerspShare, StageCells, StrategyData } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { GridChart, type GridPoint } from "@/components/GridChart";
-import { Heat } from "@/components/Heat";
 import {
   History,
   versionName,
@@ -24,7 +22,6 @@ import {
 } from "@/components/HistoryDrawer";
 import { Info } from "@/components/Info";
 import { PerspStack } from "@/components/PerspStack";
-import { Track } from "@/components/Track";
 
 const swatch = (color: string, round = false) =>
   ({
@@ -142,8 +139,6 @@ function CompareBody({
 
   /** 表示している時点 */
   const data: StrategyData = moments[0].data;
-  /** その1つ前の時点 */
-  const before: StrategyData | null = moments[1]?.data ?? null;
   const latestLabel = moments[0].label;
 
   const inds = new Set(data.bus.map((b) => b.industry));
@@ -264,39 +259,6 @@ function CompareBody({
             </div>
           </div>
         </div>
-      <div className="cmpgrid">
-        <div className="card">
-          <h2>
-            自社の事業
-            <Info>
-              実行中のデジタル施策がない事業は、上のマス目には出ません。
-            </Info>
-          </h2>
-          <div className="bul" id="bulist">
-            {data.bus.map((b, n) => {
-              // 上の表と同じく、一番上の段階の施策から測る
-              const p = gridPos(data, b, "now").p;
-              const old = before?.bus.find((x) => x.id === b.id);
-              const p0 = before && old ? gridPos(before, old, "now").p : p;
-              return (
-                <div key={b.id}>
-                  <h3>
-                    <u style={{ background: BCOL[n % 3] }} />
-                    {b.name}
-                  </h3>
-                  <div className="small">
-                    道筋にあるDX：{dxSummary(data, b)}
-                  </div>
-                  <div className="small">
-                    道筋の進み（一番上の段階の施策から）：{p0 !== p ? PROG[p0] + " → " : ""}
-                    <b>{p ? PROG[p] + "まで" : PROG[0]}</b>
-                  </div>
-                  <Track p={p} was={p0} />
-                </div>
-              );
-            })}
-          </div>
-        </div>
         <div className="card">
           <h2>
             項目ごとの比較
@@ -361,22 +323,6 @@ function CompareBody({
               <span className="sw" style={swatch("var(--faint)")} />
               比べる相手の平均
             </span>
-          </div>
-        </div>
-      </div>
-        <div className="card">
-          <h2>
-            道筋にあるDX（IPAの7項目）
-            <Info>
-              その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「—」は、その項目の施策がまだないところ。
-              <br />
-              1. アナログ・物理データのデジタル化／2. 業務の効率化による生産性の向上／3. 既存製品・サービスの高付加価値化／4. 新規製品・サービスの創出／5. 組織横断／全体の業務・製造プロセスのデジタル化／6. 顧客起点の価値創出によるビジネスモデルの根本的な変革／7. 企業文化や組織マインドの根本的な変革
-              <br />
-              出典：IPA『DX動向2026』データ集 p.2
-            </Info>
-          </h2>
-          <div id="heat">
-            <Heat data={data} snap="now" />
           </div>
         </div>
     </>,

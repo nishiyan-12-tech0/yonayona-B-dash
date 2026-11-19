@@ -111,31 +111,6 @@ def _down(b: dict, oid: str) -> set[str]:
     return seen
 
 
-def _fin_mix(d: dict, b: dict) -> int | None:
-    """実態：施策ごとに、付いた目標からつながりを先へたどり、行き着く財務の目標の種類を見る
-    （収益増大だけ＝収益増大に1、生産性向上だけ＝生産性向上に1、両方＝半分ずつ）。
-    収益増大の割合（%）を返す。財務の目標まで行き着く施策がなければ None（logic.ts の finMix と同じ）"""
-    objs = {o["id"]: o for o in b["objs"]}
-    rev = prod = 0.0
-    for i in _inits_of_bu(d, b):
-        kinds: set[int] = set()
-        for a in i.get("attach", []):
-            if a not in objs:
-                continue
-            for x in {a} | _down(b, a):
-                o = objs.get(x)
-                if o and o["persp"] == "fi" and o.get("kind") is not None:
-                    kinds.add(o["kind"])
-        if kinds == {0}:
-            rev += 1
-        elif kinds == {1}:
-            prod += 1
-        elif kinds == {0, 1}:
-            rev += 0.5
-            prod += 0.5
-    return round(rev / (rev + prod) * 100) if rev + prod else None
-
-
 def abstract_business(d: dict, b: dict) -> dict:
     """1事業ぶんの抽象化した値（戦略の中身は持たない）"""
     persp = {o["id"]: o["persp"] for o in b["objs"]}
@@ -166,8 +141,6 @@ def abstract_business(d: dict, b: dict) -> dict:
         "init_condition": sum(1 for i in its if i.get("checks", {}).get("condition")),
         "init_review": sum(1 for i in its if i.get("checks", {}).get("review")),
         "init_verified": sum(1 for i in its if (i.get("verify") or 0) >= 2),
-        "mix_plan": b.get("growth"),
-        "mix_actual": _fin_mix(d, b),
     }
 
 
@@ -178,7 +151,6 @@ SNAP_FIELDS = [
     "company_id", "company_name", "company_industry", "bu_id", "bu_name", "bu_industry",
     "as_of_label", "stage", "progress", "obj_total", "obj_reach_fin",
     "kpi_lg", "kpi_pr", "kpi_cu", "kpi_fi", "init_total", "init_condition", "init_review", "init_verified",
-    "mix_plan", "mix_actual",
 ]
 
 
@@ -228,10 +200,10 @@ def snapshot_rows(s: Session) -> list[dict]:
 
 
 def rows_from_snapshot(snap: list[dict]) -> list[SimpleNamespace]:
-    """版に残した断面を、テーブルの行と同じように読める形に戻す（あとから足した列がない古い断面は None）"""
+    """版に残した断面を、テーブルの行と同じように読める形に戻す"""
     rows = []
     for d in snap:
-        x = {"mix_plan": None, "mix_actual": None} | dict(d)
+        x = dict(d)
         x["confirmed_at"] = datetime.fromisoformat(x["confirmed_at"])
         x["extracted_at"] = datetime.fromisoformat(x["extracted_at"])
         rows.append(SimpleNamespace(**x))
@@ -270,20 +242,6 @@ DUMMY_PREFIX = [
 ]
 
 
-def dummy_mix(bu_id: str, progress: int) -> tuple[int, int | None]:
-    """他社のダミーの宣言と実態。事業IDから種を作るので、何度作っても同じ値になる。
-    宣言は収益増大を多めに言うが、実態の施策は生産性向上（社内の効率化）に寄りがち、という想定
-    （IPA『DX動向2026』：成果指標の対象は内向きの業務改革80.0%、外向き33.5%）。
-    道筋が顧客・財務まで進んだ事業ほど、宣言と実態のずれは小さい"""
-    rng = random.Random(f"mix-{bu_id}")
-    plan = rng.choices([20, 30, 40, 50, 60, 70, 80, 90], weights=[2, 4, 8, 14, 16, 14, 8, 4])[0]
-    if rng.random() < 0.06:
-        return plan, None
-    bias = rng.uniform(-8, 22) if progress >= 3 else rng.uniform(5, 55)
-    actual = max(0, min(100, round((plan - bias) / 5) * 5))
-    return plan, actual
-
-
 def dummy_rows(ts: datetime) -> list[m.OpenBusinessSnapshot]:
     """他社のダミー。乱数の種を固定しているので、何度作っても同じ中身になる"""
     rng = random.Random(20261120)
@@ -319,7 +277,6 @@ def dummy_rows(ts: datetime) -> list[m.OpenBusinessSnapshot]:
                 kpi[rng.choices(["lg", "pr", "cu", "fi"], weights=[36, 46, 10, 8])[0]] += 1
             init_total = rng.randint(3, 8)
             binom = lambda k, pr: sum(1 for _ in range(k) if rng.random() < pr)  # noqa: E731
-            mix_plan, mix_actual = dummy_mix(f"d{ci + 1:02d}_{bi + 1}", p)
             rows.append(
                 OBS(
                     company_id=DUMMY_ID_FROM + ci,
@@ -343,8 +300,6 @@ def dummy_rows(ts: datetime) -> list[m.OpenBusinessSnapshot]:
                     init_condition=binom(init_total, 0.26),
                     init_review=binom(init_total, 0.18),
                     init_verified=binom(init_total, 0.10 + 0.06 * p),
-                    mix_plan=mix_plan,
-                    mix_actual=mix_actual,
                     extracted_at=ts,
                 )
             )
@@ -359,23 +314,6 @@ def ensure_dummy(s: Session) -> bool:
     s.add_all(dummy_rows(_now()))
     s.flush()
     return True
-
-
-def backfill_mix(s: Session) -> None:
-    """宣言と実態の列をあとから足したときの埋め戻し。
-    ダミーは決まった値を入れ、生データのある会社は今の行を作り直す（すでに入っていれば何もしない）"""
-    empty = s.scalars(select(OBS).where(OBS.mix_plan.is_(None))).all()
-    if not empty:
-        return
-    own = set()
-    for r in empty:
-        if r.company_id >= DUMMY_ID_FROM:
-            r.mix_plan, r.mix_actual = dummy_mix(r.bu_id, r.progress)
-        else:
-            own.add(r.company_id)
-    for cid in own:
-        extract_company(s, cid)
-    s.flush()
 
 
 # ================================================================ 集計（画面に返す形は従来と同じ）
@@ -464,27 +402,8 @@ def meti_summary(s: Session, own_cid: int, snap: list[dict] | None = None) -> di
             }
         )
 
-    # 宣言と実態（財務の差を何で埋めるか）
-    mixed = [r for r in rows if r.mix_plan is not None and r.mix_actual is not None]
-    mix_pts = [
-        {"plan": r.mix_plan, "actual": r.mix_actual, "p": r.progress, "st": r.stage, "own": r.company_id == own_cid}
-        for r in mixed
-    ]
-    lean = [r for r in mixed if r.mix_actual - r.mix_plan <= -20]
-    mix = {
-        "points": mix_pts,
-        "planAvg": round(sum(r.mix_plan for r in mixed) / len(mixed)) if mixed else 0,
-        "actualAvg": round(sum(r.mix_actual for r in mixed) / len(mixed)) if mixed else 0,
-        "lean": _pct(len(lean), len(mixed)),
-        "leanStuck": _pct(sum(1 for r in lean if r.progress <= 2), len(lean)),
-    }
-
-    hints = _hints(rows, by_co, lean, mixed, year_ago)
-
     return {
         "flow": flow,
-        "mix": mix,
-        "hints": hints,
         "stats": [
             {"value": f"{len(by_co)}社", "label": f"参加企業（{n}事業）"},
             {"value": f"{recent}社", "label": "直近1年以内に更新"},
@@ -502,80 +421,6 @@ def meti_summary(s: Session, own_cid: int, snap: list[dict] | None = None) -> di
         "companies": companies,
         "extractedAt": max((r.extracted_at for r in rows), default=None).isoformat(timespec="minutes") if rows else "",
     }
-
-
-def _hints(rows, by_co, lean, mixed, year_ago) -> list[dict]:
-    """経産省の次の一手の示唆。集計の数字から、当てはまる事業が多い順に出す。
-    打ち手そのものは仮説（ルールで出しているだけ）"""
-    n = len(rows) or 1
-    out = []
-    stuck = [r for r in rows if r.progress == 2]
-    out.append(
-        {
-            "key": "stuck",
-            "where": "業務プロセス → 顧客",
-            "title": "業務は変わったが、顧客の変化につながっていない",
-            "n": len(stuck),
-            "share": _pct(len(stuck), n),
-            "unit": "事業",
-            "fact": f"道筋が業務プロセスで止まっている事業が{_pct(len(stuck), n)}%",
-            "move": "顧客の指標（顧客に起きる変化）の置き方の手引きと、業務→顧客がつながった事例を、同じ業種で共有する",
-        }
-    )
-    out.append(
-        {
-            "key": "lean",
-            "where": "財務の差の埋め方",
-            "title": "収益増大を掲げているのに、施策は効率化に寄っている",
-            "n": len(lean),
-            "share": _pct(len(lean), len(mixed) or 1),
-            "unit": "事業",
-            "fact": f"実態が宣言より20ポイント以上 生産性向上に寄っている事業が{_pct(len(lean), len(mixed) or 1)}%"
-            + (f"（うち{_pct(sum(1 for r in lean if r.progress <= 2), len(lean))}%は業務プロセスまでで止まっている）" if lean else ""),
-            "move": "DX認定・DX銘柄の審査で、収益増大の道筋（施策→顧客の指標→売上）を描けているかを問う",
-        }
-    )
-    tot = sum(r.init_total for r in rows) or 1
-    no_review = [r for r in rows if r.init_total and r.init_review / r.init_total < 0.3]
-    out.append(
-        {
-            "key": "review",
-            "where": "施策の検証",
-            "title": "施策の検証日が決まっておらず、効果が確かめられていない",
-            "n": len(no_review),
-            "share": _pct(len(no_review), n),
-            "unit": "事業",
-            "fact": f"検証日が決まっている施策は{_pct(sum(r.init_review for r in rows), tot)}%、検証が済んだ施策は{_pct(sum(r.init_verified for r in rows), tot)}%",
-            "move": "施策ごとに検証日と次の判断を決める運用を、補助金の中間報告や認定の更新の条件に組み込む",
-        }
-    )
-    no_cond = [r for r in rows if r.init_total and r.init_condition / r.init_total < 0.3]
-    out.append(
-        {
-            "key": "condition",
-            "where": "施策の実行",
-            "title": "予算・工数・権限・データがそろわず、施策が動き出せない",
-            "n": len(no_cond),
-            "share": _pct(len(no_cond), n),
-            "unit": "事業",
-            "fact": f"実行条件（予算・工数・権限・データの提供者）が確保された施策は{_pct(sum(r.init_condition for r in rows), tot)}%",
-            "move": "補助金・人材支援を、実行条件の確保（社内の決裁・データ提供の合意）とセットで出す",
-        }
-    )
-    stale = [rs for rs in by_co.values() if max(r.confirmed_at for r in rs) < year_ago]
-    out.append(
-        {
-            "key": "stale",
-            "where": "更新",
-            "title": "戦略マップの更新が1年以上止まっている",
-            "n": len(stale),
-            "share": _pct(len(stale), len(by_co) or 1),
-            "unit": "社",
-            "fact": f"直近1年以内に更新していない企業が{len(stale)}社",
-            "move": "年1回の更新を、DX認定の継続や表彰の応募の条件にする",
-        }
-    )
-    return sorted(out, key=lambda h: -h["share"])
 
 
 def main() -> None:

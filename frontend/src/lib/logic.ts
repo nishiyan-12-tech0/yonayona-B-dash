@@ -2,14 +2,7 @@
  * 戦略マップの計算。画面に出す「指標の動き」「道筋の進み」「DXの段階」は、
  * すべて申請内容（StrategyData）からここで計算します。
  */
-import {
-  IPA_STAGE,
-  PIDX,
-  PROG,
-  STAGE,
-  STAGES,
-  type IndState,
-} from "./constants";
+import { IPA_STAGE, PIDX, PROG, type IndState } from "./constants";
 import type {
   BusinessUnit,
   Initiative,
@@ -178,23 +171,6 @@ export function gridPos(d: StrategyData, b: BusinessUnit, snap: Snap) {
   return { st, p };
 }
 
-/** 「デジタライゼーション（項目2・3）／DX（項目5）」のような要約 */
-export function dxSummary(d: StrategyData, b: BusinessUnit) {
-  const m: Record<number, Set<number>> = {
-    1: new Set(),
-    2: new Set(),
-    3: new Set(),
-  };
-  initsOfBu(d, b)
-    .filter((i) => i.digital && i.ipa)
-    .forEach((i) => m[stageOf(i)].add(i.ipa as number));
-  return (
-    STAGES.filter((k) => m[k].size)
-      .map((k) => `${STAGE[k]}（項目${[...m[k]].sort().join("・")}）`)
-      .join("／") || "デジタルの施策はまだない"
-  );
-}
-
 /** IPAの取組項目ごとに、その項目の施策から道筋がどこまで進んだか */
 export function itemRows(d: StrategyData, b: BusinessUnit, snap: Snap) {
   return [1, 2, 3, 4, 5, 6, 7]
@@ -334,52 +310,4 @@ export function hereSet(d: StrategyData, snap: Snap) {
     });
   });
   return { objs, inits };
-}
-
-/** 財務の差を何で埋めるか：宣言（申請のスライダー）と実態（施策がつながる財務の目標の種類） */
-export interface FinMix {
-  /** 宣言：収益増大で埋める割合（%） */
-  plan: number;
-  /** 実態：収益増大の財務の目標につながる施策の割合（%）。数えられる施策がなければ null */
-  actual: number | null;
-  /** 数えた施策の数（財務の目標までつながる施策） */
-  n: number;
-  /** 財務の目標までつながっていない施策の数 */
-  none: number;
-}
-
-/**
- * 実態の数え方：事業の施策ごとに、付いている目標からつながりを先へたどり、
- * 行き着く財務の目標の種類を見る。収益増大だけなら収益増大に1、生産性向上だけなら生産性向上に1、
- * 両方なら半分ずつ。財務の目標まで行き着かない施策は数えない（none に数える）。
- */
-export function finMix(d: StrategyData, b: BusinessUnit): FinMix {
-  const ids = new Set(b.objs.map((o) => o.id));
-  let rev = 0;
-  let prod = 0;
-  let none = 0;
-  initsOfBu(d, b).forEach((i) => {
-    const kinds = new Set<number>();
-    i.attach
-      .filter((a) => ids.has(a))
-      .forEach((a) =>
-        [a, ...down(b, a)].forEach((x) => {
-          const o = objById(d, x);
-          if (o?.persp === "fi" && o.kind !== undefined) kinds.add(o.kind);
-        }),
-      );
-    if (kinds.has(0) && kinds.has(1)) {
-      rev += 0.5;
-      prod += 0.5;
-    } else if (kinds.has(0)) rev += 1;
-    else if (kinds.has(1)) prod += 1;
-    else none += 1;
-  });
-  const n = rev + prod;
-  return {
-    plan: b.growth,
-    actual: n ? Math.round((rev / n) * 100) : null,
-    n: Math.round(n),
-    none,
-  };
 }

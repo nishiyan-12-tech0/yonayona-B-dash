@@ -311,9 +311,5 @@ class OpenBusinessSnapshot(Base):
     init_condition: Mapped[int] = mapped_column(Integer, default=0)
     init_review: Mapped[int] = mapped_column(Integer, default=0)
     init_verified: Mapped[int] = mapped_column(Integer, default=0)
-    # 財務の差を何で埋めるか：宣言＝申請で決めた収益増大の割合（%）、
-    # 実態＝施策がつながる財務の目標のうち収益増大の割合（%。数えられる施策がなければ NULL）
-    mix_plan: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
-    mix_actual: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
     # 抜き出した日時（本番は夜間バッチの実行日時）
     extracted_at: Mapped[datetime] = mapped_column(DateTime)

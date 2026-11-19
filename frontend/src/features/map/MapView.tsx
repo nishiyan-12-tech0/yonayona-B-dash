@@ -13,8 +13,7 @@ import {
 } from "react";
 import { fetchVersion } from "@/lib/api";
 import { HZ, OWN, PCOL, PERSP, PERSPS, PIDX, PL, STAGE } from "@/lib/constants";
-import { finMix, focusSets, hereSet, objById, themeFin } from "@/lib/logic";
-import { FinMixBar } from "@/components/FinMixBar";
+import { focusSets, hereSet, objById, themeFin } from "@/lib/logic";
 import { useStore } from "@/lib/store";
 import type { BusinessUnit, Objective, Persp, StrategyData } from "@/lib/types";
 import { History, type Hist } from "@/components/HistoryDrawer";
@@ -409,12 +408,7 @@ function MapBody({
                           </button>
                         </div>
                         {col ? null : (
-                          <BuGrid
-                            bu={x}
-                            data={data}
-                            cards={cards}
-                            onOpen={openTheme}
-                          />
+                          <BuGrid bu={x} cards={cards} onOpen={openTheme} />
                         )}
                       </div>
                     );
@@ -432,9 +426,7 @@ function MapBody({
                       )}
                     </ThemeCell>
                   ))}
-                  <ThemeCell col={4} top={<FinMixBar mix={finMix(data, b)} compact />}>
-                    {cards(themeFin(data, b, cur))}
-                  </ThemeCell>
+                  <ThemeCell col={4}>{cards(themeFin(data, b, cur))}</ThemeCell>
                 </div>
               )}
             </div>
@@ -477,18 +469,9 @@ function BuThemes({
 }
 
 /** テーマごとの表示の1列。目標がなければ、その旨を出す */
-function ThemeCell({
-  col,
-  top,
-  children,
-}: {
-  col: number;
-  top?: ReactNode;
-  children: ReactNode[];
-}) {
+function ThemeCell({ col, children }: { col: number; children: ReactNode[] }) {
   return (
     <div className="cell" style={{ gridColumn: col, ...colVar(col - 1) }}>
-      {top}
       {children.length ? (
         children
       ) : (
@@ -501,12 +484,10 @@ function ThemeCell({
 /** 全体マップの1事業ぶん：戦略テーマごとの行と、右端の財務の目標 */
 function BuGrid({
   bu,
-  data,
   cards,
   onOpen,
 }: {
   bu: BusinessUnit;
-  data: StrategyData;
   cards: (os: Objective[]) => ReactNode[];
   onOpen: (buId: string, themeId: string) => void;
 }) {
@@ -551,7 +532,6 @@ function BuGrid({
         className="fincell"
         style={{ gridRow: `1 / span ${bu.themes.length}`, ...colVar(3) }}
       >
-        <FinMixBar mix={finMix(data, bu)} compact />
         {cards(bu.objs.filter((o) => o.persp === "fi"))}
       </div>
     </div>
