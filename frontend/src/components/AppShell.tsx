@@ -57,7 +57,8 @@ function ResetLogo() {
     try {
       await resetDemo();
       await refresh();
-      setUi({ step: 0, ebu: null, sel: null, cb: null, ct: null, snap: "now" });
+      // デモは会社名が大きく出る全体マップから始める
+      setUi({ step: 0, ebu: null, sel: null, cb: null, ct: null, snap: "now", view: "all" });
       setOpen(false);
       router.push("/map");
     } catch (e) {

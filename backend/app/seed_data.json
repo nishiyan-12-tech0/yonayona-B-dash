@@ -561,22 +561,14 @@
         "partner": "DX推進部",
         "digital": false,
         "ipa": null,
-        "exec": 2,
-        "verify": 1,
+        "exec": 0,
+        "verify": 0,
         "checks": {
           "condition": true,
           "review": true
         },
         "ev": "産業機器事業 営業会議（2025-10-08）",
         "kpi": "新しいルールで出した提案の割合",
-        "prev": {
-          "exec": 0,
-          "verify": 0,
-          "checks": {
-            "condition": false,
-            "review": false
-          }
-        },
         "base": "0%",
         "target": "80%"
       },
