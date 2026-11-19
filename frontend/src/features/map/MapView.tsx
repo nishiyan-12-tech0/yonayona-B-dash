@@ -7,12 +7,14 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type MouseEvent,
   type ReactNode,
 } from "react";
 import { fetchVersion } from "@/lib/api";
-import { HZ, OWN, PCOL, PERSP, PERSPS, PL, STAGE } from "@/lib/constants";
-import { focusSets, themeFin } from "@/lib/logic";
+import { HZ, OWN, PCOL, PERSP, PERSPS, PIDX, PL, STAGE } from "@/lib/constants";
+import { finMix, focusSets, hereSet, objById, themeFin } from "@/lib/logic";
+import { FinMixBar } from "@/components/FinMixBar";
 import { useStore } from "@/lib/store";
 import type { BusinessUnit, Objective, Persp, StrategyData } from "@/lib/types";
 import { History, type Hist } from "@/components/HistoryDrawer";
@@ -98,7 +100,11 @@ function MapBody({
     () => focusSets(data, { sel: ui.sel, stg: ui.stg, who: ui.who }),
     [data, ui.sel, ui.stg, ui.who],
   );
-  useLinks(mapRef, svgRef, data, focus.objs);
+  /** 表示が切り替わったら、箱と矢印を左から順に出し直す */
+  const enterKey = `${ui.view}-${b.id}-${t?.id ?? ""}`;
+  useLinks(mapRef, svgRef, data, focus.objs, enterKey);
+  const here = useMemo(() => hereSet(data, "now"), [data]);
+  useWave(data, ui.sel, focus);
 
   const ctx: MapCtx = {
     data,
@@ -107,6 +113,7 @@ function MapBody({
     showIpa: ui.ipa,
     sel: ui.sel,
     focus,
+    here,
     onSel: (sel) => setUi({ sel: ui.sel === sel ? null : sel }),
   };
 
@@ -332,7 +339,7 @@ function MapBody({
       <div className={cls("mapgrid", ui.sel && "haspanel")} id="mapgrid">
         <div className="card">
           <div
-            className={`map ${allv ? "v-all" : "v-theme"}`}
+            className={`map enter ${allv ? "v-all" : "v-theme"}`}
             id="mapc"
             ref={mapRef}
           >
@@ -348,7 +355,7 @@ function MapBody({
               <div className="cols mhead">
                 {allv ? <div className="x" /> : null}
                 {PERSPS.map((p) => (
-                  <div className="c" key={p}>
+                  <div className={`c pc-${p}`} key={p}>
                     <b>
                       {PL[p]}
                       <Info>
@@ -359,7 +366,7 @@ function MapBody({
                 ))}
               </div>
             </div>
-            <div id="bands">
+            <div id="bands" key={enterKey}>
               {!cur ? (
                 <>
                   <div className="band corp">
@@ -402,7 +409,12 @@ function MapBody({
                           </button>
                         </div>
                         {col ? null : (
-                          <BuGrid bu={x} cards={cards} onOpen={openTheme} />
+                          <BuGrid
+                            bu={x}
+                            data={data}
+                            cards={cards}
+                            onOpen={openTheme}
+                          />
                         )}
                       </div>
                     );
@@ -420,7 +432,9 @@ function MapBody({
                       )}
                     </ThemeCell>
                   ))}
-                  <ThemeCell col={4}>{cards(themeFin(data, b, cur))}</ThemeCell>
+                  <ThemeCell col={4} top={<FinMixBar mix={finMix(data, b)} compact />}>
+                    {cards(themeFin(data, b, cur))}
+                  </ThemeCell>
                 </div>
               )}
             </div>
@@ -463,9 +477,18 @@ function BuThemes({
 }
 
 /** テーマごとの表示の1列。目標がなければ、その旨を出す */
-function ThemeCell({ col, children }: { col: number; children: ReactNode[] }) {
+function ThemeCell({
+  col,
+  top,
+  children,
+}: {
+  col: number;
+  top?: ReactNode;
+  children: ReactNode[];
+}) {
   return (
-    <div className="cell" style={{ gridColumn: col }}>
+    <div className="cell" style={{ gridColumn: col, ...colVar(col - 1) }}>
+      {top}
       {children.length ? (
         children
       ) : (
@@ -478,10 +501,12 @@ function ThemeCell({ col, children }: { col: number; children: ReactNode[] }) {
 /** 全体マップの1事業ぶん：戦略テーマごとの行と、右端の財務の目標 */
 function BuGrid({
   bu,
+  data,
   cards,
   onOpen,
 }: {
   bu: BusinessUnit;
+  data: StrategyData;
   cards: (os: Objective[]) => ReactNode[];
   onOpen: (buId: string, themeId: string) => void;
 }) {
@@ -510,7 +535,11 @@ function BuGrid({
               <div
                 className="cell"
                 key={p}
-                style={{ gridRow: ti + 1, gridColumn: PCOL[p] }}
+                style={{
+                  gridRow: ti + 1,
+                  gridColumn: PCOL[p],
+                  ...colVar(PIDX[p] - 1),
+                }}
               >
                 {cards(tob.filter((o) => o.persp === p))}
               </div>
@@ -520,8 +549,9 @@ function BuGrid({
       })}
       <div
         className="fincell"
-        style={{ gridRow: `1 / span ${bu.themes.length}` }}
+        style={{ gridRow: `1 / span ${bu.themes.length}`, ...colVar(3) }}
       >
+        <FinMixBar mix={finMix(data, bu)} compact />
         {cards(bu.objs.filter((o) => o.persp === "fi"))}
       </div>
     </div>
@@ -542,4 +572,98 @@ function Orphans({ ctx }: { ctx: MapCtx }) {
       </div>
     </div>
   );
+}
+
+/** 列の番号（0＝学習と成長〜3＝財務）。開いたときに左の列から順に出す遅れに使う */
+const colVar = (n: number) => ({ "--col": n }) as CSSProperties;
+
+/** 動きを減らす設定（OSの「視差効果を減らす」など）か */
+const calm = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * 目標・施策を押したときの演出。押した箱から波紋が広がり、
+ * つながる目標が学習と成長→業務プロセス→顧客→財務の順に、左から右へ波打つように跳ねる。
+ */
+function useWave(
+  data: StrategyData,
+  sel: string | null,
+  focus: { objs: Set<string> | null; inits: Set<string> | null },
+) {
+  useEffect(() => {
+    if (!sel || calm()) return;
+    const id = requestAnimationFrame(() => {
+      const [k, a] = sel.split(":");
+      const colOf = (oid: string) => {
+        const o = objById(data, oid) ?? (data.corp.fin.id === oid ? data.corp.fin : null);
+        return o ? PIDX[o.persp] - 1 : 3;
+      };
+      const STEP = 150;
+      // 押したもの：波紋
+      const origin =
+        k === "o"
+          ? document.getElementById("o-" + a)
+          : k === "i"
+            ? document.querySelector<HTMLElement>(`#mapc [data-i="${a}"]`)
+            : document.querySelector<HTMLElement>(`#bands [data-b="${a}"] .bn`);
+      origin?.animate(
+        [
+          { boxShadow: "0 0 0 0 rgba(65,184,213,.75)" },
+          { boxShadow: "0 0 0 18px rgba(65,184,213,0)" },
+        ],
+        { duration: 700, easing: "ease-out" },
+      );
+      // 一番左の列から右へ順に（左から右へ流れる波）
+      const start = Math.min(3, ...[...(focus.objs ?? [])].map(colOf));
+      // つながる目標：列ごとに遅らせて跳ねる
+      focus.objs?.forEach((oid) => {
+        const el = document.getElementById("o-" + oid);
+        if (!el || oid === a) return;
+        const c = colOf(oid);
+        el.animate(
+          [
+            { transform: "translateY(0) scale(1)" },
+            {
+              transform: "translateY(-8px) scale(1.04)",
+              boxShadow: "0 12px 26px rgba(0,74,173,.28)",
+              offset: 0.4,
+            },
+            { transform: "translateY(1px) scale(.995)", offset: 0.75 },
+            { transform: "translateY(0) scale(1)" },
+          ],
+          {
+            duration: 620,
+            delay: (c - start) * STEP + 80,
+            easing: "cubic-bezier(.3,.7,.4,1)",
+          },
+        );
+      });
+      // 付いている施策：その目標の少し前に揺れる
+      focus.inits?.forEach((iid) => {
+        if (k === "i" && iid === a) return;
+        const it = data.inits.find((x) => x.id === iid);
+        const c = Math.min(
+          3,
+          ...(it?.attach.filter((x) => focus.objs?.has(x)).map(colOf) ?? [0]),
+        );
+        document
+          .querySelectorAll<HTMLElement>(`#mapc [data-i="${iid}"]`)
+          .forEach((el) =>
+            el.animate(
+              [
+                { transform: "translateX(0)" },
+                { transform: "translateX(6px)", offset: 0.35 },
+                { transform: "translateX(-2px)", offset: 0.7 },
+                { transform: "translateX(0)" },
+              ],
+              { duration: 520, delay: Math.max(0, c - start) * STEP, easing: "ease-out" },
+            ),
+          );
+      });
+    });
+    return () => cancelAnimationFrame(id);
+    // 選んだときだけ動かす（data・focus の変化では動かさない）
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sel]);
 }

@@ -375,6 +375,30 @@ function Step0({ data, update }: FormProps) {
   );
 }
 
+/** スライダーの配分に応じた一言（質問設計書：収益増大は生産性向上より価値を生むのに時間がかかる） */
+function mixMessage(g: number) {
+  if (g <= 30)
+    return "生産性向上が中心の配分です。早く成果が出る一方で、売上を伸ばす道筋が手薄になりやすくなります。";
+  if (g >= 70)
+    return "収益増大が中心の配分です。成果が出るまで時間がかかるため、途中の指標（顧客に起きる変化）で進みを確かめます。";
+  return "両方を描く配分です。生産性向上で早く成果を出しつつ、収益増大の道筋を育てます。";
+}
+
+/** 配分と財務の目標の種類が合っているか（入力は止めず、注意だけ出す） */
+function mixWarnings(g: number, fs: Objective[]) {
+  if (!fs.length) return [];
+  const out: string[] = [];
+  if (g > 0 && !fs.some((o) => o.kind === 0))
+    out.push(
+      `収益増大で${g}%を埋める配分ですが、種類が「収益増大」の財務の目標がありません。下の表に追加するか、配分を見直してください。`,
+    );
+  if (g < 100 && !fs.some((o) => o.kind === 1))
+    out.push(
+      `生産性向上で${100 - g}%を埋める配分ですが、種類が「生産性向上」の財務の目標がありません。下の表に追加するか、配分を見直してください。`,
+    );
+  return out;
+}
+
 /* ----- 1. 財務の目標 ----- */
 function Step1({ bu, update }: FormProps) {
   const fs = bu.objs.filter((o) => o.persp === "fi");
@@ -393,7 +417,7 @@ function Step1({ bu, update }: FormProps) {
       </Field>
       <Field
         label="その差を、生産性を上げる分と売上を増やす分で、それぞれどれだけ埋めますか？"
-        desc="生産性（コストを下げる・資産を活かす）は早く効き、売上を増やす道（新しい収益源・既存顧客との取引を深める）は時間がかかります。両方を描けているかを見ます。"
+        desc="生産性（コストを下げる・資産を活かす）は早く効き、売上を増やす道（新しい収益源・既存顧客との取引を深める）は時間がかかります。ここで決めた配分（宣言）は、戦略マップと参加企業の集計で、施策が実際にどちらの財務の目標につながっているか（実態）と並べて見せます。"
       >
         <div>
           <input
@@ -420,6 +444,12 @@ function Step1({ bu, update }: FormProps) {
               生産性向上 {100 - bu.growth}%
             </i>
           </div>
+          <div className="mixmsg">{mixMessage(bu.growth)}</div>
+          {mixWarnings(bu.growth, fs).map((w) => (
+            <div className="mixwarn" key={w}>
+              {w}
+            </div>
+          ))}
         </div>
       </Field>
       <Field

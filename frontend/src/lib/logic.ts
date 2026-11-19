@@ -271,3 +271,81 @@ export function focusSets(
   }
   return { objs, inits };
 }
+
+/** 目標が目標値まで届いたか（今（申請時点）から目標値までの100%に来た） */
+export const doneOf = (o: Objective, snap: Snap) => pctOf(o, snap) === 100;
+
+/** 施策が終わったか（効果の検証で「効果あり」が出た） */
+export const initDone = (i: Initiative, snap: Snap) => stAt(i, snap).verify === 2;
+
+/**
+ * 「今ここ」の目標：道筋の先端。
+ * 道筋が進んでいれば、指標が順に動いた一番先の視点の目標（まだ目標値に届いていないもの）。
+ * まだどこも動いていなければ、実行中の施策が付いた目標（いま手を付けているところ）。
+ */
+export function hereSet(d: StrategyData, snap: Snap) {
+  const out = new Set<string>();
+  d.bus.forEach((b) => {
+    const R = reachedSet(d, b, snap);
+    const p = progOf(d, b, snap);
+    if (p) {
+      R.forEach((id) => {
+        const o = objById(d, id);
+        if (o && PIDX[o.persp] === p && !doneOf(o, snap)) out.add(id);
+      });
+      return;
+    }
+    b.objs.forEach((o) => {
+      if (initsOn(d, o.id).some((i) => running(i, snap))) out.add(o.id);
+    });
+  });
+  return out;
+}
+
+/** 財務の差を何で埋めるか：宣言（申請のスライダー）と実態（施策がつながる財務の目標の種類） */
+export interface FinMix {
+  /** 宣言：収益増大で埋める割合（%） */
+  plan: number;
+  /** 実態：収益増大の財務の目標につながる施策の割合（%）。数えられる施策がなければ null */
+  actual: number | null;
+  /** 数えた施策の数（財務の目標までつながる施策） */
+  n: number;
+  /** 財務の目標までつながっていない施策の数 */
+  none: number;
+}
+
+/**
+ * 実態の数え方：事業の施策ごとに、付いている目標からつながりを先へたどり、
+ * 行き着く財務の目標の種類を見る。収益増大だけなら収益増大に1、生産性向上だけなら生産性向上に1、
+ * 両方なら半分ずつ。財務の目標まで行き着かない施策は数えない（none に数える）。
+ */
+export function finMix(d: StrategyData, b: BusinessUnit): FinMix {
+  const ids = new Set(b.objs.map((o) => o.id));
+  let rev = 0;
+  let prod = 0;
+  let none = 0;
+  initsOfBu(d, b).forEach((i) => {
+    const kinds = new Set<number>();
+    i.attach
+      .filter((a) => ids.has(a))
+      .forEach((a) =>
+        [a, ...down(b, a)].forEach((x) => {
+          const o = objById(d, x);
+          if (o?.persp === "fi" && o.kind !== undefined) kinds.add(o.kind);
+        }),
+      );
+    if (kinds.has(0) && kinds.has(1)) {
+      rev += 0.5;
+      prod += 0.5;
+    } else if (kinds.has(0)) rev += 1;
+    else if (kinds.has(1)) prod += 1;
+    else none += 1;
+  });
+  const n = rev + prod;
+  return {
+    plan: b.growth,
+    actual: n ? Math.round((rev / n) * 100) : null,
+    n: Math.round(n),
+    none,
+  };
+}

@@ -18,6 +18,7 @@ import {
 import {
   buOfObj,
   curOf,
+  finMix,
   indState,
   initsOn,
   itemRows,
@@ -31,6 +32,7 @@ import {
 } from "@/lib/logic";
 import type { Link } from "@/lib/types";
 import { Info } from "@/components/Info";
+import { FinMixBar } from "@/components/FinMixBar";
 import { ActButton, type MapCtx } from "./cards";
 import { InitiativeProgressModal } from "./InitiativeProgressModal";
 import { ObjectiveProgressModal } from "./ObjectiveProgressModal";
@@ -164,18 +166,8 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           <dt>財務の差</dt>
           <dd>
             {b.gap}
-            <div className="split">
-              <i style={{ width: `${b.growth}%`, background: "var(--accent)" }}>
-                {b.growth ? "収益増大 " + b.growth + "%" : ""}
-              </i>
-              <i
-                style={{
-                  width: `${100 - b.growth}%`,
-                  background: "var(--gray)",
-                }}
-              >
-                {100 - b.growth ? "生産性 " + (100 - b.growth) + "%" : ""}
-              </i>
+            <div style={{ marginTop: 6 }}>
+              <FinMixBar mix={finMix(data, b)} />
             </div>
           </dd>
         </dl>

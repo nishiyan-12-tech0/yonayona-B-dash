@@ -224,7 +224,40 @@ export interface PeerData {
 /** 段階(1〜3)ごとに、道筋の進み(0〜4)の割合(%)を並べたもの */
 export type StageCells = Record<Stage, number[]>;
 
+/** 参加企業の集計：道筋をどこまで進んだか（k 以上の事業数。byStage は DXの段階 0〜3 の内訳） */
+export interface MetiFlow {
+  k: number;
+  n: number;
+  byStage: number[];
+}
+
+/** 参加企業の集計：財務の差を何で埋めるか（宣言と実態） */
+export interface MetiMix {
+  points: { plan: number; actual: number; p: number; st: number; own: boolean }[];
+  planAvg: number;
+  actualAvg: number;
+  /** 実態が宣言より20ポイント以上 生産性向上に寄っている事業の割合（%） */
+  lean: number;
+  /** そのうち、道筋が業務プロセスまでで止まっている割合（%） */
+  leanStuck: number;
+}
+
+/** 参加企業の集計：経産省の次の一手の示唆（ルールで出す仮説） */
+export interface MetiHint {
+  key: string;
+  where: string;
+  title: string;
+  n: number;
+  share: number;
+  unit: string;
+  fact: string;
+  move: string;
+}
+
 export interface MetiData {
+  flow?: MetiFlow[];
+  mix?: MetiMix;
+  hints?: MetiHint[];
   stats: { value: string; label: string }[];
   cells: StageCells;
   industries: { name: string; reached: number }[];

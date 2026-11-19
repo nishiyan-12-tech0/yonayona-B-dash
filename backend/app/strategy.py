@@ -29,7 +29,8 @@ from .schemas import (
 )
 
 JST = ZoneInfo("Asia/Tokyo")
-MAX_VERSIONS = 6
+# 他社と比べる画面で、長い期間の点（版）を出せるようにする
+MAX_VERSIONS = 40
 START_LABEL = "作成時点"
 END_LABEL = "置き換え時点"
 
@@ -325,7 +326,7 @@ def _version_data(v: m.MapVersion, app: m.StrategyApplication) -> dict:
 
 
 def application_versions(s: Session, cid: int, app_id: int) -> dict:
-    """A-12：その申請の版（戦略マップのJSONつき）。新しい順に最大6つ"""
+    """A-12：その申請の版（戦略マップのJSONつき）。新しい順に最大 MAX_VERSIONS"""
     a = _get_app(s, cid, app_id)
     rows = _versions(s, a.id)[:MAX_VERSIONS]
     return {"versions": [_version_meta(v) | {"data": _version_data(v, a)} for v in rows]}

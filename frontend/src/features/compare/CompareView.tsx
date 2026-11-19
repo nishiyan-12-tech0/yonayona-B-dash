@@ -37,8 +37,13 @@ const swatch = (color: string, round = false) =>
 /** 点を打つ1つの時点 */
 interface Moment {
   label: string;
+  /** 時点の日付（ISO）。点の横に書く */
+  date: string;
   data: StrategyData;
 }
+
+/** 今日の日付（ISO、手元の時刻で） */
+const todayIso = () => new Date().toLocaleDateString("sv-SE");
 
 /**
  * 自社の事業の点。時点ごとに位置を計算して、事業ごとの軌跡にする（新しい順。[0] が塗りの点）。
@@ -52,7 +57,9 @@ function ownPoints(ms: Moment[]): GridPoint[] {
       const bu = v.data.bus.find((x) => x.id === b.id);
       if (!bu) return [];
       const st = stageTop(v.data, bu, "now");
-      return st ? [{ st, p: progOf(v.data, bu, "now"), label: v.label }] : [];
+      return st
+        ? [{ st, p: progOf(v.data, bu, "now"), label: v.label, date: v.date }]
+        : [];
     });
     if (!trail.length || trail[0].label !== ms[0].label) return [];
     return [
@@ -124,12 +131,14 @@ function CompareBody({
     const i = versions.findIndex((v) => v.id === vid);
     moments = (i >= 0 ? versions.slice(i) : []).map((v) => ({
       label: versionName(v),
+      date: v.asOf,
       data: v.data,
     }));
   } else {
     moments = [
-      { label: "現在", data: live },
-      ...versions.slice(0, 5).map((v) => ({ label: versionName(v), data: v.data })),
+      { label: "現在", date: todayIso(), data: live },
+      // 長い期間の動きを見られるように、この申請の版はすべて点にする
+      ...versions.map((v) => ({ label: versionName(v), date: v.asOf, data: v.data })),
     ];
   }
   if (!moments.length) return shell(<div className="card muted">この版は見つかりませんでした</div>);
@@ -252,6 +261,7 @@ function CompareBody({
               <span>
                 塗り＝{latestLabel}
                 {moments.length > 1 ? "　白抜き＝それより前の版" : ""}
+                　点の横の数字＝その時点の日付（年/月/日）
               </span>
               <span>数字＝比べる相手の割合（%）</span>
             </div>

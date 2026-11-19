@@ -7,6 +7,9 @@ import { GridChart } from "@/components/GridChart";
 import { History, type Hist } from "@/components/HistoryDrawer";
 import { Info } from "@/components/Info";
 import { PerspStack } from "@/components/PerspStack";
+import { FlowChart } from "./FlowChart";
+import { Hints } from "./Hints";
+import { GNAME, MixScatter } from "./MixScatter";
 
 const swatch = (color: string) =>
   ({ "--c": color, "--cs": color }) as CSSProperties;
@@ -56,6 +59,64 @@ function MetiBody({ hist, onHist }: { hist: Hist; onHist: (h: Hist) => void }) {
           ))}
         </div>
       </div>
+      {meti.flow ? (
+        <div className="card">
+          <h2>
+            どこで詰まっているか：道筋をどこまで進んだか
+            <Info>
+              参加企業の全事業を、戦略マップの道筋（学習と成長→業務プロセス→顧客→財務）で指標がどこまで順に動いたかで数えています。段を下りるごとに減った事業が、その手前で止まっている事業です。帯の色は、その事業の道筋にある実行中のデジタル施策のうち一番上の段階（IPAの3段階）です。
+            </Info>
+          </h2>
+          <FlowChart flow={meti.flow} />
+        </div>
+      ) : null}
+      {meti.mix && meti.hints ? (
+        <div className="cmpgrid meti2">
+          <div className="card">
+            <h2>
+              財務の差を何で埋めるか：宣言と実態
+              <Info>
+                1点が1事業です。横は申請で決めた「目標と今の差のうち、収益増大で埋める割合」（宣言）。縦は、その事業の施策がつながりをたどってどちらの財務の目標に行き着くかを施策の数で数えた割合（実態）。斜めの線より下にある事業は、宣言より施策が生産性向上（社内の効率化）に寄っています。参考：IPA『DX動向2026』では、成果指標の対象は「内向きの業務改革」が80.0%、「外向きの業務改革」が33.5%（p.19 図表2-15、複数回答）。
+              </Info>
+            </h2>
+            <div className="mx-sum">
+              <div>
+                <b>{meti.mix.lean}%</b>
+                <span>の事業で、施策が宣言より生産性向上に20ポイント以上寄っている</span>
+              </div>
+              <div>
+                <b>{meti.mix.leanStuck}%</b>
+                <span>そのうち、道筋が業務プロセスまでで止まっている事業</span>
+              </div>
+            </div>
+            <MixScatter mix={meti.mix} />
+            <div className="legend" style={{ marginTop: 6 }}>
+              {GNAME.map((g, i) => (
+                <span key={g}>
+                  <span
+                    className="sw"
+                    style={{
+                      ...swatch(["var(--faint)", "var(--amber)", "var(--accent)"][i]),
+                      borderRadius: "50%",
+                    }}
+                  />
+                  {g}
+                </span>
+              ))}
+              <span>黒い縁＝自社の事業</span>
+            </div>
+          </div>
+          <div className="card">
+            <h2>
+              経産省の次の一手（示唆）
+              <Info>
+                上の集計から、当てはまる事業（企業）の割合が大きい順に並べています。打ち手は、集計の結果に対応させてルールで出した仮説です。政策として採るかどうかは、ヒアリングなどで確かめてから判断します。
+              </Info>
+            </h2>
+            <Hints hints={meti.hints} />
+          </div>
+        </div>
+      ) : null}
       <div className="cmpgrid">
         <div className="card">
           <h2>

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { PROG, STAGE } from "@/lib/constants";
 import type { Stage, StageCells } from "@/lib/types";
 
@@ -7,6 +8,8 @@ export interface GridStep {
   p: number;
   /** 時点の名前（例：現在、第2版 2026年12月末） */
   label: string;
+  /** 時点の日付（ISO。例：2026-12-31）。点の横に「26/12/31」と書く */
+  date?: string;
 }
 
 export interface GridPoint {
@@ -43,7 +46,16 @@ function geom(size: GridSize) {
 const ROWS: Stage[] = [3, 2, 1];
 
 /** マス目：横＝道筋の進み（0〜4）、縦＝DXの段階（1〜3）。cells は割合(%)、points は自社の事業 */
-export function GridChart({
+export function GridChart(props: {
+  cells: StageCells;
+  points: GridPoint[];
+  label: string;
+  size?: GridSize;
+}) {
+  return props.size === "lg" ? <WideGrid {...props} /> : <SmallGrid {...props} />;
+}
+
+function SmallGrid({
   cells,
   points,
   label,
@@ -190,5 +202,211 @@ export function GridChart({
         );
       })}
     </svg>
+  );
+}
+
+/** 「2026-12-31」→「26/12/31」 */
+export function shortDate(iso?: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || "");
+  return m ? `${m[1].slice(2)}/${Number(m[2])}/${Number(m[3])}` : "";
+}
+
+/**
+ * 他社と比べる用の大きいマス目。描く幅を実際の画面の幅に合わせ（1単位＝1px）、
+ * 文字はほかの文字と同じ大きさのまま、マスだけを画面いっぱいに広げる。
+ * 点は小さくし、同じマスに入る点は古い順に左から並べて、日付を添える。
+ */
+function WideGrid({
+  cells,
+  points,
+  label,
+}: {
+  cells: StageCells;
+  points: GridPoint[];
+  label: string;
+}) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(1200);
+  const [vh, setVh] = useState(900);
+  useEffect(() => {
+    const el = wrap.current;
+    if (!el) return;
+    const measure = () => {
+      setW(Math.max(640, Math.round(el.clientWidth)));
+      setVh(window.innerHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const L = 150;
+  const T = 26;
+  const CW = (W - L - 4) / 5;
+  const CH = Math.round(Math.min(250, Math.max(150, (vh - 300) / 3)));
+  const H = T + CH * 3 + 6;
+  const cx0 = (p: number) => L + CW * p;
+  const cy = (st: number) => T + CH * (3 - st) + CH / 2;
+  const mx = Math.max(1, ...ROWS.flatMap((r) => cells[r]));
+
+  // 事業ごとに、マスの中の高さ（レーン）を分ける
+  const N = Math.max(1, points.length);
+  const laneGap = Math.min(52, (CH - 34) / N);
+  const pts = points.map((q, n) => {
+    const dy = (n - (N - 1) / 2) * laneGap + 6;
+    // 古い順に並べ直し、マスごとに左から詰める
+    const asc = q.trail.map((s, j) => ({ ...s, latest: j === 0 })).reverse();
+    const byCell = new Map<string, number>();
+    asc.forEach((s) => {
+      const k = `${s.st}-${s.p}`;
+      byCell.set(k, (byCell.get(k) ?? 0) + 1);
+    });
+    const seen = new Map<string, number>();
+    const steps = asc.map((s) => {
+      const k = `${s.st}-${s.p}`;
+      const i = seen.get(k) ?? 0;
+      seen.set(k, i + 1);
+      const cnt = byCell.get(k) ?? 1;
+      // 最新の点の右に事業名を書くので、その分を空けておく
+      const room = CW - 30 - (s.latest || i === cnt - 1 ? 46 : 0);
+      const step = Math.min(30, room / Math.max(1, cnt));
+      return {
+        ...s,
+        x: cx0(s.p) + 16 + i * step,
+        y: cy(s.st) + dy,
+        idx: i,
+        cnt,
+        step,
+      };
+    });
+    return { ...q, steps };
+  });
+
+  return (
+    <div ref={wrap} style={{ width: "100%" }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width={W}
+        height={H}
+        role="img"
+        aria-label={label}
+        style={{ display: "block", width: "100%", height: "auto" }}
+      >
+        {PROG.map((t, p) => (
+          <text
+            key={p}
+            x={cx0(p) + CW / 2}
+            y={16}
+            textAnchor="middle"
+            fontSize={12.5}
+            fontWeight={p ? 700 : 400}
+            fill={p ? "var(--ink)" : "var(--muted)"}
+          >
+            {p ? t : "まだ動いていない"}
+          </text>
+        ))}
+        {ROWS.map((st) => (
+          <g key={st}>
+            <text
+              x={L - 10}
+              y={cy(st) + 4}
+              textAnchor="end"
+              fontSize={12.5}
+              fontWeight={700}
+              fill="var(--ink)"
+            >
+              {STAGE[st]}
+            </text>
+            {cells[st].map((v, p) => (
+              <g key={p}>
+                <rect
+                  x={cx0(p) + 2}
+                  y={T + CH * (3 - st) + 2}
+                  width={CW - 4}
+                  height={CH - 4}
+                  rx={10}
+                  fill="var(--accent-2)"
+                  fillOpacity={((v / mx) * 0.5).toFixed(2)}
+                  stroke="var(--line)"
+                />
+                <text
+                  x={cx0(p) + 10}
+                  y={T + CH * (3 - st) + 18}
+                  fontSize={12}
+                  fill="var(--muted)"
+                >
+                  {v ? v + "%" : ""}
+                </text>
+              </g>
+            ))}
+          </g>
+        ))}
+        {pts.map((q) => (
+          <polyline
+            key={q.name + "-line"}
+            points={q.steps.map((s) => `${s.x},${s.y}`).join(" ")}
+            fill="none"
+            stroke={q.color}
+            strokeWidth={1.3}
+            strokeDasharray="3 3"
+            strokeOpacity={0.7}
+          />
+        ))}
+        {pts.map((q) =>
+          q.steps.map((s, j) => {
+            // 混んでいるマスでは、日付はマスの最初・最後と最新の点だけに書く
+            const showDate =
+              s.step >= 22 || s.latest || s.idx === 0 || s.idx === s.cnt - 1;
+            const up = j % 2 === 0;
+            const tip = `${q.name}（${s.label}${s.date ? "・" + shortDate(s.date) : ""}）：${STAGE[s.st]}・${PROG[s.p]}`;
+            return (
+              <g key={q.name + j}>
+                {s.latest ? (
+                  <circle cx={s.x} cy={s.y} r={9} fill={q.color} opacity={0.18} />
+                ) : null}
+                <circle
+                  cx={s.x}
+                  cy={s.y}
+                  r={s.latest ? 5 : 3.4}
+                  fill={s.latest ? q.color : "var(--surface)"}
+                  stroke={s.latest ? "var(--surface)" : q.color}
+                  strokeWidth={s.latest ? 1.2 : 1.6}
+                >
+                  <title>{tip}</title>
+                </circle>
+                {showDate && s.date ? (
+                  <text
+                    x={s.x}
+                    y={up ? s.y - 8 : s.y + 15}
+                    textAnchor="middle"
+                    fontSize={10}
+                    fontWeight={s.latest ? 700 : 400}
+                    fill={s.latest ? "var(--ink)" : "var(--muted)"}
+                  >
+                    {shortDate(s.date)}
+                  </text>
+                ) : null}
+                {s.latest ? (
+                  <text
+                    x={s.x + 10}
+                    y={s.y + 4}
+                    fontSize={12}
+                    fontWeight={700}
+                    fill="var(--ink)"
+                  >
+                    {q.short}
+                  </text>
+                ) : null}
+              </g>
+            );
+          }),
+        )}
+      </svg>
+    </div>
   );
 }

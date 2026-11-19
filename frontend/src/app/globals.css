@@ -2475,3 +2475,698 @@ fieldset.ro-wrap {
 .modal label.chk input {
   width: auto;
 }
+
+/* ================================================================ 戦略マップ：色と動き（デモ用の磨き上げ） */
+/* 視点ごとの色（凡例と同じ：学習と成長＝cyan、業務プロセス＝accent-2、顧客＝accent、財務＝gray。財務は種類で塗り分け） */
+.pc-lg {
+  --pc: var(--cyan);
+}
+.pc-pr {
+  --pc: var(--accent-2);
+}
+.pc-cu {
+  --pc: var(--accent);
+}
+.pc-fi {
+  --pc: var(--gray);
+}
+.pc-fi.k0 {
+  --pc: var(--accent);
+}
+.pc-fi.k1 {
+  --pc: var(--gray);
+}
+
+/* 列の見出しと背景の帯を、視点の色で薄く塗る */
+.mhead > div.c[class*="pc-"] {
+  background: color-mix(in srgb, var(--pc) 16%, var(--surface));
+  border-bottom: 3px solid var(--pc);
+  border-radius: 8px 8px 4px 4px;
+}
+.vst i:nth-last-child(4) {
+  background: color-mix(in srgb, var(--cyan) 7%, var(--stripe));
+}
+.vst i:nth-last-child(3) {
+  background: color-mix(in srgb, var(--accent-2) 7%, var(--stripe));
+}
+.vst i:nth-last-child(2) {
+  background: color-mix(in srgb, var(--accent) 6%, var(--stripe));
+}
+.vst i:nth-last-child(1) {
+  background: color-mix(in srgb, var(--gray) 7%, var(--stripe));
+}
+
+/* 目標の箱：左の縁を視点の色に、うっすらグラデーション、触ると浮く */
+.ocard[class*="pc-"] {
+  border-color: color-mix(in srgb, var(--pc) 45%, var(--line));
+  border-left: 5px solid var(--pc);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--pc) 10%, var(--surface)) 0%,
+    var(--surface) 55%
+  );
+  box-shadow: var(--shadow);
+  transition:
+    opacity 0.25s,
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.25s;
+}
+.ocard[class*="pc-"]:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 2px 4px rgba(20, 33, 61, 0.06),
+    0 10px 24px color-mix(in srgb, var(--pc) 26%, transparent);
+}
+.ocard[class*="pc-"] .tag {
+  background: var(--pc);
+}
+.ocard.sel[class*="pc-"] {
+  box-shadow:
+    0 0 0 3px var(--cyan-soft),
+    0 0 0 4.5px var(--cyan),
+    0 12px 28px color-mix(in srgb, var(--cyan) 30%, transparent);
+}
+/* 目標値までの進み（箱の下の細い帯） */
+.ocard .ob {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--pc, var(--accent)) 14%, var(--surface));
+  overflow: hidden;
+  margin-top: 5px;
+}
+.ocard .ob i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--pc) 60%, #fff), var(--pc));
+  animation: mm-grow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.35s backwards;
+}
+.met .mb i {
+  animation: mm-grow 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s backwards;
+}
+@keyframes mm-grow {
+  from {
+    width: 0;
+  }
+}
+
+/* 今ここ：道筋の先端の箱を、脈打つ光で囲む */
+.ocard.here {
+  overflow: visible;
+}
+.ocard.here::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 13px;
+  border: 2px solid var(--cyan);
+  pointer-events: none;
+  animation: mm-ring 1.8s ease-out infinite;
+}
+.ocard.here::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 10px;
+  pointer-events: none;
+  box-shadow: 0 0 18px 2px color-mix(in srgb, var(--cyan) 45%, transparent);
+  animation: mm-glow 1.8s ease-in-out infinite;
+}
+@keyframes mm-ring {
+  0% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.07, 1.14);
+  }
+}
+@keyframes mm-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.here-b {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  z-index: 2;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--cyan), var(--accent));
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--cyan) 45%, transparent);
+  animation: mm-bob 1.8s ease-in-out infinite;
+}
+@keyframes mm-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* 達成：グレーにして「達成」の判を押し、中身を畳む */
+.ocard.done {
+  filter: grayscale(1);
+  opacity: 0.62;
+  background: var(--gray-soft) !important;
+  border-left-color: var(--faint) !important;
+  box-shadow: none !important;
+}
+.ocard.done.sel {
+  filter: none;
+  opacity: 1;
+}
+.ocard.done:hover {
+  opacity: 0.9;
+}
+.ocard.fold {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.ocard.fold .on {
+  text-decoration: line-through;
+  text-decoration-color: var(--faint);
+}
+.stamp {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--gray);
+  border: 2px solid var(--gray);
+  border-radius: 6px;
+  padding: 0 6px;
+  transform: rotate(-9deg);
+  background: var(--surface);
+  animation: mm-stamp 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) 0.6s backwards;
+}
+.ocard.done .oh .own {
+  visibility: hidden;
+}
+@keyframes mm-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-9deg) scale(2.2);
+  }
+}
+.met.done {
+  background: var(--gray-soft);
+}
+.met.done .mb i {
+  background: linear-gradient(90deg, var(--ok), var(--accent));
+}
+
+/* 施策：実行中は緑の点が脈打つ。完了（効果あり）はグレーに */
+.act {
+  transition:
+    opacity 0.25s,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.act:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.1);
+}
+.act.run .an::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  margin-right: 6px;
+  vertical-align: 1px;
+  animation: mm-dot 1.4s ease-in-out infinite;
+}
+@keyframes mm-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--ok) 0%, transparent);
+  }
+}
+.act.done {
+  background: var(--gray-soft);
+  color: var(--muted);
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+.act .dn {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1px solid var(--gray);
+  color: var(--gray);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+/* 開いたとき：左の列から順に箱が浮かび上がる */
+.map.enter .ocard,
+.map.enter .act,
+.map.enter .fmix {
+  animation: mm-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--col, 0) * 120ms);
+}
+.map.enter .act {
+  animation-delay: calc(var(--col, 0) * 120ms + 120ms);
+}
+.map.enter .ocard.here {
+  animation:
+    mm-rise 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: calc(var(--col, 0) * 120ms);
+}
+@keyframes mm-rise {
+  from {
+    opacity: 0;
+    transform: translateX(-26px) scale(0.96);
+  }
+}
+
+/* 矢印：開いたときは左から描く。選んだ道筋は光り、光の粒が流れる */
+#links path.lk-in {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: mm-draw 0.6s ease-out forwards;
+}
+@keyframes mm-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+#links path.lk-hi {
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent) 55%, transparent));
+}
+#links .lk-dot {
+  fill: var(--cyan);
+  filter: drop-shadow(0 0 4px var(--cyan));
+}
+
+/* 財務の差を何で埋めるか（宣言と実態） */
+.fmix {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 8px 10px;
+  display: grid;
+  gap: 5px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+}
+.fmix.gap {
+  border-color: color-mix(in srgb, var(--amber) 60%, var(--line));
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--amber) 9%, var(--surface)),
+    var(--surface) 70%
+  );
+}
+.fm-h {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.fm-row {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+.fm-l {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.fm-bar {
+  display: flex;
+  height: 18px;
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--gray-soft);
+}
+.fm-bar i {
+  display: grid;
+  place-items: center;
+  font-style: normal;
+  font-size: 10.5px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: mm-grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s backwards;
+}
+.fm-bar i.rev {
+  background: var(--accent);
+}
+.fm-bar i.prod {
+  background: var(--gray);
+  animation: none;
+}
+.fm-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  align-items: center;
+  font-size: 11px;
+}
+.fm-tag {
+  font-weight: 700;
+  color: var(--ok);
+}
+.fmix.gap .fm-tag {
+  color: var(--amber);
+}
+.fmix:not(.compact) {
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map.enter .ocard,
+  .map.enter .act,
+  .map.enter .fmix,
+  .ocard.here::before,
+  .ocard.here::after,
+  .here-b,
+  .stamp,
+  .act.run .an::before,
+  .ocard .ob i,
+  .met .mb i,
+  .fm-bar i,
+  #links path.lk-in {
+    animation: none !important;
+  }
+  #links path.lk-in {
+    stroke-dashoffset: 0;
+  }
+}
+.fm-key {
+  display: flex;
+  gap: 10px;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.fm-key u {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  margin-right: 3px;
+  vertical-align: -1px;
+}
+.fm-key u.rev {
+  background: var(--accent);
+}
+.fm-key u.prod {
+  background: var(--gray);
+}
+
+/* ================================================================ 参加企業の集計：詰まり・宣言と実態・次の一手 */
+.flow2 {
+  display: grid;
+  gap: 0;
+}
+.fl-row {
+  display: grid;
+  grid-template-columns: 190px 1fr 110px;
+  gap: 12px;
+  align-items: center;
+  animation: mm-fade 0.5s ease backwards;
+  animation-delay: var(--d, 0ms);
+}
+.fl-name {
+  font-size: 13px;
+}
+.fl-track {
+  height: 30px;
+  background: var(--gray-soft);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.fl-bar {
+  height: 100%;
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+  animation: mm-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation-delay: var(--d, 0ms);
+}
+.fl-bar i {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+}
+.fl-n {
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.fl-n b {
+  font-size: 18px;
+  color: var(--ink);
+  margin-right: 2px;
+}
+.fl-n em {
+  font-style: normal;
+  margin-left: 6px;
+}
+.fl-drop {
+  margin: 2px 0 2px 202px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-left: 2px dashed var(--line);
+  animation: mm-fade 0.5s ease backwards;
+  animation-delay: var(--d, 0ms);
+}
+.fl-drop b {
+  color: var(--ink);
+}
+.fl-arrow {
+  color: var(--faint);
+  font-size: 10px;
+}
+.fl-drop.worst {
+  color: var(--amber);
+  border-left-color: var(--amber);
+  background: linear-gradient(90deg, var(--amber-soft), transparent 70%);
+  border-radius: 0 8px 8px 0;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.fl-drop.worst b {
+  color: var(--amber);
+  font-size: 14px;
+}
+.fl-drop.worst .fl-arrow {
+  color: var(--amber);
+}
+.fl-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--amber);
+  border-radius: 999px;
+  padding: 1px 9px;
+  animation: mm-bob 1.8s ease-in-out infinite;
+}
+@keyframes mm-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.meti2 {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.mx-sum {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.mx-sum > div {
+  background: var(--amber-soft);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.45;
+}
+.mx-sum b {
+  display: block;
+  font-size: 22px;
+  color: var(--amber);
+}
+.mx-pt {
+  animation: mm-pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes mm-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+.hints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.hints li {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  animation: mm-fade 0.5s ease backwards;
+  animation-delay: var(--d, 0ms);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.hints li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.hints li.top {
+  border-color: color-mix(in srgb, var(--amber) 55%, var(--line));
+  background: linear-gradient(100deg, var(--amber-soft), var(--surface) 60%);
+}
+.hn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  background: var(--accent);
+}
+.hints li.top .hn {
+  background: var(--amber);
+}
+.hw {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.hwhere {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  padding: 0 8px;
+}
+.hints li.top .hwhere {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+.hshare {
+  margin-left: auto;
+}
+.hshare b {
+  font-size: 18px;
+}
+.ht {
+  font-weight: 700;
+  font-size: 13.5px;
+  margin-top: 2px;
+}
+.hbar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--gray-soft);
+  overflow: hidden;
+  margin: 5px 0 4px;
+}
+.hbar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  animation: mm-grow 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s backwards;
+}
+.hints li.top .hbar i {
+  background: var(--amber);
+}
+.hm {
+  margin-top: 6px;
+  font-size: 12.5px;
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 6px 9px;
+}
+.hm span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+@media (max-width: 1000px) {
+  .meti2 {
+    grid-template-columns: 1fr;
+  }
+  .fl-row {
+    grid-template-columns: 130px 1fr 90px;
+  }
+  .fl-drop {
+    margin-left: 142px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fl-row,
+  .fl-bar,
+  .fl-drop,
+  .fl-tag,
+  .mx-pt,
+  .hints li,
+  .hbar i {
+    animation: none !important;
+  }
+}
+
+/* 申請：財務の配分の一言と注意 */
+.mixmsg {
+  margin-top: 8px;
+  font-size: 12.5px;
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.mixwarn {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--amber);
+  background: var(--amber-soft);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.mixwarn::before {
+  content: "⚠ ";
+}

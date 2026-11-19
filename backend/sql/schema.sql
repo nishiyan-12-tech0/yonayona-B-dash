@@ -35,6 +35,8 @@ CREATE TABLE open_business_snapshot (
 	init_condition INTEGER NOT NULL, 
 	init_review INTEGER NOT NULL, 
 	init_verified INTEGER NOT NULL, 
+	mix_plan SMALLINT, 
+	mix_actual SMALLINT, 
 	extracted_at DATETIME NOT NULL, 
 	PRIMARY KEY (id), 
 	CONSTRAINT uq_open_company_bu UNIQUE (company_id, bu_id)

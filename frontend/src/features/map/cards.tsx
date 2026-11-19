@@ -1,5 +1,14 @@
-import { EXEC, IPA, IPA_STAGE, IS, OWN, STAGE, VERIFY } from "@/lib/constants";
-import { curOf, indState, initsOn, pctOf, running, stAt } from "@/lib/logic";
+import { EXEC, FINKIND, IPA, IPA_STAGE, IS, OWN, STAGE, VERIFY } from "@/lib/constants";
+import {
+  curOf,
+  doneOf,
+  indState,
+  initDone,
+  initsOn,
+  pctOf,
+  running,
+  stAt,
+} from "@/lib/logic";
 import type { Initiative, Objective, Snap, StrategyData } from "@/lib/types";
 
 export const cls = (...xs: (string | false | null | undefined)[]) =>
@@ -21,6 +30,8 @@ export interface MapCtx {
   focus: { objs: Set<string> | null; inits: Set<string> | null };
   /** 選択する（同じものをもう一度選ぶと解除） */
   onSel: (sel: string) => void;
+  /** 「今ここ」の目標（道筋の先端） */
+  here: Set<string>;
 }
 
 /** 施策のボタン。dimmable＝強調のときに薄くする対象か（マップ上の施策だけ） */
@@ -35,11 +46,14 @@ export function ActButton({
 }) {
   const s = stAt(init, ctx.snap);
   const run = running(init, ctx.snap);
+  const done = initDone(init, ctx.snap);
   const key = "i:" + init.id;
   return (
     <button
       className={cls(
         "act",
+        run && !done && "run",
+        done && "done",
         dimmable && !!ctx.focus.inits && !ctx.focus.inits.has(init.id) && "dim",
         dimmable && ctx.sel === key && "sel",
       )}
@@ -56,6 +70,7 @@ export function ActButton({
           </span>
         ) : null}
         {init.name}
+        {done ? <span className="dn">完了</span> : null}
       </span>
       <span className="am">
         担当：{OWN[init.owner]}・{EXEC[s.exec]}
@@ -82,24 +97,48 @@ export function ObjCard({
   const its = initsOn(ctx.data, obj.id);
   const key = "o:" + obj.id;
   const dim = !!ctx.focus.objs && !corp && !ctx.focus.objs.has(obj.id);
+  const pc = pctOf(obj, ctx.snap);
+  const done = doneOf(obj, ctx.snap);
+  const sel = ctx.sel === key;
+  const here = ctx.here.has(obj.id);
+  /** 達成した目標は、選んでいるとき以外は畳む */
+  const fold = done && !sel;
   return (
     <div className="obj" data-o={obj.id}>
       <button
         className={cls(
           "ocard",
+          `pc-${obj.persp}`,
+          obj.persp === "fi" && obj.kind !== undefined && `k${obj.kind}`,
           !obj.kpi && "nok",
+          done && "done",
+          fold && "fold",
+          here && !done && "here",
           dim && "dim",
-          ctx.sel === key && "sel",
+          sel && "sel",
         )}
         id={`o-${obj.id}`}
         onClick={() => ctx.onSel(key)}
       >
+        {here && !done ? <span className="here-b">今ここ</span> : null}
+        {done ? <span className="stamp">達成</span> : null}
         <span className="oh">
-          <span className="tag">{corp ? "全社の目標" : "目標"}</span>
+          <span className="tag">
+            {corp
+              ? "全社の目標"
+              : obj.persp === "fi" && obj.kind !== undefined
+                ? FINKIND[obj.kind]
+                : "目標"}
+          </span>
           <span className="own">主担当：{OWN[obj.owner]}</span>
         </span>
         <span className="on">{obj.name}</span>
-        {obj.kpi ? (
+        {fold ? (
+          <span className="od">
+            {obj.kpi ? `${obj.kpi}：目標 ${obj.target} に到達` : "目標に到達"}
+            {its.length ? `・施策${its.length}件` : ""}
+          </span>
+        ) : obj.kpi ? (
           <>
             <span className="ok">{obj.kpi}</span>
             <span className="ov">
@@ -115,6 +154,11 @@ export function ObjCard({
               <span>期限 {obj.due || "未設定"}</span>
               <span className={`is ${s}`}>指標：{IS[s]}</span>
             </span>
+            {pc !== null ? (
+              <span className="ob" title={`目標値まで ${pc}%`}>
+                <i style={{ width: `${pc}%` }} />
+              </span>
+            ) : null}
           </>
         ) : (
           <>
@@ -125,7 +169,7 @@ export function ObjCard({
           </>
         )}
       </button>
-      {its.length ? (
+      {its.length && !fold ? (
         <div className="acts">
           <span className="tag t2">実施する施策</span>
           {its.map((i) => (
@@ -152,7 +196,7 @@ export function MetButton({
   const key = "o:" + obj.id;
   return (
     <button
-      className={cls("met", ctx.sel === key && "sel")}
+      className={cls("met", pc === 100 && "done", ctx.sel === key && "sel")}
       data-m={obj.id}
       onClick={() => ctx.onSel(key)}
     >
