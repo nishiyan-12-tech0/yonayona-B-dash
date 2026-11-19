@@ -3,6 +3,7 @@
 - 戦略（トップが申請で入力）：company / business_unit / theme / objective / link / initiative / initiative_objective
 - 進捗（担当者が戦略マップで入力。上書き）：objective_progress / initiative_progress
 - 確定版・その他：progress_confirmation / strategy_version / change_note / reference_data
+- 抽象化（オープンなDBの代わり）：open_business_snapshot
 """
 
 from datetime import date, datetime
@@ -227,3 +228,53 @@ class ReferenceData(Base):
     key: Mapped[str] = mapped_column(String(40), primary_key=True)
     body: Mapped[dict] = mapped_column(JSON)
     updated_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+# ---------------------------------------------------------------- 抽象化（オープンなDBの代わり）
+
+
+class OpenBusinessSnapshot(Base):
+    """各社の最新の確定版から、事業ごとに段階・進み・件数だけを抜き出したもの。
+
+    本番は「会社ごとのセキュアなDB → 夜間バッチ → オープンなDB」の想定。
+    MVPは1つのDBの中のこのテーブルを、オープンなDBの代わりにする。
+    他社と比べる画面・参加企業の集計画面は、このテーブルだけから集計する。
+    戦略の中身（目標の文章・施策名・つながりの理由など）は持たない。
+    他社のダミーもここに入るため、company テーブルへの外部キーは張らない。
+    """
+
+    __tablename__ = "open_business_snapshot"
+    __table_args__ = (
+        UniqueConstraint("company_id", "bu_id", name="uq_open_company_bu"),
+        TABLE_ARGS | {"comment": "抽象化した事業ごとの現在地（オープンなDBの代わり。1行＝1社の1事業）"},
+    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    company_id: Mapped[int] = mapped_column(Integer, index=True)
+    company_name: Mapped[str] = mapped_column(String(100))
+    company_industry: Mapped[str] = mapped_column(String(100), default="")
+    bu_id: Mapped[str] = mapped_column(String(40))
+    bu_name: Mapped[str] = mapped_column(String(100), default="")
+    bu_industry: Mapped[str] = mapped_column(String(100), default="")
+    # どの確定版から抜いたか
+    as_of_label: Mapped[str] = mapped_column(String(50), default="")
+    as_of: Mapped[date | None] = mapped_column(Date, nullable=True)
+    confirmed_at: Mapped[datetime] = mapped_column(DateTime)
+    # 段階：道筋にある試行・実行中のデジタル施策のうち一番上（0＝なし、1〜3）
+    stage: Mapped[int] = mapped_column(SmallInteger, default=0)
+    # 道筋の進み：施策から順に指標が動いた一番先の視点（0＝まだ、1＝学習と成長〜4＝財務）
+    progress: Mapped[int] = mapped_column(SmallInteger, default=0)
+    # 財務以外の目標の数と、そのうち財務の目標までつながっている数
+    obj_total: Mapped[int] = mapped_column(Integer, default=0)
+    obj_reach_fin: Mapped[int] = mapped_column(Integer, default=0)
+    # 指標を置いた目標の数（視点別）
+    kpi_lg: Mapped[int] = mapped_column(Integer, default=0)
+    kpi_pr: Mapped[int] = mapped_column(Integer, default=0)
+    kpi_cu: Mapped[int] = mapped_column(Integer, default=0)
+    kpi_fi: Mapped[int] = mapped_column(Integer, default=0)
+    # この事業の目標に付いた施策の数と、実行条件あり・検証日あり・検証済み（効果あり・なし）の数
+    init_total: Mapped[int] = mapped_column(Integer, default=0)
+    init_condition: Mapped[int] = mapped_column(Integer, default=0)
+    init_review: Mapped[int] = mapped_column(Integer, default=0)
+    init_verified: Mapped[int] = mapped_column(Integer, default=0)
+    # 抜き出した日時（本番は夜間バッチの実行日時）
+    extracted_at: Mapped[datetime] = mapped_column(DateTime)

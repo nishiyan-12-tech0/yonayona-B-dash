@@ -18,6 +18,7 @@ from sqlalchemy import delete, select, text
 from sqlalchemy.orm import Session
 
 from . import models as m
+from . import open_data
 from .config import get_settings
 from .db import SessionLocal, engine
 from .strategy import now
@@ -194,6 +195,10 @@ def insert_seed(s: Session, cid: int) -> None:
         else:
             ref.body, ref.updated_at = seed[key], ts
 
+    # 抽象化テーブル（オープンなDBの代わり）：他社のダミーと、自社の出発点の確定版から作った行
+    open_data.ensure_dummy(s)
+    open_data.extract_company(s, cid)
+
 
 def clear_company(s: Session, cid: int) -> None:
     for model in COMPANY_TABLES:
@@ -219,6 +224,15 @@ def ensure_seeded(cid: int) -> bool:
             conn.commit()
             with Session(bind=conn) as s:
                 if s.scalars(select(m.Company).where(m.Company.id == cid)).first() is not None:
+                    # 会社のデータはある。抽象化テーブルが空なら（このテーブルを足す前のDBなど）ここで作る
+                    open_data.ensure_dummy(s)
+                    has_own = s.scalars(
+                        select(m.OpenBusinessSnapshot.id).where(m.OpenBusinessSnapshot.company_id == cid).limit(1)
+                    ).first()
+                    if has_own is None:
+                        open_data.extract_company(s, cid)
+                    s.commit()
+                    conn.commit()
                     return False
                 insert_seed(s, cid)
                 s.commit()

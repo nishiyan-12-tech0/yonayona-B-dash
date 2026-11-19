@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from .. import models as m
-from .. import seed, strategy
+from .. import open_data, seed, strategy
 from ..config import get_settings
 from ..db import get_session
 from ..schemas import ConfirmIn, InitiativeProgressIn, ObjectiveProgressIn, StrategyIn
@@ -119,12 +119,19 @@ def _reference(s: Session, key: str):
 
 
 @router.get("/peers")
-def get_peers(s: Session = Depends(get_session)):
-    """A-10"""
-    return _reference(s, "peers")
+def get_peers(s: Session = Depends(get_session), c: int = Depends(cid)):
+    """A-10：他社と比べる。抽象化テーブル（オープンなDBの代わり）の自社以外の行から集計"""
+    return open_data.peers(s, c)
 
 
 @router.get("/meti/summary")
-def get_meti(s: Session = Depends(get_session)):
-    """A-11"""
-    return _reference(s, "meti")
+def get_meti(s: Session = Depends(get_session), c: int = Depends(cid)):
+    """A-11：参加企業の集計（経産省）。抽象化テーブルの全社の行から集計"""
+    return open_data.meti_summary(s, c)
+
+
+@router.post("/batch/open-data")
+def post_batch(s: Session = Depends(get_session)):
+    """A-14：抽象化テーブルを全社ぶん作り直す（本番の夜間バッチにあたる。手動実行用）"""
+    open_data.ensure_dummy(s)
+    return open_data.run_batch(s)

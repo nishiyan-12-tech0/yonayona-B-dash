@@ -210,13 +210,15 @@ export interface MetiData {
   cells: StageCells;
   industries: { name: string; reached: number }[];
   perspRows: { name: string; persp: PerspShare }[];
-  /** 自社の最終更新日 */
-  ownUpdatedAt: string;
-  otherCompanies: {
+  /** 企業一覧（自社が先頭）。updatedAt は最新の確定日 */
+  companies: {
     name: string;
     industry: string;
     buCount: number;
     best: string;
     updatedAt: string;
+    own: boolean;
   }[];
+  /** 抽象化テーブルを最後に作り直した日時 */
+  extractedAt: string;
 }

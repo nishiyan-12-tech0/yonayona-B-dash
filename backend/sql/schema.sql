@@ -176,3 +176,32 @@ CREATE TABLE theme (
 	FOREIGN KEY(company_id) REFERENCES company (id)
 )CHARSET=utf8mb4 ENGINE=InnoDB COMMENT='戦略テーマ';
 
+
+CREATE TABLE open_business_snapshot (
+	id INTEGER NOT NULL AUTO_INCREMENT, 
+	company_id INTEGER NOT NULL, 
+	company_name VARCHAR(100) NOT NULL, 
+	company_industry VARCHAR(100) NOT NULL, 
+	bu_id VARCHAR(40) NOT NULL, 
+	bu_name VARCHAR(100) NOT NULL, 
+	bu_industry VARCHAR(100) NOT NULL, 
+	as_of_label VARCHAR(50) NOT NULL, 
+	as_of DATE, 
+	confirmed_at DATETIME NOT NULL, 
+	stage SMALLINT NOT NULL, 
+	progress SMALLINT NOT NULL, 
+	obj_total INTEGER NOT NULL, 
+	obj_reach_fin INTEGER NOT NULL, 
+	kpi_lg INTEGER NOT NULL, 
+	kpi_pr INTEGER NOT NULL, 
+	kpi_cu INTEGER NOT NULL, 
+	kpi_fi INTEGER NOT NULL, 
+	init_total INTEGER NOT NULL, 
+	init_condition INTEGER NOT NULL, 
+	init_review INTEGER NOT NULL, 
+	init_verified INTEGER NOT NULL, 
+	extracted_at DATETIME NOT NULL, 
+	PRIMARY KEY (id), 
+	CONSTRAINT uq_open_company_bu UNIQUE (company_id, bu_id)
+)CHARSET=utf8mb4 ENGINE=InnoDB COMMENT='抽象化した事業ごとの現在地（オープンなDBの代わり。1行＝1社の1事業）';
+CREATE INDEX ix_open_business_snapshot_company_id ON open_business_snapshot (company_id);

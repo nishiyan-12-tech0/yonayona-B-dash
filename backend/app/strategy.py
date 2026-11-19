@@ -16,6 +16,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from . import models as m
+from . import open_data
 from .schemas import (
     ConfirmIn,
     InitiativeProgressIn,
@@ -496,6 +497,8 @@ def confirm(s: Session, cid: int, body: ConfirmIn) -> None:
         s.add(row)
     row.as_of, row.body = body.asOf, snapshot
     row.confirmed_by, row.confirmed_at = body.confirmedBy, ts
+    # 抽象化テーブル（オープンなDBの代わり）の自社の行を作り直す。本番は夜間バッチで行う
+    open_data.extract_company(s, cid)
 
 
 def delete_confirmation(s: Session, cid: int, conf_id: int) -> None:
@@ -506,3 +509,5 @@ def delete_confirmation(s: Session, cid: int, conf_id: int) -> None:
         raise HTTPException(409, "出発点の確定版は消せません")
     s.execute(delete(m.ChangeNote).where(m.ChangeNote.confirmation_id == conf_id))
     s.delete(row)
+    # 最新の確定版が変わるので、抽象化テーブルの自社の行も作り直す
+    open_data.extract_company(s, cid)

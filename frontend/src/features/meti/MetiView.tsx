@@ -2,10 +2,6 @@
 
 import type { CSSProperties } from "react";
 import { fetchMetiSummary } from "@/lib/api";
-import { PROG, STAGE } from "@/lib/constants";
-import { progOf, stageTop } from "@/lib/logic";
-import { useStore } from "@/lib/store";
-import type { StrategyData } from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { GridChart } from "@/components/GridChart";
 import { Info } from "@/components/Info";
@@ -14,39 +10,22 @@ import { PerspStack } from "@/components/PerspStack";
 const swatch = (color: string) =>
   ({ "--c": color, "--cs": color }) as CSSProperties;
 
-/** 自社の中で、道筋が一番進んだ事業 */
-function bestOf(d: StrategyData) {
-  let best: { p: number; st: number; name: string } | null = null;
-  d.bus.forEach((b) => {
-    const p = progOf(d, b, "now");
-    if (!best || p > best.p)
-      best = { p, st: stageTop(d, b, "now"), name: b.name };
-  });
-  const bb = best as { p: number; st: number; name: string } | null;
-  return bb ? `${bb.name}：${STAGE[bb.st]}・${PROG[bb.p]}まで` : "";
-}
-
 /** ④ 経産省の画面 */
 export function MetiView() {
-  const { data } = useStore();
   const meti = useAsync(fetchMetiSummary);
   if (!meti) return null;
-
-  const companies = [
-    {
-      name: data.company.name,
-      industry: data.company.industry,
-      buCount: data.bus.length,
-      best: bestOf(data),
-      updatedAt: meti.ownUpdatedAt,
-    },
-    ...meti.otherCompanies,
-  ];
+  const companies = meti.companies;
 
   return (
     <section className="view on" aria-label="経産省の画面">
       <div className="card">
-        <h2>参加企業の現在地（2026年3月末の集計）</h2>
+        <h2>
+          参加企業の現在地（各社の最新の確定版）
+          <Info>
+            各社が確定した戦略から、段階・道筋の進み・件数だけを抜き出したデータ（抽象化データ）を集計しています。戦略の中身は含みません。本番は毎晩のバッチで更新します（最終更新：
+            {meti.extractedAt.replace("T", " ")}）。
+          </Info>
+        </h2>
         <div className="summary">
           {meti.stats.map((s) => (
             <div className="stat" key={s.label}>
@@ -141,7 +120,7 @@ export function MetiView() {
                 <th>最終更新</th>
               </tr>
               {companies.map((c) => (
-                <tr key={c.name}>
+                <tr key={c.name} className={c.own ? "own" : undefined}>
                   <td>{c.name}</td>
                   <td>{c.industry}</td>
                   <td>{c.buCount}</td>
