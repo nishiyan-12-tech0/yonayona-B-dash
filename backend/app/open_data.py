@@ -212,7 +212,7 @@ def dummy_rows(ts: datetime) -> list[m.OpenBusinessSnapshot]:
     names = iter(DUMMY_PREFIX)
     for ind, n, suffix, pool in DUMMY_INDUSTRIES:
         for _ in range(n):
-            companies.append({"industry": ind, "name": f"{next(names)}{suffix}株式会社（架空）", "pool": pool, "bus": 1})
+            companies.append({"industry": ind, "name": f"{next(names)}{suffix}株式会社", "pool": pool, "bus": 1})
     total = sum(sum(v) for v in DUMMY_CELLS.values())
     while sum(c["bus"] for c in companies) < total:
         c = rng.choice(companies)

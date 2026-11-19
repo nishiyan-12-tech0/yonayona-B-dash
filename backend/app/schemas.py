@@ -87,6 +87,8 @@ class InitiativeIn(_In):
     base: str | None = ""
     target: str | None = ""
     checks: ChecksIn = ChecksIn()
+    # 申請時点の状態（0 検討中・1 試行中・2 実行中）。出発点を作る前と、新しく足した施策にだけ使う
+    exec: int = Field(default=0, ge=0, le=2)
 
 
 class CorpIn(_In):

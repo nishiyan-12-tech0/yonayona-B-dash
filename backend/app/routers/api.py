@@ -43,6 +43,14 @@ def put_strategy(body: StrategyIn, s: Session = Depends(get_session), c: int = D
     return strategy.build_strategy(s, c)
 
 
+@router.post("/strategy/submit")
+def post_submit(s: Session = Depends(get_session), c: int = Depends(cid)):
+    """A-15：申請を出し終えた。初めてなら、その内容を出発点の確定版にする"""
+    strategy.submit(s, c)
+    s.flush()
+    return strategy.build_strategy(s, c)
+
+
 @router.post("/strategy/versions")
 def post_version(s: Session = Depends(get_session), c: int = Depends(cid)):
     """A-4：今の申請内容を版として残す"""

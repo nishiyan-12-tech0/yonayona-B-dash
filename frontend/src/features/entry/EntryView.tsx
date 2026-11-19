@@ -2,25 +2,31 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { saveVersion } from "@/lib/api";
+import { saveVersion, submitStrategy } from "@/lib/api";
 import { useStore, type SaveState } from "@/lib/store";
 import { FORMS } from "./forms";
 import { BU_STEPS, STEPS } from "./steps";
 
 /** ① 申請 */
 export function EntryView() {
-  const { data, update, ui, setUi, flush, saveState, saveError } = useStore();
+  const { data, update, replace, ui, setUi, flush, saveState, saveError } =
+    useStore();
   const router = useRouter();
   const [moving, setMoving] = useState(false);
 
-  /** 書きかけを保存し、申請内容を版として残してから戦略マップへ */
+  /**
+   * 書きかけを保存し、申請内容を版として残してから戦略マップへ。
+   * 初めて出し終えたときは、その内容が出発点の確定版になり、すぐ他社と比べられる
+   */
   const toMap = async () => {
     setMoving(true);
     try {
       await flush();
       await saveVersion();
-    } catch {
-      // 版が残せなくても、戦略マップは見られるようにする
+      replace(await submitStrategy());
+    } catch (e) {
+      // 失敗しても、戦略マップは見られるようにする
+      console.error(e);
     }
     setUi({ snap: "now", sel: null });
     router.push("/map");

@@ -3,10 +3,12 @@ import {
   CAP,
   CAPS,
   CVP,
+  EXEC,
   FINKIND,
   HZ,
   IPA,
   IPA_ITEMS,
+  OWN,
   PERSP,
   PROG,
 } from "@/lib/constants";
@@ -16,6 +18,7 @@ import type {
   Initiative,
   Link,
   Objective,
+  Owner,
   Persp,
   StrategyData,
 } from "@/lib/types";
@@ -34,7 +37,9 @@ export interface FormProps {
 /** 指標の欄。今の値は担当者が戦略マップで入れるので、申請では聞かない */
 const KPI_KEYS = ["kpi", "base", "target", "due"] as const;
 const KPI_HEAD = ["指標", "基準（申請時点）", "目標", "期限"];
-const OWNER_OPTIONS = ["事業部", "DX推進部"];
+/** 主担当の選択肢（事業部・DX推進部・経営） */
+const OWNER_KEYS: Owner[] = ["biz", "dx", "mgmt"];
+const OWNER_OPTIONS = OWNER_KEYS.map((k) => OWN[k]);
 
 /* ----- 書き換えの小道具 ----- */
 const findObj = (d: StrategyData, id: string) =>
@@ -189,13 +194,13 @@ function OwnerSel({
   onChange,
 }: {
   owner: string;
-  onChange: (o: "biz" | "dx") => void;
+  onChange: (o: Owner) => void;
 }) {
   return (
     <Sel
       options={OWNER_OPTIONS}
-      value={owner === "dx" ? 1 : 0}
-      onChange={(v) => onChange(v === 1 ? "dx" : "biz")}
+      value={Math.max(0, OWNER_KEYS.indexOf(owner as Owner))}
+      onChange={(v) => onChange(OWNER_KEYS[v ?? 0])}
     />
   );
 }
@@ -697,7 +702,7 @@ function Step4({ data, bu, update }: FormProps) {
       </Field>
       <Field
         label="足りない力を埋めるために、何をしますか？ それはどの目標のための施策ですか？"
-        desc="システムを入れる施策には、使う人の育成や役割の見直しもセットで考えます。IPA項目は、施策が何を変えるかで選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で出ます。"
+        desc="すでに動いている施策は、申請時点の状態（試行中・実行中）を選びます。申請を出し終えた時点の内容が出発点になり、すぐ他社と比べられます。そのあとの状態は、担当者が戦略マップで更新します。システムを入れる施策には、使う人の育成や役割の見直しもセットで考えます。IPA項目は、施策が何を変えるかで選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で出ます。"
         wide
       >
         <Table
@@ -705,6 +710,7 @@ function Step4({ data, bu, update }: FormProps) {
             "施策",
             "付ける目標（この事業）",
             "主担当",
+            "申請時点の状態",
             "デジタル",
             "IPA項目",
             "施策の指標",
@@ -750,6 +756,15 @@ function Step4({ data, bu, update }: FormProps) {
                   <OwnerSel
                     owner={i.owner}
                     onChange={(v) => edit((x) => void (x.owner = v))}
+                  />
+                </td>
+                <td>
+                  {/* 出発点を作ったあとは、担当者が戦略マップで更新する */}
+                  <Sel
+                    options={EXEC.slice(0, 3)}
+                    value={Math.min(i.exec, 2)}
+                    disabled={i.prev !== undefined}
+                    onChange={(v) => edit((x) => void (x.exec = v ?? 0))}
                   />
                 </td>
                 <td>

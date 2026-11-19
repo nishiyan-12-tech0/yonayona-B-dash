@@ -410,6 +410,9 @@ def save_strategy(s: Session, cid: int, body: StrategyIn) -> None:
     s.execute(delete(m.Link).where(m.Link.company_id == cid, m.Link.bu_id.not_in(bu_ids or {""})))
 
     # ---- 施策
+    # 出発点（最初の確定版）を作る前は、申請で選んだ「申請時点の状態」を施策の状態に入れる。
+    # 出発点を作ったあとは、施策の状態は担当者が戦略マップで更新する（新しく足した施策だけ申請の値で始める）
+    before_start = _latest_confirmation(s, cid) is None
     init_ids = set()
     s.execute(delete(m.InitiativeObjective).where(m.InitiativeObjective.company_id == cid))
     for ii, i in enumerate(body.inits):
@@ -430,9 +433,12 @@ def save_strategy(s: Session, cid: int, body: StrategyIn) -> None:
         for ai, oid in enumerate(dict.fromkeys(i.attach)):
             if oid in obj_ids:  # ない目標への紐づけは保存しない
                 s.add(m.InitiativeObjective(company_id=cid, initiative_id=i.id, objective_id=oid, sort_order=ai))
-        # 新しい施策は「検討中」「未測定」から始める
-        if s.get(m.InitiativeProgress, (cid, i.id)) is None:
-            s.add(m.InitiativeProgress(company_id=cid, initiative_id=i.id, exec=0, verify=0, updated_at=ts))
+        # 新しい施策は、申請時点の状態・「未測定」から始める
+        prog = s.get(m.InitiativeProgress, (cid, i.id))
+        if prog is None:
+            s.add(m.InitiativeProgress(company_id=cid, initiative_id=i.id, exec=i.exec, verify=0, updated_at=ts))
+        elif before_start and prog.exec != i.exec:
+            prog.exec, prog.updated_at = i.exec, ts
     s.flush()
     _soft_delete_missing(s, m.Initiative, cid, init_ids, ts)
 
@@ -498,6 +504,27 @@ def confirm(s: Session, cid: int, body: ConfirmIn) -> None:
     row.as_of, row.body = body.asOf, snapshot
     row.confirmed_by, row.confirmed_at = body.confirmedBy, ts
     # 抽象化テーブル（オープンなDBの代わり）の自社の行を作り直す。本番は夜間バッチで行う
+    open_data.extract_company(s, cid)
+
+
+def submit(s: Session, cid: int) -> None:
+    """A-15：申請を初めて出し終えたとき、その内容を出発点の確定版にする（2回目以降は何もしない）。
+    出発点は消せない・上書きできない（is_seed）。抽象化テーブルの自社の行もここで作る"""
+    if _latest_confirmation(s, cid) is not None:
+        return
+    ts = now()
+    s.add(
+        m.ProgressConfirmation(
+            company_id=cid,
+            label=f"{ts.year}年{ts.month}月 申請時点",
+            as_of=ts.date(),
+            body=_current(s, cid),
+            confirmed_by="申請",
+            confirmed_at=ts,
+            is_seed=True,
+        )
+    )
+    s.flush()
     open_data.extract_company(s, cid)
 
 

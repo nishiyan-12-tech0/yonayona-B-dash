@@ -115,6 +115,9 @@ export const deleteConfirmation = (id: number) =>
 
 /** デモを初期状態に戻す（A-13） */
 export const resetDemo = () => call<StrategyData>("POST", "/api/demo/reset");
+/** 申請を出し終えた。初めてなら、その内容が出発点の確定版になる */
+export const submitStrategy = () =>
+  call<StrategyData>("POST", "/api/strategy/submit");
 
 /** 他社と比べる画面の確定版（新しい順に最大6つ。A-9） */
 export async function fetchConfirmedVersions(): Promise<ConfirmedVersion[]> {
