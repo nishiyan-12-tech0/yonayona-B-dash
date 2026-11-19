@@ -1,15 +1,20 @@
 import { PROG, STAGE } from "@/lib/constants";
 import type { Stage, StageCells } from "@/lib/types";
 
+/** 確定版1つぶんの位置 */
+export interface GridStep {
+  st: number;
+  p: number;
+  /** 確定版の期間（例：2026年9月末） */
+  label: string;
+}
+
 export interface GridPoint {
   name: string;
   short: string;
   color: string;
-  st: number;
-  p: number;
-  /** 2026年3月末の位置 */
-  st0: number;
-  p0: number;
+  /** 確定版ごとの位置。新しい順（[0] がいちばん新しい＝塗りの点） */
+  trail: GridStep[];
 }
 
 const W = 700;
@@ -33,10 +38,16 @@ export function GridChart({
   label: string;
 }) {
   const mx = Math.max(1, ...ROWS.flatMap((r) => cells[r]));
-  // 自社の点：同じマスに重なるときは縦にずらす
+  // 自社の点：事業ごとに縦にずらす。同じ事業の古い点が同じマスに重なるときは左にずらす
   const pts = points.map((q, n) => {
     const off = (n - (points.length - 1) / 2) * 22 + 8;
-    return { ...q, off, x: cx(q.p) - 34, y: cy(q.st) + off };
+    const steps = q.trail.map((s, j) => {
+      const same = q.trail
+        .slice(0, j)
+        .filter((x) => x.st === s.st && x.p === s.p).length;
+      return { ...s, x: cx(s.p) - 34 - same * 15, y: cy(s.st) + off };
+    });
+    return { ...q, steps };
   });
   return (
     <svg
@@ -108,56 +119,68 @@ export function GridChart({
         </g>
       ))}
       {pts.map((q) => {
-        if (!(q.st0 && (q.st0 !== q.st || q.p0 !== q.p))) return null;
-        const x0 = cx(q.p0) - 34;
-        const y0 = cy(q.st0) + q.off;
+        const old = q.steps.slice(1);
+        if (!old.length) return null;
+        // 古い順に線でつなぐ（軌跡）
+        const line = [...q.steps].reverse();
         return (
-          <g key={q.name}>
-            <line
-              x1={x0}
-              y1={y0}
-              x2={q.x - 9}
-              y2={q.y}
+          <g key={q.name + "-trail"}>
+            <polyline
+              points={line
+                .map(
+                  (s, j) => `${j === line.length - 1 ? s.x - 9 : s.x},${s.y}`,
+                )
+                .join(" ")}
+              fill="none"
               stroke={q.color}
               strokeWidth={2}
               strokeDasharray="4 3"
+              strokeOpacity={0.8}
             />
-            <circle
-              cx={x0}
-              cy={y0}
-              r={6}
-              fill="var(--surface)"
-              stroke={q.color}
-              strokeWidth={2}
-            >
-              <title>{`${q.name}（2026年3月末）`}</title>
-            </circle>
+            {old.map((s, j) => (
+              <circle
+                key={s.label}
+                cx={s.x}
+                cy={s.y}
+                r={6}
+                fill="var(--surface)"
+                stroke={q.color}
+                strokeWidth={2}
+                opacity={Math.max(0.35, 1 - j * 0.18)}
+              >
+                <title>{`${q.name}（${s.label}）：${STAGE[s.st]}・${PROG[s.p]}`}</title>
+              </circle>
+            ))}
           </g>
         );
       })}
-      {pts.map((q) => (
-        <g key={q.name}>
-          <circle
-            cx={q.x}
-            cy={q.y}
-            r={8}
-            fill={q.color}
-            stroke="var(--surface)"
-            strokeWidth={1.5}
-          >
-            <title>{`${q.name}：${STAGE[q.st]}・${PROG[q.p]}`}</title>
-          </circle>
-          <text
-            x={q.x + 12}
-            y={q.y + 4}
-            fontSize="11"
-            fontWeight={700}
-            fill="var(--ink)"
-          >
-            {q.short}
-          </text>
-        </g>
-      ))}
+      {pts.map((q) => {
+        const s = q.steps[0];
+        if (!s) return null;
+        return (
+          <g key={q.name}>
+            <circle
+              cx={s.x}
+              cy={s.y}
+              r={8}
+              fill={q.color}
+              stroke="var(--surface)"
+              strokeWidth={1.5}
+            >
+              <title>{`${q.name}（${s.label}）：${STAGE[s.st]}・${PROG[s.p]}`}</title>
+            </circle>
+            <text
+              x={s.x + 12}
+              y={s.y + 4}
+              fontSize="11"
+              fontWeight={700}
+              fill="var(--ink)"
+            >
+              {q.short}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 }

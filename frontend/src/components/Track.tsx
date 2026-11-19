@@ -1,6 +1,6 @@
 import { PROG } from "@/lib/constants";
 
-/** 道筋の進みの4段のバー。was＝2026年3月末の進み（薄い色で出す） */
+/** 道筋の進みの4段のバー。was＝比べる時点（前の確定版）の進み（薄い色で出す） */
 export function Track({ p, was = 0 }: { p: number; was?: number }) {
   return (
     <>

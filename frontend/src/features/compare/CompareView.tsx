@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { fetchPeers } from "@/lib/api";
+import { fetchConfirmedVersions, fetchPeers } from "@/lib/api";
 import { BCOL, PROG, STAGES } from "@/lib/constants";
 import {
   allObjs,
@@ -14,7 +14,12 @@ import {
   stageTop,
 } from "@/lib/logic";
 import { useStore } from "@/lib/store";
-import type { PerspShare, StageCells, StrategyData } from "@/lib/types";
+import type {
+  ConfirmedVersion,
+  PerspShare,
+  StageCells,
+  StrategyData,
+} from "@/lib/types";
 import { useAsync } from "@/lib/useAsync";
 import { GridChart, type GridPoint } from "@/components/GridChart";
 import { Heat } from "@/components/Heat";
@@ -28,11 +33,21 @@ const swatch = (color: string, round = false) =>
     ...(round ? { borderRadius: "50%" } : {}),
   }) as CSSProperties;
 
-/** 自社の事業の点（試行・実行中のデジタル施策がない事業は出さない） */
-function ownPoints(d: StrategyData): GridPoint[] {
-  return d.bus.flatMap((b, n) => {
-    const st = stageTop(d, b, "now");
-    if (!st) return [];
+/**
+ * 自社の事業の点。確定版ごとに位置を計算して、事業ごとの軌跡にする（新しい順）。
+ * 試行・実行中のデジタル施策がない時点は点を出さない。
+ */
+function ownPoints(vs: ConfirmedVersion[]): GridPoint[] {
+  const latest = vs[0]?.data;
+  if (!latest) return [];
+  return latest.bus.flatMap((b, n) => {
+    const trail = vs.flatMap((v) => {
+      const bu = v.data.bus.find((x) => x.id === b.id);
+      if (!bu) return [];
+      const st = stageTop(v.data, bu, "now");
+      return st ? [{ st, p: progOf(v.data, bu, "now"), label: v.label }] : [];
+    });
+    if (!trail.length || trail[0].label !== vs[0].label) return [];
     return [
       {
         name: b.name,
@@ -41,10 +56,7 @@ function ownPoints(d: StrategyData): GridPoint[] {
           .replace("（新規）", "")
           .replace("サービス", ""),
         color: BCOL[n % 3],
-        st,
-        p: progOf(d, b, "now"),
-        st0: stageTop(d, b, "mar"),
-        p0: progOf(d, b, "mar"),
+        trail,
       },
     ];
   });
@@ -52,9 +64,16 @@ function ownPoints(d: StrategyData): GridPoint[] {
 
 /** ③ 他社と比べる */
 export function CompareView() {
-  const { data, ui, setUi } = useStore();
+  const { ui, setUi } = useStore();
   const peerData = useAsync(fetchPeers);
-  if (!peerData) return null;
+  /** 確定版（新しい順）。この画面は確定版だけで描く（ふだんの保存は出さない） */
+  const versions = useAsync(fetchConfirmedVersions);
+  if (!peerData || !versions || !versions.length) return null;
+  /** いちばん新しい確定版 */
+  const data: StrategyData = versions[0].data;
+  /** その1つ前の確定版 */
+  const before: StrategyData | null = versions[1]?.data ?? null;
+  const latestLabel = versions[0].label;
 
   const inds = new Set(data.bus.map((b) => b.industry));
   const peers = peerData.points.filter(
@@ -116,7 +135,9 @@ export function CompareView() {
         <div>
           <b>他社と比べる</b>
           <span className="muted small">
-            　他社：年度末の集計（2026年3月末）／自社：現在と2026年3月末
+            　他社：年度末の集計（2026年3月末）／自社：確定した進捗（最新：
+            {latestLabel}
+            ）。ふだんの保存は、戦略マップで「進捗を確定」すると出ます
           </span>
         </div>
         <span className="small muted" style={{ marginLeft: "auto" }}>
@@ -143,7 +164,7 @@ export function CompareView() {
           <div id="grid">
             <GridChart
               cells={cells}
-              points={ownPoints(data)}
+              points={ownPoints(versions)}
               label="道筋の進みとDXの段階のマス目"
             />
             <div className="legend" style={{ marginTop: 6 }}>
@@ -153,7 +174,15 @@ export function CompareView() {
                   {b.name}
                 </span>
               ))}
-              <span>白抜き＝2026年3月末</span>
+              <span>
+                塗り＝{latestLabel}
+                {versions.length > 1
+                  ? `／白抜き＝それより前の確定版（${versions
+                      .slice(1)
+                      .map((v) => v.label)
+                      .join("・")}）`
+                  : ""}
+              </span>
               <span>数字＝比べる相手（{peers.length}事業・匿名）の割合</span>
             </div>
           </div>
@@ -169,7 +198,8 @@ export function CompareView() {
           <div className="bul" id="bulist">
             {data.bus.map((b, n) => {
               const p = progOf(data, b, "now");
-              const p0 = progOf(data, b, "mar");
+              const old = before?.bus.find((x) => x.id === b.id);
+              const p0 = before && old ? progOf(before, old, "now") : p;
               const st = stageTop(data, b, "now");
               return (
                 <div key={b.id}>
@@ -232,7 +262,7 @@ export function CompareView() {
           <div className="legend" style={{ marginTop: 10 }}>
             <span>
               <span className="sw o-dx" />
-              自社（現在）
+              自社（{latestLabel}）
             </span>
             <span>
               <span className="sw" style={swatch("var(--faint)")} />

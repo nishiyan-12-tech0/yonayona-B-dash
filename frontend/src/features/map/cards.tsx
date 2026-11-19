@@ -4,7 +4,13 @@ import type { Initiative, Objective, Snap, StrategyData } from "@/lib/types";
 
 export const cls = (...xs: (string | false | null | undefined)[]) =>
   xs.filter(Boolean).join(" ");
-export const nowLabel = (snap: Snap) => (snap === "mar" ? "3月末" : "現在");
+/** 比べる時点（直近の確定版）の名前。例：2026年3月末 */
+export const prevLabel = (d: StrategyData) => d.snap?.prev ?? "前回の確定";
+/** 表示中の時点の短い名前（箱の「現在 ○○」の部分） */
+export const nowLabel = (snap: Snap, d?: StrategyData) =>
+  snap === "mar"
+    ? (d ? prevLabel(d) : "前回").replace(/^\d{4}年/, "")
+    : (d?.snap?.now ?? "現在");
 
 /** 戦略マップの描画に共通で渡すもの */
 export interface MapCtx {
@@ -101,7 +107,7 @@ export function ObjCard({
             <span className="ok">{obj.kpi}</span>
             <span className="ov">
               <span>
-                {nowLabel(ctx.snap)} <b>{curOf(obj, ctx.snap)}</b>
+                {nowLabel(ctx.snap, ctx.data)} <b>{curOf(obj, ctx.snap)}</b>
               </span>
               {" ／ "}
               <span>
@@ -159,7 +165,7 @@ export function MetButton({
         <>
           <span className="mv">
             <span>
-              {nowLabel(ctx.snap)} <b>{curOf(obj, ctx.snap)}</b>
+              {nowLabel(ctx.snap, ctx.data)} <b>{curOf(obj, ctx.snap)}</b>
             </span>
             {" ／ "}
             <span>

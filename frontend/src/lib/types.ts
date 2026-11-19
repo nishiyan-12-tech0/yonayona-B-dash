@@ -4,7 +4,7 @@ export type Persp = "lg" | "pr" | "cu" | "fi";
 export type Owner = "biz" | "dx" | "mgmt";
 /** 学習と成長の資本の種類：人的／情報／組織 */
 export type Cap = "hum" | "inf" | "org";
-/** 表示する時点：現在／2026年3月末 */
+/** 表示する時点：現在／比べる時点（直近の確定版）。"mar" は 2026年3月末だったころの名残り */
 export type Snap = "now" | "mar";
 /** DXの段階：1＝デジタイゼーション、2＝デジタライゼーション、3＝DX */
 export type Stage = 1 | 2 | 3;
@@ -17,8 +17,9 @@ export interface Objective {
   /** 指標名。空なら「指標が未設定」 */
   kpi: string;
   base?: string;
-  /** 2026年3月末の値 */
+  /** 比べる時点（直近の確定版）の値 */
   prev?: string;
+  /** 今の値（担当者が戦略マップで入力） */
   cur?: string;
   target?: string;
   due?: string;
@@ -30,6 +31,29 @@ export interface Objective {
   cap?: Cap;
   /** 財務の目標だけ。FINKIND の番号（0＝収益増大、1＝生産性向上） */
   kind?: number;
+  /** 担当者の入力（最後に保存した内容）。まだ入力がなければない */
+  progress?: ObjectiveProgress;
+}
+
+/** 目標の進捗（担当者が戦略マップで入力。上書き） */
+export interface ObjectiveProgress {
+  /** 測った日（YYYY-MM-DD） */
+  at: string;
+  /** 動かなかった・下がった理由。REASON の番号 */
+  reason: number | null;
+  memo: string;
+  author: string;
+  updatedAt: string;
+}
+
+/** 施策の進捗のうち、実行の状態・検証・今の値以外（担当者が戦略マップで入力。上書き） */
+export interface InitiativeProgress {
+  /** 今の期間にやったこと */
+  did: string;
+  /** 結果・わかったこと */
+  result: string;
+  author: string;
+  updatedAt: string;
 }
 
 /** 目標どうしのつながり（因果の仮説）。戦略マップの矢印になります。 */
@@ -103,8 +127,9 @@ export interface Initiative extends InitState {
   base?: string;
   cur?: string;
   target?: string;
-  /** 2026年3月末の状態 */
+  /** 比べる時点（直近の確定版）の状態 */
   prev?: InitState;
+  progress?: InitiativeProgress;
 }
 
 /** 1社ぶんの申請内容。戦略マップ・他社比較はここから計算して描きます。 */
@@ -113,8 +138,46 @@ export interface StrategyData {
   corp: { fin: Objective };
   bus: BusinessUnit[];
   inits: Initiative[];
-  /** 2026年3月末から変わったこと */
+  /** 比べる時点から変わったこと */
   diffs: string[];
+  /** 時点の名前。now＝現在（または確定版の期間）、prev＝比べる時点（直近の確定版の期間） */
+  snap?: { now: string; prev: string | null };
+}
+
+/** 確定版の一覧の1行 */
+export interface Confirmation {
+  id: number;
+  label: string;
+  asOf: string;
+  confirmedBy: string;
+  confirmedAt: string;
+  /** 初期データの確定版（出発点。消せない） */
+  isSeed: boolean;
+}
+
+/** 他社と比べる画面に出す確定版（新しい順） */
+export interface ConfirmedVersion {
+  id: number;
+  label: string;
+  asOf: string;
+  data: StrategyData;
+}
+
+export interface ObjectiveProgressInput {
+  value: string;
+  at: string;
+  reason: number | null;
+  memo: string;
+  author: string;
+}
+
+export interface InitiativeProgressInput {
+  exec: number;
+  verify: number;
+  kpiCur: string;
+  did: string;
+  result: string;
+  author: string;
 }
 
 export type PerspShare = Record<Persp, number>;

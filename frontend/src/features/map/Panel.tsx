@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   CAP,
   CHECK_LABELS,
@@ -11,6 +11,7 @@ import {
   OWN,
   PERSP,
   PL,
+  REASON,
   STAGE,
   VERIFY,
 } from "@/lib/constants";
@@ -29,7 +30,43 @@ import {
   stAt,
 } from "@/lib/logic";
 import type { Link } from "@/lib/types";
-import { ActButton, nowLabel, type MapCtx } from "./cards";
+import { ActButton, nowLabel, prevLabel, type MapCtx } from "./cards";
+import { InitiativeProgressModal } from "./InitiativeProgressModal";
+import { ObjectiveProgressModal } from "./ObjectiveProgressModal";
+
+/** 見出しと、その右のボタン */
+function H4Btn({
+  title,
+  label,
+  show,
+  onClick,
+}: {
+  title: string;
+  label: string;
+  show: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <div className="h4row">
+      <h4>{title}</h4>
+      {show ? (
+        <button className="btn sm pri" onClick={onClick}>
+          {label}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
+/** 「最終更新：日付　入力した人」 */
+function Updated({ at, author }: { at?: string; author?: string }) {
+  if (!author) return null;
+  return (
+    <p className="upd">
+      最終更新：{(at || "").slice(0, 10)}　{author}
+    </p>
+  );
+}
 
 interface Props {
   ctx: MapCtx;
@@ -93,9 +130,14 @@ function Hyp({ ctx, link }: { ctx: MapCtx; link: Link }) {
 /** 戦略マップの右側に出る詳細（事業・目標・施策） */
 export function Panel({ ctx, onClose, onOpenTheme }: Props) {
   const { data, snap, sel } = ctx;
+  /** 開いている「進捗を入力」（選択中の目標・施策） */
+  const [editing, setEditing] = useState<string | null>(null);
   if (!sel) return null;
+  /** 比べる時点（過去）を表示中は見るだけ */
+  const editable = snap === "now";
   const [k, a] = sel.split(":");
   let body: ReactNode = null;
+  let modal: ReactNode = null;
 
   if (k === "b") {
     const b = data.bus.find((x) => x.id === a);
@@ -204,6 +246,15 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
         .filter((i) => i.digital && i.ipa === n && i.attach.length)
         .map((i) => i.name)
         .join("・") || "まだない";
+    if (editing === sel && editable) {
+      modal = (
+        <ObjectiveProgressModal
+          obj={o}
+          crumb={crumb}
+          onClose={() => setEditing(null)}
+        />
+      );
+    }
     body = (
       <>
         <Head
@@ -212,17 +263,22 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           name={o.name}
           onClose={onClose}
         />
-        <h4>指標</h4>
+        <H4Btn
+          title="指標"
+          label="進捗を入力"
+          show={editable && !!o.kpi}
+          onClick={() => setEditing(sel)}
+        />
         {o.kpi ? (
           <>
             <dl className="kv">
               <dt>指標名</dt>
               <dd>{o.kpi}</dd>
-              <dt>{nowLabel(snap)}の値</dt>
+              <dt>{nowLabel(snap, data)}の値</dt>
               <dd>
                 <b>{curOf(o, snap)}</b>
                 {snap === "now" && o.prev !== undefined && o.prev !== o.cur
-                  ? `（2026年3月末：${o.prev}）`
+                  ? `（${prevLabel(data)}：${o.prev}）`
                   : ""}
               </dd>
               <dt>目標値</dt>
@@ -231,9 +287,26 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
               <dd>{o.due || "未設定"}</dd>
               <dt>基準値</dt>
               <dd>{o.base}</dd>
-              <dt>測り方</dt>
-              <dd className="muted">未登録</dd>
+              {o.progress?.reason !== null &&
+              o.progress?.reason !== undefined ? (
+                <>
+                  <dt>動かなかった理由</dt>
+                  <dd>{REASON[o.progress.reason]}</dd>
+                </>
+              ) : null}
+              {o.progress?.memo ? (
+                <>
+                  <dt>メモ</dt>
+                  <dd>{o.progress.memo}</dd>
+                </>
+              ) : null}
             </dl>
+            {snap === "now" ? (
+              <Updated
+                at={o.progress?.at || o.progress?.updatedAt}
+                author={o.progress?.author}
+              />
+            ) : null}
             <h4>状態</h4>
             <dl className="kv">
               <dt>指標の動き</dt>
@@ -353,6 +426,15 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
         )
       : "どの事業の目標にも付いていない";
     const first = i.attach.length ? objById(data, i.attach[0]) : null;
+    if (editing === sel && editable) {
+      modal = (
+        <InitiativeProgressModal
+          init={i}
+          crumb={crumb}
+          onClose={() => setEditing(null)}
+        />
+      );
+    }
     body = (
       <>
         <Head
@@ -361,7 +443,12 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           name={i.name}
           onClose={onClose}
         />
-        <h4>状態</h4>
+        <H4Btn
+          title="状態"
+          label="進捗を入力"
+          show={editable}
+          onClick={() => setEditing(sel)}
+        />
         <dl className="kv">
           <dt>実行の状態</dt>
           <dd>{EXEC[s.exec]}</dd>
@@ -377,7 +464,22 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
           ) : (
             <dd className="muted">未登録</dd>
           )}
+          {snap === "now" && i.progress?.did ? (
+            <>
+              <dt>今の期間にやったこと</dt>
+              <dd>{i.progress.did}</dd>
+            </>
+          ) : null}
+          {snap === "now" && i.progress?.result ? (
+            <>
+              <dt>結果・わかったこと</dt>
+              <dd>{i.progress.result}</dd>
+            </>
+          ) : null}
         </dl>
+        {snap === "now" ? (
+          <Updated at={i.progress?.updatedAt} author={i.progress?.author} />
+        ) : null}
         <h4>この施策が付いている目標</h4>
         {i.attach.length ? (
           <div className="jump">
@@ -434,5 +536,10 @@ export function Panel({ ctx, onClose, onOpenTheme }: Props) {
     );
   }
 
-  return body;
+  return (
+    <>
+      {body}
+      {modal}
+    </>
+  );
 }

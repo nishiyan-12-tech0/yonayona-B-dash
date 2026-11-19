@@ -32,16 +32,16 @@ src/
 │  ├─ types.ts      データの型
 │  ├─ constants.ts  ラベルや分類
 │  ├─ logic.ts      計算（指標の動き、道筋の進み、DXの段階）
-│  ├─ api.ts        データ取得の窓口
-│  └─ store.tsx     申請内容と表示状態の置き場
-└─ mocks/       ダミーデータ
+│  ├─ api.ts        データ取得の窓口（バックエンドの API）
+│  └─ store.tsx     申請内容と表示状態の置き場、申請の保存
 ```
 
-## データについて（バックエンドをつなぐとき）
+## データについて（バックエンドとのつなぎ）
 
-- 画面は `src/lib/api.ts` だけを呼びます。今はここが `src/mocks/seed.ts` のダミーデータを返しています。
-- 申請で入力した内容は、ブラウザの localStorage（キー `michisuji.strategy.v1`）に保存しています。
-  ダミーデータに戻すときは、ブラウザの開発者ツールでこのキーを消してください。
-- バックエンドができたら、`api.ts` の4つの関数の中身を API 呼び出しに差し替え、`src/mocks` を消します。
-  画面側は変えません。`seed.ts` の内容は DB の初期データに使えます。
-- 戦略マップ・他社比較に出る値（道筋の進み、DXの段階など）は保存せず、申請内容から `logic.ts` で計算しています。
+- 画面は `src/lib/api.ts` だけを呼びます。中身はバックエンド（`backend/`、FastAPI）の API 呼び出しです。
+- バックエンドの URL は、ビルドのときの環境変数 `NEXT_PUBLIC_API_BASE_URL` で決まります（なければ `http://localhost:8000`）。
+  手元では `.env.local` に、Azure では `.github/workflows/azure-static-web-apps-*.yml` に書きます。
+- 申請の入力は、入力が止まってから0.8秒後にまとめて保存します（`src/lib/store.tsx`）。
+- 担当者の進捗（戦略マップの「進捗を入力」）と「進捗を確定」は、`src/features/map/*Modal.tsx`。
+- 戦略マップ・他社比較に出る値（道筋の進み、DXの段階など）は保存せず、届いたデータから `logic.ts` で計算しています。
+- 他社と比べる画面は、確定版（`GET /api/strategy/confirmed`）だけで描きます。

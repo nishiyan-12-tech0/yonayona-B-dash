@@ -1,0 +1,1105 @@
+{
+  "strategy": {
+    "company": {
+      "name": "テクゼロン株式会社",
+      "industry": "製造業（機械）"
+    },
+    "corp": {
+      "fin": {
+        "id": "cfin",
+        "persp": "fi",
+        "name": "連結の営業利益を伸ばす",
+        "kpi": "連結営業利益",
+        "base": "180億円",
+        "prev": "184億円",
+        "cur": "190億円",
+        "target": "260億円",
+        "due": "2028年度",
+        "owner": "mgmt"
+      }
+    },
+    "bus": [
+      {
+        "id": "B1",
+        "name": "産業機器事業",
+        "industry": "はん用・生産用機械",
+        "share": 70,
+        "owner": "産業機器事業部長",
+        "cvp": 2,
+        "customer": "当社設備を使う工場の保全部門・生産技術部門",
+        "future": "顧客の設備を止めず、段取りも短くできる機械と保守を提供している",
+        "gap": "＋150億円（2028年度）",
+        "growth": 70,
+        "confBy": "産業機器事業部長",
+        "confAt": "2026-04-15",
+        "themes": [
+          {
+            "id": "T1",
+            "name": "保守を「壊れてから」から「止めない」へ",
+            "hz": 1
+          },
+          {
+            "id": "T2",
+            "name": "組立の段取り替えを短くする",
+            "hz": 0
+          }
+        ],
+        "objs": [
+          {
+            "id": "b1lg1",
+            "persp": "lg",
+            "cap": "inf",
+            "theme": "T1",
+            "name": "必要な稼働データがそろっている",
+            "kpi": "必要データの欠損なし率",
+            "base": "70%",
+            "prev": "78%",
+            "cur": "91%",
+            "target": "98%",
+            "due": "2027年3月",
+            "owner": "dx",
+            "partner": "事業部"
+          },
+          {
+            "id": "b1pr1",
+            "persp": "pr",
+            "theme": "T1",
+            "name": "稼働状況に応じて保守を提案する",
+            "kpi": "稼働データを使った提案件数",
+            "base": "月20件",
+            "prev": "月20件",
+            "cur": "月42件",
+            "target": "月60件",
+            "due": "2027年度",
+            "owner": "biz",
+            "partner": "DX推進部"
+          },
+          {
+            "id": "b1pr2",
+            "persp": "pr",
+            "theme": "T1",
+            "name": "保守メニューを予防型に組み直す",
+            "kpi": "",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b1cu1",
+            "persp": "cu",
+            "theme": "T1",
+            "name": "保守契約を続けてもらう",
+            "kpi": "保守契約の継続率",
+            "base": "82%",
+            "prev": "82%",
+            "cur": "84%",
+            "target": "90%",
+            "due": "2027年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b1lg2",
+            "persp": "lg",
+            "cap": "inf",
+            "theme": "T2",
+            "name": "組立の実績が自動で取れている",
+            "kpi": "実績を自動で取れる工程の割合",
+            "base": "20%",
+            "prev": "20%",
+            "cur": "35%",
+            "target": "80%",
+            "due": "2027年度",
+            "owner": "dx",
+            "partner": "生産技術部"
+          },
+          {
+            "id": "b1lg3",
+            "persp": "lg",
+            "cap": "hum",
+            "theme": "T2",
+            "name": "標準の手順で誰でも段取りできる",
+            "kpi": "標準手順で段取りできる作業者の割合",
+            "base": "30%",
+            "prev": "30%",
+            "cur": "45%",
+            "target": "80%",
+            "due": "2027年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b1pr3",
+            "persp": "pr",
+            "theme": "T2",
+            "name": "段取り替えの時間を短くする",
+            "kpi": "1回あたりの段取り替え時間",
+            "base": "45分",
+            "prev": "43分",
+            "cur": "38分",
+            "target": "25分",
+            "due": "2027年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b1fi1",
+            "persp": "fi",
+            "kind": 0,
+            "name": "既存顧客からの売上を伸ばす",
+            "kpi": "既存顧客からの売上",
+            "base": "1,200億円",
+            "prev": "1,220億円",
+            "cur": "1,240億円",
+            "target": "1,350億円",
+            "due": "2028年度",
+            "owner": "mgmt"
+          },
+          {
+            "id": "b1fi2",
+            "persp": "fi",
+            "kind": 1,
+            "name": "製造原価率を下げる",
+            "kpi": "製造原価率",
+            "base": "68%",
+            "prev": "68%",
+            "cur": "67%",
+            "target": "64%",
+            "due": "2028年度",
+            "owner": "mgmt"
+          }
+        ],
+        "links": [
+          {
+            "from": "b1lg1",
+            "to": "b1pr1",
+            "reason": "欠損のない稼働データがあれば、故障の前に提案できる",
+            "cond": "提案に使える精度のデータが取れる",
+            "check": "提案に使えたデータの割合",
+            "date": "2026年9月"
+          },
+          {
+            "from": "b1pr1",
+            "to": "b1cu1",
+            "reason": "故障前に提案できれば停止のリスクが下がり、顧客が価値を感じて契約を続ける",
+            "cond": "営業に提案する時間がある",
+            "check": "提案への反応と実施率",
+            "date": "2027年3月"
+          },
+          {
+            "from": "b1pr2",
+            "to": "b1cu1",
+            "reason": "予防型のメニューがないと、提案しても契約の形にできない",
+            "cond": "価格と提供体制を決められる",
+            "check": "新メニューの受注件数",
+            "date": "2027年9月"
+          },
+          {
+            "from": "b1cu1",
+            "to": "b1fi1",
+            "reason": "継続率が上がれば、既存顧客からの保守売上が積み上がる",
+            "cond": "解約の主な理由が設備停止である",
+            "check": "解約理由の調査",
+            "date": "2027年3月"
+          },
+          {
+            "from": "b1lg2",
+            "to": "b1pr3",
+            "reason": "実績が自動で取れれば、時間がかかる段取りを特定できる",
+            "cond": "工程ごとの実績が比べられる形で取れる",
+            "check": "時間がかかる段取りの特定件数",
+            "date": "2026年12月"
+          },
+          {
+            "from": "b1lg3",
+            "to": "b1pr3",
+            "reason": "手順がそろえば、人による段取り時間のばらつきが減る",
+            "cond": "標準手順の教育時間を確保できる",
+            "check": "作業者ごとの段取り時間のばらつき",
+            "date": "2026年12月"
+          },
+          {
+            "from": "b1pr3",
+            "to": "b1fi2",
+            "reason": "段取り時間が減れば稼働率が上がり、原価率が下がる",
+            "cond": "受注量が今の水準を保つ",
+            "check": "稼働率と原価率",
+            "date": "2027年3月"
+          }
+        ]
+      },
+      {
+        "id": "B2",
+        "name": "計測機器事業",
+        "industry": "電気機器",
+        "share": 30,
+        "owner": "計測機器事業部長",
+        "cvp": 1,
+        "customer": "品質検査を行う電子部品メーカー",
+        "future": "検査の結果から不良の原因まで示す計測機器で選ばれている",
+        "gap": "＋60億円（2028年度）",
+        "growth": 90,
+        "confBy": "",
+        "confAt": "",
+        "themes": [
+          {
+            "id": "T3",
+            "name": "検査データから原因まで示す新製品",
+            "hz": 2
+          }
+        ],
+        "objs": [
+          {
+            "id": "b2lg1",
+            "persp": "lg",
+            "cap": "hum",
+            "theme": "T3",
+            "name": "検査データを解析できる技術者がいる",
+            "kpi": "データ解析ができる技術者",
+            "base": "8人",
+            "prev": "8人",
+            "cur": "12人",
+            "target": "30人",
+            "due": "2028年度",
+            "owner": "biz",
+            "partner": "DX推進部"
+          },
+          {
+            "id": "b2lg2",
+            "persp": "lg",
+            "cap": "inf",
+            "theme": "T3",
+            "name": "顧客の検査データが集まる",
+            "kpi": "接続できた顧客の検査装置",
+            "base": "0台",
+            "prev": "0台",
+            "cur": "40台",
+            "target": "500台",
+            "due": "2028年度",
+            "owner": "dx",
+            "partner": "事業部"
+          },
+          {
+            "id": "b2lg3",
+            "persp": "lg",
+            "cap": "org",
+            "theme": "T3",
+            "name": "開発と営業が顧客の声を共有する",
+            "kpi": "",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b2pr1",
+            "persp": "pr",
+            "theme": "T3",
+            "name": "新製品の開発期間を短くする",
+            "kpi": "新製品の開発期間",
+            "base": "24か月",
+            "prev": "24か月",
+            "cur": "22か月",
+            "target": "15か月",
+            "due": "2028年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b2cu1",
+            "persp": "cu",
+            "theme": "T3",
+            "name": "新製品を採用してもらう",
+            "kpi": "新製品の採用社数",
+            "base": "0社",
+            "prev": "0社",
+            "cur": "3社",
+            "target": "50社",
+            "due": "2028年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b2fi1",
+            "persp": "fi",
+            "kind": 0,
+            "name": "新製品で売上をつくる",
+            "kpi": "新製品の売上",
+            "base": "0億円",
+            "prev": "0億円",
+            "cur": "0億円",
+            "target": "60億円",
+            "due": "2028年度",
+            "owner": "mgmt"
+          }
+        ],
+        "links": [
+          {
+            "from": "b2lg1",
+            "to": "b2pr1",
+            "reason": "解析できる技術者が増えれば、検査データから製品の改良点を早く見つけられる",
+            "cond": "技術者が解析に使う時間を取れる",
+            "check": "改良点の発見から設計反映までの日数",
+            "date": "2027年6月"
+          },
+          {
+            "from": "b2lg2",
+            "to": "b2pr1",
+            "reason": "実際の検査データがあれば、試作の回数を減らせる",
+            "cond": "顧客がデータ提供に同意する",
+            "check": "試作の回数",
+            "date": "2027年6月"
+          },
+          {
+            "from": "b2pr1",
+            "to": "b2cu1",
+            "reason": "開発が早まれば、顧客の新ラインの立ち上げに間に合う",
+            "cond": "顧客の設備投資の時期が読める",
+            "check": "商談での採用・失注の理由",
+            "date": "2027年9月"
+          },
+          {
+            "from": "b2cu1",
+            "to": "b2fi1",
+            "reason": "採用社数が増えれば新製品の売上が立つ",
+            "cond": "単価を今の想定で保てる",
+            "check": "受注単価",
+            "date": "2027年9月"
+          }
+        ]
+      },
+      {
+        "id": "B3",
+        "name": "予防保守サービス事業（新規）",
+        "industry": "情報サービス",
+        "share": 0,
+        "owner": "新事業推進室長",
+        "cvp": 2,
+        "customer": "複数の拠点を持つ大手の製造業",
+        "future": "予防保守を有償のサービスとして提供している",
+        "gap": "＋40億円（2028年度）",
+        "growth": 100,
+        "confBy": "新事業推進室長",
+        "confAt": "2026-05-20",
+        "themes": [
+          {
+            "id": "T4",
+            "name": "予防保守を有償のサービスに",
+            "hz": 1
+          }
+        ],
+        "objs": [
+          {
+            "id": "b3lg1",
+            "persp": "lg",
+            "cap": "inf",
+            "theme": "T4",
+            "name": "故障を前もって予知できる",
+            "kpi": "故障予知の精度",
+            "base": "60%",
+            "prev": "60%",
+            "cur": "72%",
+            "target": "85%",
+            "due": "2027年度",
+            "owner": "dx",
+            "partner": "事業部"
+          },
+          {
+            "id": "b3pr1",
+            "persp": "pr",
+            "theme": "T4",
+            "name": "予知に基づいて訪問する",
+            "kpi": "",
+            "owner": "biz",
+            "partner": "DX推進部"
+          },
+          {
+            "id": "b3cu1",
+            "persp": "cu",
+            "theme": "T4",
+            "name": "有償の予防保守を契約してもらう",
+            "kpi": "有償予防保守の契約数",
+            "base": "0社",
+            "prev": "0社",
+            "cur": "0社",
+            "target": "300社",
+            "due": "2028年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b3cu2",
+            "persp": "cu",
+            "theme": "T4",
+            "name": "販売パートナーを広げる",
+            "kpi": "販売パートナーの数",
+            "base": "0社",
+            "prev": "0社",
+            "cur": "0社",
+            "target": "20社",
+            "due": "2028年度",
+            "owner": "biz",
+            "partner": ""
+          },
+          {
+            "id": "b3fi1",
+            "persp": "fi",
+            "kind": 0,
+            "name": "新しいサービスで売上をつくる",
+            "kpi": "新サービスの売上",
+            "base": "0億円",
+            "prev": "0億円",
+            "cur": "0億円",
+            "target": "40億円",
+            "due": "2028年度",
+            "owner": "mgmt"
+          }
+        ],
+        "links": [
+          {
+            "from": "b3lg1",
+            "to": "b3pr1",
+            "reason": "予知できれば、止まる前に訪問できる",
+            "cond": "予知の精度が実用水準（85%）に届く",
+            "check": "PoC先での停止回数",
+            "date": "2027年6月"
+          },
+          {
+            "from": "b3pr1",
+            "to": "b3cu1",
+            "reason": "止まらない価値を体験すれば、有償でも契約してもらえる",
+            "cond": "訪問の人員を確保できる",
+            "check": "PoC先の有償契約への移行率",
+            "date": "2027年9月"
+          },
+          {
+            "from": "b3cu1",
+            "to": "b3fi1",
+            "reason": "契約数が増えれば新サービスの売上が立つ",
+            "cond": "",
+            "check": "",
+            "date": ""
+          },
+          {
+            "from": "b3cu2",
+            "to": "b3fi1",
+            "reason": "パートナー経由で自社が届かない顧客に売れる",
+            "cond": "",
+            "check": "",
+            "date": ""
+          }
+        ]
+      }
+    ],
+    "inits": [
+      {
+        "id": "i1",
+        "name": "稼働データの連携基盤",
+        "attach": [
+          "b1lg1"
+        ],
+        "owner": "dx",
+        "partner": "事業部",
+        "digital": true,
+        "ipa": 3,
+        "exec": 2,
+        "verify": 1,
+        "checks": {
+          "condition": true,
+          "review": false
+        },
+        "ev": "産業機器事業 事業計画会議（2026-04-15）",
+        "kpi": "連携できた設備の台数",
+        "base": "0台",
+        "cur": "1,800台",
+        "target": "3,000台",
+        "prev": {
+          "exec": 1,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i9",
+        "name": "全社データ基盤",
+        "attach": [
+          "b1lg1",
+          "b2lg2"
+        ],
+        "owner": "dx",
+        "partner": "情報システム部",
+        "digital": true,
+        "ipa": 5,
+        "exec": 2,
+        "verify": 1,
+        "checks": {
+          "condition": true,
+          "review": false
+        },
+        "ev": "経営会議（2026-02-10）",
+        "kpi": "基盤につながった事業の数",
+        "base": "0",
+        "cur": "2",
+        "target": "3",
+        "prev": {
+          "exec": 2,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i2",
+        "name": "提案ルールの見直し",
+        "attach": [
+          "b1pr1"
+        ],
+        "owner": "biz",
+        "partner": "DX推進部",
+        "digital": false,
+        "ipa": null,
+        "exec": 2,
+        "verify": 1,
+        "checks": {
+          "condition": true,
+          "review": true
+        },
+        "ev": "産業機器事業 営業会議（2026-05-08）",
+        "kpi": "",
+        "prev": {
+          "exec": 0,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i3",
+        "name": "予防型メニューの設計",
+        "attach": [
+          "b1pr2"
+        ],
+        "owner": "biz",
+        "partner": "",
+        "digital": false,
+        "ipa": null,
+        "exec": 0,
+        "verify": 0,
+        "checks": {
+          "condition": false,
+          "review": false
+        },
+        "ev": "",
+        "kpi": ""
+      },
+      {
+        "id": "i4",
+        "name": "組立実績の自動収集",
+        "attach": [
+          "b1lg2"
+        ],
+        "owner": "dx",
+        "partner": "生産技術部",
+        "digital": true,
+        "ipa": 2,
+        "exec": 2,
+        "verify": 1,
+        "checks": {
+          "condition": true,
+          "review": false
+        },
+        "ev": "",
+        "kpi": "自動収集を始めた工程の数",
+        "base": "0",
+        "cur": "6",
+        "target": "14",
+        "prev": {
+          "exec": 1,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i5",
+        "name": "段取り手順の標準化と教育",
+        "attach": [
+          "b1lg3"
+        ],
+        "owner": "biz",
+        "partner": "",
+        "digital": false,
+        "ipa": null,
+        "exec": 2,
+        "verify": 1,
+        "checks": {
+          "condition": true,
+          "review": false
+        },
+        "ev": "製造部 定例（2026-03-12）",
+        "kpi": "",
+        "prev": {
+          "exec": 1,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i6",
+        "name": "検査データのAI解析PoC",
+        "attach": [
+          "b2pr1"
+        ],
+        "owner": "dx",
+        "partner": "計測機器事業部",
+        "digital": true,
+        "ipa": 4,
+        "exec": 1,
+        "verify": 1,
+        "checks": {
+          "condition": false,
+          "review": false
+        },
+        "ev": "",
+        "kpi": "PoCで見つけた改良点",
+        "base": "0件",
+        "cur": "4件",
+        "target": "10件",
+        "prev": {
+          "exec": 0,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i7",
+        "name": "データ解析の研修",
+        "attach": [
+          "b2lg1"
+        ],
+        "owner": "dx",
+        "partner": "計測機器事業部",
+        "digital": true,
+        "ipa": 7,
+        "exec": 2,
+        "verify": 0,
+        "checks": {
+          "condition": true,
+          "review": false
+        },
+        "ev": "",
+        "kpi": "受講者数",
+        "base": "0人",
+        "cur": "26人",
+        "target": "60人"
+      },
+      {
+        "id": "i8",
+        "name": "故障予知モデルのPoC",
+        "attach": [
+          "b3lg1"
+        ],
+        "owner": "dx",
+        "partner": "事業部",
+        "digital": true,
+        "ipa": 4,
+        "exec": 1,
+        "verify": 1,
+        "checks": {
+          "condition": false,
+          "review": false
+        },
+        "ev": "新事業推進会議（2026-05-20）",
+        "kpi": "",
+        "prev": {
+          "exec": 0,
+          "verify": 0,
+          "checks": {
+            "condition": false,
+            "review": false
+          }
+        }
+      },
+      {
+        "id": "i11",
+        "name": "予防保守の顧客ポータル",
+        "attach": [
+          "b3pr1"
+        ],
+        "owner": "dx",
+        "partner": "",
+        "digital": true,
+        "ipa": 6,
+        "exec": 0,
+        "verify": 0,
+        "checks": {
+          "condition": false,
+          "review": false
+        },
+        "ev": "",
+        "kpi": ""
+      },
+      {
+        "id": "i10",
+        "name": "社内チャットAI",
+        "attach": [],
+        "owner": "dx",
+        "partner": "",
+        "digital": true,
+        "ipa": 2,
+        "exec": 2,
+        "verify": 0,
+        "checks": {
+          "condition": false,
+          "review": false
+        },
+        "ev": "",
+        "kpi": "利用率",
+        "base": "0%",
+        "cur": "38%",
+        "target": "60%"
+      }
+    ],
+    "diffs": [
+      "産業機器事業：「稼働データの連携基盤」の予算と工数を確保（事業計画会議 2026-04-15）",
+      "「提案ルールの見直し」を開始。稼働データを使った提案は月20件 → 月42件",
+      "保守契約の継続率は82% → 84%。提案との関係は確認中（次の確認：2027年3月）",
+      "計測機器事業：新製品のテーマを追加。採用は3社。売上はまだ動いていない",
+      "予防保守サービス（新規）：「故障予知モデルのPoC」を開始。予知の精度は60% → 72%",
+      "「社内チャットAI」はどの目標にも付いていないまま（利用率38%）"
+    ]
+  },
+  "peers": {
+    "points": [
+      {
+        "ind": "はん用・生産用機械",
+        "st": 1,
+        "p": 0
+      },
+      {
+        "ind": "電気機器",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 1,
+        "p": 0
+      },
+      {
+        "ind": "情報サービス",
+        "st": 1,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "電気機器",
+        "st": 3,
+        "p": 4
+      },
+      {
+        "ind": "情報サービス",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 1,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 2,
+        "p": 1
+      },
+      {
+        "ind": "情報サービス",
+        "st": 3,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "情報サービス",
+        "st": 1,
+        "p": 0
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 1,
+        "p": 0
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "電気機器",
+        "st": 2,
+        "p": 3
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 0
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "電気機器",
+        "st": 1,
+        "p": 0
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 0
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "電気機器",
+        "st": 1,
+        "p": 1
+      },
+      {
+        "ind": "情報サービス",
+        "st": 1,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 3,
+        "p": 1
+      },
+      {
+        "ind": "電気機器",
+        "st": 2,
+        "p": 1
+      },
+      {
+        "ind": "情報サービス",
+        "st": 2,
+        "p": 2
+      },
+      {
+        "ind": "はん用・生産用機械",
+        "st": 3,
+        "p": 0
+      }
+    ],
+    "avg": {
+      "reach": 74,
+      "condition": 26,
+      "review": 18,
+      "verified": 16,
+      "persp": {
+        "lg": 36,
+        "pr": 46,
+        "cu": 10,
+        "fi": 8
+      }
+    }
+  },
+  "meti": {
+    "stats": [
+      {
+        "value": "42社",
+        "label": "参加企業（118事業）"
+      },
+      {
+        "value": "31社",
+        "label": "直近1年以内に更新"
+      },
+      {
+        "value": "13%",
+        "label": "顧客・財務まで道筋が進んだ事業"
+      },
+      {
+        "value": "47%",
+        "label": "業務プロセスで止まっている事業"
+      },
+      {
+        "value": "17%",
+        "label": "どの目標にも付いていない施策"
+      }
+    ],
+    "cells": {
+      "1": [
+        3,
+        8,
+        3,
+        1,
+        0
+      ],
+      "2": [
+        2,
+        11,
+        25,
+        3,
+        1
+      ],
+      "3": [
+        3,
+        13,
+        19,
+        6,
+        2
+      ]
+    },
+    "industries": [
+      {
+        "name": "はん用・生産用機械",
+        "reached": 12
+      },
+      {
+        "name": "電気機器",
+        "reached": 16
+      },
+      {
+        "name": "輸送用機械",
+        "reached": 9
+      },
+      {
+        "name": "化学",
+        "reached": 13
+      },
+      {
+        "name": "情報サービス",
+        "reached": 22
+      },
+      {
+        "name": "小売",
+        "reached": 11
+      }
+    ],
+    "perspRows": [
+      {
+        "name": "全参加企業",
+        "persp": {
+          "lg": 36,
+          "pr": 46,
+          "cu": 10,
+          "fi": 8
+        }
+      },
+      {
+        "name": "はん用・生産用機械",
+        "persp": {
+          "lg": 38,
+          "pr": 47,
+          "cu": 9,
+          "fi": 6
+        }
+      },
+      {
+        "name": "電気機器",
+        "persp": {
+          "lg": 34,
+          "pr": 44,
+          "cu": 13,
+          "fi": 9
+        }
+      },
+      {
+        "name": "情報サービス",
+        "persp": {
+          "lg": 30,
+          "pr": 40,
+          "cu": 18,
+          "fi": 12
+        }
+      }
+    ],
+    "ownUpdatedAt": "2026-05-20",
+    "otherCompanies": [
+      {
+        "name": "あおば化学株式会社（架空）",
+        "industry": "化学",
+        "buCount": 4,
+        "best": "機能材料事業：デジタライゼーション・業務プロセスまで",
+        "updatedAt": "2026-04-02"
+      },
+      {
+        "name": "ひかり電機株式会社（架空）",
+        "industry": "電気機器",
+        "buCount": 3,
+        "best": "空調事業：DX・顧客まで",
+        "updatedAt": "2026-03-28"
+      },
+      {
+        "name": "さくら物流株式会社（架空）",
+        "industry": "運輸",
+        "buCount": 2,
+        "best": "国内輸送事業：デジタイゼーション・学習と成長まで",
+        "updatedAt": "2025-11-14"
+      }
+    ]
+  }
+}

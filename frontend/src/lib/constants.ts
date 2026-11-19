@@ -70,6 +70,14 @@ export const CHECK_LABELS = {
   review: "検証と次の判断日の決定",
 } as const;
 export const FINKIND = ["収益増大", "生産性向上"];
+/** 指標が動かなかった・下がった理由（設計書v0.4 U-3） */
+export const REASON = [
+  "施策が遅れた",
+  "施策は進んだが指標が動かない",
+  "外部環境が変わった",
+  "測れていない",
+  "その他",
+];
 /** 道筋の進み（0〜4） */
 export const PROG = [
   "指標はまだ動いていない",

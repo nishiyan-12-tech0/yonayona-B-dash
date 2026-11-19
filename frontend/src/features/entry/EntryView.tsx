@@ -1,14 +1,30 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useStore } from "@/lib/store";
+import { useState } from "react";
+import { saveVersion } from "@/lib/api";
+import { useStore, type SaveState } from "@/lib/store";
 import { FORMS } from "./forms";
 import { BU_STEPS, STEPS } from "./steps";
 
 /** ① 申請 */
 export function EntryView() {
-  const { data, update, ui, setUi } = useStore();
+  const { data, update, ui, setUi, flush, saveState, saveError } = useStore();
   const router = useRouter();
+  const [moving, setMoving] = useState(false);
+
+  /** 書きかけを保存し、申請内容を版として残してから戦略マップへ */
+  const toMap = async () => {
+    setMoving(true);
+    try {
+      await flush();
+      await saveVersion();
+    } catch {
+      // 版が残せなくても、戦略マップは見られるようにする
+    }
+    setUi({ snap: "now", sel: null });
+    router.push("/map");
+  };
 
   const step = ui.step;
   const s = STEPS[step];
@@ -25,6 +41,7 @@ export function EntryView() {
             　事業部と経営が事業の目標を先に決め、そのあとDX推進部が加わって作ります
           </span>
         </div>
+        <SaveBadge state={saveState} error={saveError} />
         <span className="small muted" style={{ marginLeft: "auto" }}>
           入力中の事業
         </span>
@@ -93,12 +110,10 @@ export function EntryView() {
             <button
               className="btn pri"
               id="tomap"
-              onClick={() => {
-                setUi({ snap: "now", sel: null });
-                router.push("/map");
-              }}
+              disabled={moving}
+              onClick={toMap}
             >
-              入力内容で戦略マップを表示
+              {moving ? "保存しています…" : "入力内容で戦略マップを表示"}
             </button>
           </div>
         </div>
@@ -120,5 +135,27 @@ function StepItem({
       {group ? <li className="grp">{group}</li> : null}
       <li>{children}</li>
     </>
+  );
+}
+
+/** 申請の保存の状態 */
+function SaveBadge({
+  state,
+  error,
+}: {
+  state: SaveState;
+  error: string | null;
+}) {
+  if (state === "idle") return null;
+  const text =
+    state === "saving"
+      ? "保存中…"
+      : state === "saved"
+        ? "保存しました"
+        : `保存できませんでした（${error ?? ""}）。次の入力のときにもう一度送ります`;
+  return (
+    <span className={`savest${state === "error" ? " err" : ""}`} role="status">
+      {text}
+    </span>
   );
 }

@@ -4,6 +4,7 @@ import {
   Fragment,
   useMemo,
   useRef,
+  useState,
   type MouseEvent,
   type ReactNode,
 } from "react";
@@ -11,7 +12,15 @@ import { HZ, OWN, PCOL, PERSP, PERSPS, PL, STAGE } from "@/lib/constants";
 import { focusSets, themeFin } from "@/lib/logic";
 import { useStore } from "@/lib/store";
 import type { BusinessUnit, Objective, Persp } from "@/lib/types";
-import { ActButton, cls, MetButton, ObjCard, type MapCtx } from "./cards";
+import {
+  ActButton,
+  cls,
+  MetButton,
+  ObjCard,
+  prevLabel,
+  type MapCtx,
+} from "./cards";
+import { ConfirmModal } from "./ConfirmModal";
 import { Panel } from "./Panel";
 import { useLinks } from "./useLinks";
 
@@ -22,6 +31,10 @@ export function MapView() {
   const { data, ui, setUi } = useStore();
   const mapRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  /** 「進捗を確定」のポップアップを開いているか */
+  const [confirming, setConfirming] = useState(false);
+  /** 比べる時点（直近の確定版）の名前 */
+  const prev = prevLabel(data);
 
   const co = data.company;
   const b = data.bus.find((x) => x.id === ui.cb) ?? data.bus[0];
@@ -124,6 +137,15 @@ export function MapView() {
         >
           表示オプション
         </button>
+        {ui.snap === "now" ? (
+          <button
+            className="btn sm pri"
+            onClick={() => setConfirming(true)}
+            title="今の進捗を確定版にして、他社と比べる画面に反映します"
+          >
+            進捗を確定
+          </button>
+        ) : null}
         <span className="co" id="m-co">
           {co.name}
         </span>
@@ -139,12 +161,14 @@ export function MapView() {
             >
               現在
             </button>
-            <button
-              aria-pressed={ui.snap === "mar"}
-              onClick={() => setUi({ snap: "mar" })}
-            >
-              2026年3月末
-            </button>
+            {data.snap?.prev ? (
+              <button
+                aria-pressed={ui.snap === "mar"}
+                onClick={() => setUi({ snap: "mar" })}
+              >
+                {prev}（前回の確定）
+              </button>
+            ) : null}
           </div>
         </div>
         <div className="grp">
@@ -202,7 +226,8 @@ export function MapView() {
         {ui.snap === "mar" ? (
           <div className="fnote on">
             <span>
-              <b>2026年3月末</b>の時点を表示しています
+              <b>{prev}</b>
+              （前回の確定）の時点を表示しています。進捗の入力は「現在」に戻すとできます
             </span>
             <button onClick={() => setUi({ snap: "now" })}>現在に戻す</button>
           </div>
@@ -392,13 +417,20 @@ export function MapView() {
       </div>
 
       <details className="card dbox" id="diffbox" hidden={ui.snap !== "now"}>
-        <summary>2026年3月末から変わったこと</summary>
+        <summary>{prev}（前回の確定）から変わったこと</summary>
         <ul className="diff">
-          {data.diffs.map((d) => (
-            <li key={d}>{d}</li>
-          ))}
+          {data.diffs.length ? (
+            data.diffs.map((d, n) => <li key={n}>{d}</li>)
+          ) : (
+            <li className="muted">
+              まだありません。進捗を入力すると、ここに出ます
+            </li>
+          )}
         </ul>
       </details>
+      {confirming ? (
+        <ConfirmModal onClose={() => setConfirming(false)} />
+      ) : null}
     </section>
   );
 }
