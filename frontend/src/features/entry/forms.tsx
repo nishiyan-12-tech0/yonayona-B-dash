@@ -249,7 +249,11 @@ function Step0({ data, update }: FormProps) {
   const fin = data.corp.fin;
   return (
     <>
-      <Field label="全社の財務目標" wide>
+      <Field
+        label="会社全体として、中長期でどんな財務目標を目指しますか？"
+        desc="中期経営計画の目標を書きます。"
+        wide
+      >
         <Table head={["目標", ...KPI_HEAD]}>
           <tr>
             {(["name", ...KPI_KEYS] as const).map((k) => (
@@ -265,7 +269,11 @@ function Step0({ data, update }: FormProps) {
           </tr>
         </Table>
       </Field>
-      <Field label="対象にする事業" wide>
+      <Field
+        label="戦略を描く事業はどれですか？ 全社の売上に占める割合は？"
+        desc="売上がまだない新規事業は0%にします。"
+        wide
+      >
         <Table
           head={["事業名", "業種", "全社売上に占める割合（%）", "責任者", ""]}
         >
@@ -348,7 +356,6 @@ function Step0({ data, update }: FormProps) {
             )
           }
         />
-        <Hint>売上がまだない新規事業は0%にします。</Hint>
       </Field>
     </>
   );
@@ -359,16 +366,21 @@ function Step1({ bu, update }: FormProps) {
   const fs = bu.objs.filter((o) => o.persp === "fi");
   return (
     <>
-      <Field label="今との差">
+      <Field
+        label="目標と今とでは、どれだけ差がありますか？"
+        desc="中期経営計画の目標と、今の差を書きます。"
+      >
         <div>
           <Txt
             value={bu.gap}
             onChange={(v) => editBu(update, bu.id, { gap: v })}
           />
-          <Hint>中期経営計画の目標と、今の差</Hint>
         </div>
       </Field>
-      <Field label="差の埋め方">
+      <Field
+        label="その差を、生産性を上げる分と売上を増やす分で、それぞれどれだけ埋めますか？"
+        desc="生産性（コストを下げる・資産を活かす）は早く効き、売上を増やす道（新しい収益源・既存顧客との取引を深める）は時間がかかります。両方を描けているかを見ます。"
+      >
         <div>
           <input
             type="range"
@@ -394,12 +406,13 @@ function Step1({ bu, update }: FormProps) {
               生産性向上 {100 - bu.growth}%
             </i>
           </div>
-          <Hint>
-            生産性向上（効率化）だけで差を埋める計画か、収益増大も描けているかが、最初に見えます。
-          </Hint>
         </div>
       </Field>
-      <Field label="財務の目標" wide>
+      <Field
+        label="この事業の財務の目標と、測る指標は何ですか？"
+        desc="売上を増やす目標なら「収益増大」、コストを下げる・資産を活かす目標なら「生産性向上」を選びます。"
+        wide
+      >
         <Table head={["目標", "種類", ...KPI_HEAD, ""]}>
           {fs.map((o) => (
             <tr key={o.id}>
@@ -435,37 +448,43 @@ function Step2({ bu, update }: FormProps) {
   const cs = bu.objs.filter((o) => o.persp === "cu");
   return (
     <>
-      <Field label="対象の顧客">
+      <Field
+        label="誰に選ばれたいですか？"
+        desc="狙う顧客のまとまり（業種・規模・地域など）を書きます。"
+      >
         <Txt
           value={bu.customer}
           onChange={(v) => editBu(update, bu.id, { customer: v })}
         />
       </Field>
-      <Field label="顧客価値提案の類型">
+      <Field
+        label="何で選ばれる事業にしますか？（4つから1つ）"
+        desc="1つを選びます。「すべてを少しずつ」は戦略にならない、という考え方です（Kaplan & Norton『戦略マップ』）。"
+      >
         <div>
           <Sel
             options={CVP}
             value={bu.cvp}
             onChange={(v) => editBu(update, bu.id, { cvp: v ?? 0 })}
           />
-          <Hint>
-            一つを選びます。「すべてを少しずつ」は戦略にならない、という考え方です（Kaplan
-            &amp; Norton『戦略マップ』）。
-          </Hint>
         </div>
       </Field>
-      <Field label="将来の提供価値">
+      <Field
+        label="顧客にどんな変化を届けますか？"
+        desc="価格・品質・品揃え・機能・サービス・関係・ブランドのうち、どこで他社と違うかを書きます。技術名は使いません（例：×AI導入　○設備を止めない保守）。"
+      >
         <div>
           <textarea
             value={bu.future}
             onChange={(e) => editBu(update, bu.id, { future: e.target.value })}
           />
-          <Hint>
-            技術名を使わずに書けるか確認してください（例：×AI導入　○設備を止めない保守）
-          </Hint>
         </div>
       </Field>
-      <Field label="顧客の成果目標" wide>
+      <Field
+        label="顧客に起きる変化を、どの指標で測りますか？"
+        desc="顧客満足・継続率・新規獲得・顧客あたりの売上などで測ります。"
+        wide
+      >
         <Table head={["目標", ...KPI_HEAD, ""]}>
           {cs.map((o) => (
             <tr key={o.id}>
@@ -503,7 +522,11 @@ function Step3({ bu, update }: FormProps) {
     );
   return (
     <>
-      <Field label="戦略テーマ（1〜3個）" wide>
+      <Field
+        label="選ばれるために、特に力を入れる業務のまとまり（戦略テーマ）は何ですか？ どのくらいの期間で効きますか？（1〜3個）"
+        desc="日々の生産・提供は半年〜1年、顧客との関係づくりは1〜2年、新しい商品・サービスづくりは2〜4年で効きます。すぐ効くものだけに偏っていないかを見ます。"
+        wide
+      >
         <Table head={["テーマ名", "取り組む期間の目安", ""]}>
           {bu.themes.map((t) => (
             <tr key={t.id}>
@@ -556,7 +579,11 @@ function Step3({ bu, update }: FormProps) {
           }
         />
       </Field>
-      <Field label="変える業務" wide>
+      <Field
+        label="そのテーマで、どの業務をどう変えますか？ 誰が主に担当しますか？"
+        desc="業務を変えた結果を測る指標まで決めます。主担当と、一緒に動く部署も書きます。"
+        wide
+      >
         <Table head={["目標", "テーマ", "主担当", "協働", ...KPI_HEAD, ""]}>
           {ps.map((o) => (
             <tr key={o.id}>
@@ -595,7 +622,9 @@ function Step3({ bu, update }: FormProps) {
           onClick={() => addObj(update, bu.id, "pr")}
         />
       </Field>
-      <Field label="事業側で確認した人・日付">
+      <Field
+        label="事業部の誰が、いつ、ここまでの内容を確認しましたか？"
+      >
         <div className="row">
           <Txt
             value={bu.confBy}
@@ -623,7 +652,11 @@ function Step4({ data, bu, update }: FormProps) {
   const its = data.inits.filter((i) => i.attach.some(inBu) || !i.attach.length);
   return (
     <>
-      <Field label="必要な力（学習と成長の目標）" wide>
+      <Field
+        label="変える業務のために、どんな人材・情報・組織の力が必要ですか？ 今どれだけ足りませんか？"
+        desc="人材（スキル・知識）は人的資本、システム・データは情報資本、組織の力は組織資本です。組織の力には、文化・リーダー・目標のそろえ方（事業部とDX推進部の目標を戦略に結びつける）・協働の4つがあります。人材とITは、どの業務のためかが決まって初めて価値が出ます。"
+        wide
+      >
         <Table
           head={["目標", "資本の種類", "テーマ", "主担当", ...KPI_HEAD, ""]}
         >
@@ -661,11 +694,12 @@ function Step4({ data, bu, update }: FormProps) {
           ))}
         </Table>
         <AddBtn label="必要な力" onClick={() => addObj(update, bu.id, "lg")} />
-        <Hint>
-          データ・システムは情報資本、スキル・人数は人的資本、文化・協働の仕組みは組織資本です。
-        </Hint>
       </Field>
-      <Field label="施策（チップ）" wide>
+      <Field
+        label="足りない力を埋めるために、何をしますか？ それはどの目標のための施策ですか？"
+        desc="システムを入れる施策には、使う人の育成や役割の見直しもセットで考えます。IPA項目は、施策が何を変えるかで選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で出ます。"
+        wide
+      >
         <Table
           head={[
             "施策",
@@ -795,9 +829,6 @@ function Step4({ data, bu, update }: FormProps) {
             )
           }
         />
-        <Hint>
-          IPA項目は、施策が何を変えるかで企業が選びます。段階は、項目1＝デジタイゼーション、項目2・3＝デジタライゼーション、項目4〜7＝DXとして自動で表示します。
-        </Hint>
       </Field>
     </>
   );
@@ -811,7 +842,11 @@ function Step5({ bu, update }: FormProps) {
       if (b) mutate(b.links);
     });
   return (
-    <Field label="目標どうしのつながり" wide>
+    <Field
+      label="なぜその目標が次の目標につながると言えますか？ いつ、何で確かめますか？"
+      desc="つながりは「因果の仮説」です。半年〜1年ごとの更新で、確かめた結果と、変えたかどうかを記録します。"
+      wide
+    >
       <Table
         head={[
           "元の目標",
@@ -881,9 +916,6 @@ function Step5({ bu, update }: FormProps) {
           ＋ つながりを追加
         </button>
       </div>
-      <Hint>
-        つながりは「因果の仮説」です。半年〜1年ごとの更新で、確かめた結果と、変えたかどうかを記録します。
-      </Hint>
     </Field>
   );
 }
@@ -892,7 +924,11 @@ function Step5({ bu, update }: FormProps) {
 function Step6({ data, bu, update }: FormProps) {
   const its = initsOfBu(data, bu);
   return (
-    <Field label="施策ごとの実行の準備" wide>
+    <Field
+      label="施策を動かす予算・工数・権限・データの提供者はそろっていますか？ 検証日は決まっていますか？"
+      desc="事業部とDX推進部の目標の合意は、この申請を一緒に作った時点で済んでいるので、別には聞きません。評価・報酬の変更は条件にしません。"
+      wide
+    >
       <Table
         head={[
           "施策",
@@ -931,9 +967,6 @@ function Step6({ data, bu, update }: FormProps) {
           </tr>
         ))}
       </Table>
-      <Hint>
-        実行条件＝予算・工数・権限・データの提供者。事業部とDX推進部の目標の合意は、この申請を一緒に作る時点で済んでいるので、別には聞きません。評価・報酬の変更は条件にしません。
-      </Hint>
     </Field>
   );
 }
@@ -942,15 +975,20 @@ function Step6({ data, bu, update }: FormProps) {
 function Step7({ data }: FormProps) {
   return (
     <>
-      <Field label="道筋にあるDX（入力なし・自動）" wide>
-        <Heat data={data} snap="now" />
-        <Hint>
+      <Field
+        label="道筋にあるDX（入力なし・自動）"
+        desc={
+          <>
           その項目の施策がある事業について、その施策から道筋がどこまで進んだかを出しています。「未着手／取り組み中／成果が出ている」の自己申告はしません。
           <br />
           項目：{IPA_ITEMS.map((k) => k + ". " + IPA[k]).join("／")}
           （1＝デジタイゼーション、2・3＝デジタライゼーション、4〜7＝DX。分類の出典：IPA『DX動向2025』本文
           p.16 図表1-19）
-        </Hint>
+        </>
+        }
+        wide
+      >
+        <Heat data={data} snap="now" />
       </Field>
       <Field label="事業ごとの道筋の進み" wide>
         <div className="bul">

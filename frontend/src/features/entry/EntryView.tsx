@@ -80,6 +80,7 @@ export function EntryView() {
               {step}. {s.t}
               {needBu ? <span className="small muted">　{bu.name}</span> : null}
             </h2>
+            <p className="stepq">{s.q}</p>
             <div className="lead">
               <b>ここで決めること</b>
               <span>{s.dec}</span>

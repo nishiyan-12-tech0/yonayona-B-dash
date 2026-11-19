@@ -60,23 +60,28 @@ export function Sel({
   );
 }
 
-/** ラベルと入力欄の組。wide＝表などを横いっぱいに置く */
+/**
+ * 問いと入力欄の組。label＝問い、desc＝問いの下に常に出す説明。
+ * wide＝表などを横いっぱいに置く（そうでなければ入力欄の幅を抑える）
+ */
 export function Field({
   label,
+  desc,
   wide,
   children,
 }: {
   label: string;
+  desc?: ReactNode;
   wide?: boolean;
   children: ReactNode;
 }) {
   return (
-    <div
-      className="field"
-      style={wide ? { gridTemplateColumns: "1fr" } : undefined}
-    >
-      <label>{label}</label>
-      {children}
+    <div className="field">
+      <div className="fq">
+        <label>{label}</label>
+        {desc ? <p className="fdesc">{desc}</p> : null}
+      </div>
+      <div className={wide ? "fin" : "fin narrow"}>{children}</div>
     </div>
   );
 }
