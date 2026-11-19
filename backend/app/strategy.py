@@ -225,7 +225,10 @@ def current_data(s: Session, cid: int) -> dict | None:
             "target": i.target,
             "exec": p.exec if p else i.exec0,
             "verify": p.verify if p else 0,
-            "checks": {"condition": i.chk_condition, "review": i.chk_review},
+            "checks": {
+                "condition": p.chk_condition if p is not None and p.chk_condition is not None else i.chk_condition,
+                "review": p.chk_review if p is not None and p.chk_review is not None else i.chk_review,
+            },
         }
         cur = p.kpi_cur if p is not None and p.kpi_cur else i.base
         if cur:
@@ -426,6 +429,57 @@ def discard_draft(s: Session, cid: int) -> None:
 # ================================================================ 戦略マップを作成（A-5）
 
 
+def missing_items(body: StrategyIn) -> list[str]:
+    """申請の入力チェック（フロントの validate.ts と同じ考え方）。
+    全項目必須。空でもよいのは協働と、実行の準備のチェックだけ"""
+    out: list[str] = []
+    blank = lambda v: v is None or str(v).strip() == ""  # noqa: E731
+    kpi = (("kpi", "指標"), ("base", "今（申請時点）"), ("target", "目標"), ("due", "期限"))
+
+    def obj(o: ObjectiveIn, where: str, theme: bool) -> None:
+        m = (["目標"] if blank(o.name) else []) + [t for k, t in kpi if blank(getattr(o, k))]
+        if theme and blank(o.theme):
+            m.append("テーマ")
+        if m:
+            out.append(f"{where}「{o.name or '（名前なし）'}」の{'・'.join(m)}")
+
+    obj(body.corp.fin, "全社の財務目標", False)
+    if not body.bus:
+        out.append("戦略を描く事業がありません")
+    for b in body.bus:
+        n = b.name or "（名前なし）"
+        for k, t in (("name", "事業名"), ("industry", "業種"), ("owner", "責任者"), ("gap", "目標と今との差"),
+                     ("customer", "対象の顧客"), ("future", "顧客に届ける変化"),
+                     ("confBy", "事業側で確認した人"), ("confAt", "事業側で確認した日付")):
+            if blank(getattr(b, k)):
+                out.append(f"{n}：{t}")
+        for p, t in (("fi", "財務の目標"), ("cu", "顧客の成果目標"), ("pr", "変える業務"), ("lg", "必要な力")):
+            os_ = [o for o in b.objs if o.persp == p]
+            if not os_:
+                out.append(f"{n}：{t}がありません")
+            for o in os_:
+                obj(o, f"{n}：{t}", p in ("pr", "lg"))
+        if not b.themes or any(blank(t.name) for t in b.themes):
+            out.append(f"{n}：戦略テーマ")
+        if not b.links:
+            out.append(f"{n}：目標どうしのつながりがありません")
+        for li, lk in enumerate(b.links):
+            if any(blank(v) for v in (lk.from_, lk.to, lk.reason, lk.cond, lk.check, lk.date)):
+                out.append(f"{n}：{li + 1}本目のつながり")
+    for i in body.inits:
+        n = f"施策「{i.name or '（名前なし）'}」"
+        if not i.attach:
+            out.append(f"{n}が、どの目標にも付いていません")
+        m = [t for v, t in ((i.name, "施策名"), (i.kpi, "施策の指標"), (i.base, "今（申請時点）"),
+                            (i.target, "目標"), (i.ev, "決めた場")) if blank(v)]
+        if i.digital and not i.ipa:
+            m.append("IPA項目")
+        if m:
+            out.append(f"{n}の{'・'.join(m)}")
+    return out
+
+
+
 def _apply_objective(s: Session, cid: int, o: ObjectiveIn, bu_id: str | None, order: int) -> None:
     s.add(
         m.Objective(
@@ -583,8 +637,10 @@ def create_application(s: Session, cid: int) -> dict:
         first = e.errors()[0] if e.errors() else {}
         where = ".".join(str(x) for x in first.get("loc", []))
         raise HTTPException(422, f"申請の内容が正しくありません（{where}：{first.get('msg', '')}）") from e
-    if not body.bus:
-        raise HTTPException(422, "ステップ0で事業を追加してください")
+    missing = missing_items(body)
+    if missing:
+        more = f" ほか{len(missing) - 5}件" if len(missing) > 5 else ""
+        raise HTTPException(422, "入っていない項目があります：" + "／".join(missing[:5]) + more)
     ts = now()
 
     # ① 現在の申請があれば、置き換え時点の版を作ってから置き換える
@@ -654,6 +710,10 @@ def save_initiative_progress(s: Session, cid: int, iid: str, body: InitiativePro
     row.exec = 1
     row.verify = body.verify
     row.kpi_cur = body.kpiCur or None
+    if body.condition is not None:
+        row.chk_condition = body.condition
+    if body.review is not None:
+        row.chk_review = body.review
     row.did, row.result, row.author, row.updated_at = body.did, body.result, body.author, now()
     open_data.extract_company(s, cid)
 

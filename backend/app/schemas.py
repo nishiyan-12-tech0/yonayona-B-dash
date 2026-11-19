@@ -125,6 +125,9 @@ class InitiativeProgressIn(_In):
     did: str = Field(min_length=1)
     result: str = ""
     author: str = Field(min_length=1, max_length=100)
+    # 実行の準備（送られてこなければ変えない）
+    condition: bool | None = None
+    review: bool | None = None
 
 
 # ---------------------------------------------------------------- 版（A-13）

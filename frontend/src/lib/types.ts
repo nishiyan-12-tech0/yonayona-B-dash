@@ -189,6 +189,10 @@ export interface ObjectiveProgressInput {
 
 export interface InitiativeProgressInput {
   verify: number;
+  /** 実行の準備：実行条件の確保 */
+  condition: boolean;
+  /** 実行の準備：検証と次の判断日の決定 */
+  review: boolean;
   kpiCur: string;
   did: string;
   result: string;

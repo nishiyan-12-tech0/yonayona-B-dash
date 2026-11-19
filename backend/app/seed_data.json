@@ -79,9 +79,12 @@
             "persp": "pr",
             "theme": "T1",
             "name": "保守メニューを予防型に組み直す",
-            "kpi": "",
+            "kpi": "予防型メニューの契約件数",
             "owner": "biz",
-            "partner": ""
+            "partner": "",
+            "base": "0件",
+            "target": "120件",
+            "due": "2027年度"
           },
           {
             "id": "b1cu1",
@@ -238,8 +241,8 @@
         "future": "検査の結果から不良の原因まで示す計測機器で選ばれている",
         "gap": "＋60億円（2028年度）",
         "growth": 90,
-        "confBy": "",
-        "confAt": "",
+        "confBy": "計測機器事業部長",
+        "confAt": "2026-05-10",
         "themes": [
           {
             "id": "T3",
@@ -284,9 +287,12 @@
             "cap": "org",
             "theme": "T3",
             "name": "開発と営業が顧客の声を共有する",
-            "kpi": "",
+            "kpi": "顧客の声を開発に共有した件数",
             "owner": "biz",
-            "partner": ""
+            "partner": "",
+            "base": "月5件",
+            "target": "月30件",
+            "due": "2027年度"
           },
           {
             "id": "b2pr1",
@@ -406,9 +412,12 @@
             "persp": "pr",
             "theme": "T4",
             "name": "予知に基づいて訪問する",
-            "kpi": "",
+            "kpi": "予知に基づく訪問の割合",
             "owner": "biz",
-            "partner": "DX推進部"
+            "partner": "DX推進部",
+            "base": "0%",
+            "target": "60%",
+            "due": "2028年度"
           },
           {
             "id": "b3cu1",
@@ -473,17 +482,17 @@
             "from": "b3cu1",
             "to": "b3fi1",
             "reason": "契約数が増えれば新サービスの売上が立つ",
-            "cond": "",
-            "check": "",
-            "date": ""
+            "cond": "有償の契約単価が、訪問にかかる費用を上回る",
+            "check": "有償契約の件数と継続率",
+            "date": "2027年度末"
           },
           {
             "from": "b3cu2",
             "to": "b3fi1",
             "reason": "パートナー経由で自社が届かない顧客に売れる",
-            "cond": "",
-            "check": "",
-            "date": ""
+            "cond": "パートナー経由でも保守の品質を保てる",
+            "check": "パートナー経由の契約件数と解約率",
+            "date": "2027年度末"
           }
         ]
       }
@@ -567,7 +576,7 @@
           "review": true
         },
         "ev": "産業機器事業 営業会議（2026-05-08）",
-        "kpi": "",
+        "kpi": "新しいルールで出した提案の割合",
         "prev": {
           "exec": 0,
           "verify": 0,
@@ -575,7 +584,9 @@
             "condition": false,
             "review": false
           }
-        }
+        },
+        "base": "0%",
+        "target": "80%"
       },
       {
         "id": "i3",
@@ -593,8 +604,10 @@
           "condition": false,
           "review": false
         },
-        "ev": "",
-        "kpi": ""
+        "ev": "産業機器事業 事業計画会議（2026-04-15）",
+        "kpi": "設計した予防型メニューの数",
+        "base": "0件",
+        "target": "3件"
       },
       {
         "id": "i4",
@@ -612,7 +625,7 @@
           "condition": true,
           "review": false
         },
-        "ev": "",
+        "ev": "製造部 定例（2026-03-12）",
         "kpi": "自動収集を始めた工程の数",
         "base": "0",
         "cur": "6",
@@ -643,7 +656,7 @@
           "review": false
         },
         "ev": "製造部 定例（2026-03-12）",
-        "kpi": "",
+        "kpi": "標準手順で段取りできる作業者の割合",
         "prev": {
           "exec": 1,
           "verify": 0,
@@ -651,7 +664,9 @@
             "condition": false,
             "review": false
           }
-        }
+        },
+        "base": "20%",
+        "target": "90%"
       },
       {
         "id": "i6",
@@ -669,7 +684,7 @@
           "condition": false,
           "review": false
         },
-        "ev": "",
+        "ev": "計測機器事業 開発会議（2026-04-22）",
         "kpi": "PoCで見つけた改良点",
         "base": "0件",
         "cur": "4件",
@@ -699,7 +714,7 @@
           "condition": true,
           "review": false
         },
-        "ev": "",
+        "ev": "計測機器事業 開発会議（2026-04-22）",
         "kpi": "受講者数",
         "base": "0人",
         "cur": "26人",
@@ -722,7 +737,7 @@
           "review": false
         },
         "ev": "新事業推進会議（2026-05-20）",
-        "kpi": "",
+        "kpi": "故障予知の的中率",
         "prev": {
           "exec": 0,
           "verify": 0,
@@ -730,7 +745,9 @@
             "condition": false,
             "review": false
           }
-        }
+        },
+        "base": "0%",
+        "target": "80%"
       },
       {
         "id": "i11",
@@ -748,28 +765,10 @@
           "condition": false,
           "review": false
         },
-        "ev": "",
-        "kpi": ""
-      },
-      {
-        "id": "i10",
-        "name": "社内チャットAI",
-        "attach": [],
-        "owner": "dx",
-        "partner": "",
-        "digital": true,
-        "ipa": 2,
-        "exec": 2,
-        "verify": 0,
-        "checks": {
-          "condition": false,
-          "review": false
-        },
-        "ev": "",
-        "kpi": "利用率",
-        "base": "0%",
-        "cur": "38%",
-        "target": "60%"
+        "ev": "新事業推進会議（2026-05-20）",
+        "kpi": "ポータルに登録した顧客の数",
+        "base": "0社",
+        "target": "50社"
       }
     ],
     "diffs": [

@@ -7,17 +7,21 @@ export function Txt({
   placeholder,
   style,
   type = "text",
+  optional,
 }: {
   value: string | undefined;
   onChange: (v: string) => void;
   placeholder?: string;
   style?: CSSProperties;
   type?: "text" | "date";
+  /** 空でもよい欄（協働など）。それ以外は、空だと入力チェックで赤くなる */
+  optional?: boolean;
 }) {
   return (
     <input
       type={type}
       value={value ?? ""}
+      className={!optional && !(value ?? "").trim() ? "empty" : undefined}
       placeholder={placeholder}
       style={style}
       onChange={(e) => onChange(e.target.value)}
@@ -46,6 +50,7 @@ export function Sel({
     <select
       value={value === null ? "" : String(value)}
       disabled={disabled}
+      className={value === null && !disabled ? "empty" : undefined}
       onChange={(e) =>
         onChange(e.target.value === "" ? null : Number(e.target.value))
       }

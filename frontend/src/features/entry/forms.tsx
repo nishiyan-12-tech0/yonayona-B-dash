@@ -215,7 +215,12 @@ function ThemeSel({
   onChange: (v: string) => void;
 }) {
   return (
-    <select value={value ?? ""} onChange={(e) => onChange(e.target.value)}>
+    <select
+      value={value ?? ""}
+      className={value ? undefined : "empty"}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {value ? null : <option value="">選んでください</option>}
       {bu.themes.map((t) => (
         <option key={t.id} value={t.id}>
           {t.name}
@@ -238,7 +243,11 @@ function ObjSel({
   onChange: (v: string) => void;
 }) {
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}>
+    <select
+      value={value}
+      className={value ? undefined : "empty"}
+      onChange={(e) => onChange(e.target.value)}
+    >
       <option value="">{blank}</option>
       {bu.objs.map((o) => (
         <option key={o.id} value={o.id}>
@@ -614,6 +623,8 @@ function Step3({ bu, update }: FormProps) {
               <td>
                 <Txt
                   value={o.partner}
+                  optional
+                  placeholder="なし"
                   onChange={(v) => editObj(update, o.id, { partner: v })}
                 />
               </td>
@@ -939,7 +950,7 @@ function Step6({ data, bu, update }: FormProps) {
   return (
     <Field
       label="施策を動かす予算・工数・権限・データの提供者はそろっていますか？ 検証日は決まっていますか？"
-      desc="事業部とDX推進部の目標の合意は、この申請を一緒に作った時点で済んでいるので、別には聞きません。評価・報酬の変更は条件にしません。"
+      desc="まだそろっていない施策は、チェックを空けたままにします（未着手の施策など）。そろったら、担当者が戦略マップの施策の「進捗を入力」でチェックします。決めた場は必ず書きます。事業部とDX推進部の目標の合意は、この申請を一緒に作った時点で済んでいるので、別には聞きません。評価・報酬の変更は条件にしません。"
       wide
     >
       <Table

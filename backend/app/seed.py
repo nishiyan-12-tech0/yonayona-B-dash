@@ -30,7 +30,7 @@ log = logging.getLogger("michisuji")
 SEED_FILE = Path(__file__).with_name("seed_data.json")
 
 # スキーマの版。テーブルの作りを変えたら上げる（古いDBは起動時に作り直す）
-SCHEMA_VERSION = "0.4"
+SCHEMA_VERSION = "0.4.1"
 # 前の版で使っていて、今は使わないテーブル（作り直すときに消す）
 LEGACY_TABLES = ["change_note", "progress_confirmation", "strategy_version"]
 

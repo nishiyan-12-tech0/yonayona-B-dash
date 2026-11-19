@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ApiError, saveInitiativeProgress } from "@/lib/api";
-import { VERIFY } from "@/lib/constants";
+import { CHECK_LABELS, VERIFY } from "@/lib/constants";
 import { useStore } from "@/lib/store";
 import type { Initiative } from "@/lib/types";
 import { lastAuthor, MRow, Modal, rememberAuthor } from "@/components/Modal";
@@ -21,6 +21,8 @@ export function InitiativeProgressModal({
   const p = it.progress;
   const start = {
     verify: it.verify,
+    condition: it.checks.condition,
+    review: it.checks.review,
     kpiCur: it.cur ?? "",
     did: p?.did ?? "",
     result: p?.result ?? "",
@@ -47,6 +49,8 @@ export function InitiativeProgressModal({
     try {
       const d = await saveInitiativeProgress(it.id, {
         verify: f.verify,
+        condition: f.condition,
+        review: f.review,
         kpiCur: f.kpiCur.trim(),
         did: f.did.trim(),
         result: f.result.trim(),
@@ -88,6 +92,19 @@ export function InitiativeProgressModal({
             </option>
           ))}
         </select>
+      </MRow>
+      <MRow label="実行の準備">
+        {(["condition", "review"] as const).map((c) => (
+          <label key={c} className="chk">
+            <input
+              type="checkbox"
+              checked={f[c]}
+              onChange={(e) => set({ [c]: e.target.checked })}
+            />
+            {CHECK_LABELS[c]}
+          </label>
+        ))}
+        <div className="hint">そろったらチェックします</div>
       </MRow>
       {it.kpi ? (
         <MRow label="施策の指標の今の値" htmlFor="ip-k">

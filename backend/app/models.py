@@ -184,6 +184,10 @@ class InitiativeProgress(Base):
     exec: Mapped[int] = mapped_column(SmallInteger, default=0)
     verify: Mapped[int] = mapped_column(SmallInteger, default=0)
     kpi_cur: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # 実行の準備（実行条件の確保・検証と次の判断日の決定）。担当者があとからチェックできる。
+    # NULL なら申請の値（initiative.chk_condition / chk_review）のまま
+    chk_condition: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    chk_review: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     did: Mapped[str] = mapped_column(Text, default="")
     result: Mapped[str] = mapped_column(Text, default="")
     author: Mapped[str] = mapped_column(String(100), default="")

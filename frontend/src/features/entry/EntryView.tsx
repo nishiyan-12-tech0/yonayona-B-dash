@@ -11,6 +11,7 @@ import {
 } from "@/lib/api";
 import { useStore, type SaveState } from "@/lib/store";
 import type { StrategyData } from "@/lib/types";
+import { issueText, validate, type Issue } from "@/lib/validate";
 import { History, type Hist } from "@/components/HistoryDrawer";
 import { Modal } from "@/components/Modal";
 import { FORMS } from "./forms";
@@ -52,6 +53,10 @@ export function EntryView() {
   const [err, setErr] = useState<string | null>(null);
   /** 開いている確認（引き継ぐか／作り直しをやめるか／進捗の紐付きが外れるか） */
   const [ask, setAsk] = useState<"carry" | "discard" | "create" | null>(null);
+  /** 入っていない項目を見せるか（先へ進もうとして止められたら、赤くする） */
+  const [tried, setTried] = useState(false);
+  /** 作成しようとして止められたときの、全ステップの一覧 */
+  const [allIssues, setAllIssues] = useState<Issue[] | null>(null);
 
   // 申請がないのに「現在」を見ようとしたら、作成中の申請を出す
   const view: Hist =
@@ -74,6 +79,9 @@ export function EntryView() {
   }, [showId]);
 
   const form: StrategyData | null = editing ? draft : shown;
+  /** 入っていない項目（入力中のときだけ） */
+  const issues = editing && draft ? validate(draft) : [];
+  const countOf = (step: number) => issues.filter((x) => x.step === step).length;
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -81,20 +89,34 @@ export function EntryView() {
     try {
       await fn();
     } catch (e) {
-      setErr(e instanceof ApiError ? e.message : "うまくいきませんでした");
+      setErr(
+        e instanceof ApiError || e instanceof Error
+          ? e.message
+          : "うまくいきませんでした",
+      );
     } finally {
       setBusy(false);
     }
   };
 
-  /** ステップを移る。入力中なら書きかけを保存してから */
-  const go = (step: number) =>
-    editing
-      ? run(async () => {
-          await flush();
-          setUi({ step });
-        })
-      : setUi({ step });
+  /** ステップを移る。入力中なら書きかけを保存してから。先へ進むときは、それより前のステップがそろっていないと止める */
+  const go = (step: number, ebu?: string) => {
+    if (!editing) return setUi({ step, ...(ebu ? { ebu } : {}) });
+    const blocked = step > ui.step && issues.some((x) => x.step < step);
+    return run(async () => {
+      await flush();
+      if (blocked) {
+        setTried(true);
+        const first = issues.find((x) => x.step < step);
+        if (first && first.step !== ui.step) {
+          setUi({ step: first.step, ...(first.bu ? { ebu: first.bu } : {}) });
+        }
+        throw new Error("入っていない項目があります。赤い欄を埋めてから先へ進んでください");
+      }
+      setAllIssues(null);
+      setUi({ step, ...(ebu ? { ebu } : {}) });
+    });
+  };
 
   const start = (carryOver: boolean) =>
     run(async () => {
@@ -128,8 +150,10 @@ export function EntryView() {
     });
 
   const onCreate = () => {
-    if (!draft?.bus.length) {
-      setErr("ステップ0で事業を追加してください");
+    if (issues.length) {
+      setTried(true);
+      setAllIssues(issues);
+      setErr("入っていない項目があります。すべて埋めてから作成してください");
       return;
     }
     if (current) setAsk("create");
@@ -212,13 +236,21 @@ export function EntryView() {
                 >
                   <span className="n">{i}</span>
                   {x.t}
+                  {editing && countOf(i) ? (
+                    <span className="miss" title="入っていない項目の数">
+                      {countOf(i)}
+                    </span>
+                  ) : null}
                 </button>
               </StepItem>
             ))}
           </ul>
         </div>
         <div className="card">
-          <div id="form" className={editing ? undefined : "ro-form"}>
+          <div
+            id="form"
+            className={editing ? (tried ? "show-err" : undefined) : "ro-form"}
+          >
             <h2>
               {step}. {s.t}
               {needBu && bu ? (
@@ -226,6 +258,23 @@ export function EntryView() {
               ) : null}
             </h2>
             <p className="stepq">{s.q}</p>
+            {editing && tried && countOf(step) ? (
+              <IssueList
+                title="このステップで、まだ入っていないもの"
+                items={issues.filter((x) => x.step === step)}
+                data={form}
+                onJump={(x) => go(x.step, x.bu)}
+              />
+            ) : null}
+            {editing && allIssues && allIssues.length ? (
+              <IssueList
+                title="戦略マップを作る前に、入っていないもの（押すとそのステップへ）"
+                items={issues}
+                data={form}
+                onJump={(x) => go(x.step, x.bu)}
+                showStep
+              />
+            ) : null}
             <div className="lead">
               <b>ここで決めること</b>
               <span>{s.dec}</span>
@@ -337,6 +386,40 @@ export function EntryView() {
         </Modal>
       ) : null}
     </section>
+  );
+}
+
+/** 入っていない項目の一覧 */
+function IssueList({
+  title,
+  items,
+  data,
+  onJump,
+  showStep,
+}: {
+  title: string;
+  items: Issue[];
+  data: StrategyData;
+  onJump: (x: Issue) => void;
+  showStep?: boolean;
+}) {
+  return (
+    <div className="issues" role="alert">
+      <b>{title}</b>
+      <ul>
+        {items.map((x, n) => (
+          <li key={n}>
+            {showStep ? (
+              <button onClick={() => onJump(x)}>
+                {x.step}. {STEPS[x.step].t}
+              </button>
+            ) : null}
+            {showStep ? "　" : ""}
+            {issueText(data, x)}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
