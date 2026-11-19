@@ -26,9 +26,10 @@ python -m app.seed --reset
 
 ## Azure（App Service Web App）
 
-- 起動コマンド：`gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app`
+- 起動コマンド：`gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --chdir backend app.main:app`
 - アプリ設定：`DB_HOST` `DB_PORT` `DB_NAME` `DB_USER` `DB_PASSWORD` `CORS_ORIGINS` `COMPANY_ID` `SCM_DO_BUILD_DURING_DEPLOYMENT=true`
-- デプロイ：`main` に `backend/` の変更を push すると `.github/workflows/backend.yml` が動きます
+- デプロイ：Web App の「デプロイ センター」で GitHub のこのリポジトリ（main）につないであり、push すると自動でデプロイされます。
+  デプロイ センターはリポジトリの一番上でビルドするので、一番上の `requirements.txt` から `backend/requirements.txt` を読み込み、起動コマンドの `--chdir backend` で backend/ に移ってから動かします
 
 ## ファイル
 

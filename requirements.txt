@@ -1,0 +1,2 @@
+# Azure のデプロイ センターはリポジトリの一番上でビルドするので、backend/ の依存関係をここから読み込む
+-r backend/requirements.txt

@@ -1,7 +1,7 @@
 """ミチスジ バックエンド（FastAPI）。
 
 起動（手元）：  uvicorn app.main:app --reload
-起動（Azure）： gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 app.main:app
+起動（Azure）： gunicorn -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --chdir backend app.main:app
 """
 
 import logging
